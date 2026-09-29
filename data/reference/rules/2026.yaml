@@ -1,0 +1,383 @@
+# NCS Track & Field qualification rules — 2026
+#
+# Transcribed from docs/rules/rules_2026_source.md. Every number and standard in that
+# document is represented here. Where the source documents disagree, BOTH values are
+# kept as explicit fields and cross-referenced to `discrepancies` — nothing is silently
+# resolved. `authoritative:` records which value the analysis uses by default, and only
+# where the source doc itself says so.
+#
+# Only 2026 rules are in hand. They are applied to every season; outputs must carry
+# the label in `applied_label`. Add rules/{season}.yaml for another season only when a
+# source document for that season exists.
+#
+# Marks are quoted strings exactly as written in the source (feet-inches for field
+# events); src/ncs_track/marks.py parses them. Area keys match meets.csv `area` slugs.
+
+schema_version: 1
+season: 2026
+applied_label: "2026 rules applied"
+applies_to_seasons: [2019, 2022, 2023, 2024, 2025, 2026]
+applies_to_seasons_note: >-
+  2026 rules applied to all seasons by instruction; earlier-season rules are not in hand
+  and may differ (discrepancy D7).
+
+sources:
+  - id: moc_guide
+    title: "2026 MOC Guide"
+    updated: 2026-05-13
+  - id: class_a_guide
+    title: "2026 Class A Track Guide"
+  - id: area_sheets
+    title: "NCS area qualification sheets (Tri-Valley, Bay Shore, Redwood Empire)"
+  - id: nbl_flyer
+    title: "NBL advancement flyer"
+    dated: 2026-04-27
+  - id: transcription
+    path: docs/rules/rules_2026_source.md
+
+# ---------------------------------------------------------------------------
+# Event scope
+# ---------------------------------------------------------------------------
+events:
+  # Canonical event codes; see src/ncs_track/events.py.
+  main_simulation:
+    girls: ["100", "200", "400", "800", "1600", "3200", "100H", "300H", "4x100", "4x400",
+            "HJ", "PV", "LJ", "TJ", "SP", "DT"]
+    boys:  ["100", "200", "400", "800", "1600", "3200", "110H", "300H", "4x100", "4x400",
+            "HJ", "PV", "LJ", "TJ", "SP", "DT"]
+  separate_system: ["4x800"]          # section `relay_4x800`; excluded from main simulation
+  excluded_divisions: ["Unified", "Ambulatory"]
+  exhibition_history:
+    # Observed in Hy-Tek results, not in the rules documents.
+    "4x800":
+      exhibition_at_moc: [2019, 2022]
+      not_contested_at_tri_valley: [2019, 2022]
+      scoring_from: 2023
+
+# ---------------------------------------------------------------------------
+# Wind (D6)
+# ---------------------------------------------------------------------------
+wind:
+  legal_max_mps: 2.0            # standard NFHS/World Athletics limit, used only for flagging
+  required_for_qualifying: null # unspecified in every 2026 document (discrepancy D6)
+  handling: flag_only           # carry wind + wind_aided flag; never exclude a mark for wind
+  wind_events: ["100", "200", "100H", "110H", "LJ", "TJ"]
+
+# ---------------------------------------------------------------------------
+# Phase 2: league championship -> Area / Class A meet
+# ---------------------------------------------------------------------------
+league_to_area:
+  general:
+    qualifying_rounds: [final]        # "Only performances from league championship finals"
+    dq_at_league_cannot_advance: true
+    only_qualified_entries: true      # a league may under-fill its allotment
+    redistribution:
+      trigger: "league forwards no entries in an individual event"
+      to: other_participating_leagues
+      max_entries_per_league: 6
+      equal_entries_rule:
+        text: "the Meet Director must maintain equal entries from each participating league"
+        stated_in: [tri-valley, bay-shore]      # area sheets only
+        conflicts_with: "base auto split 4/6/6"
+        probable_scope: redistribution_only   # source doc's reading, not confirmed
+        discrepancy: D5
+
+  tri-valley:
+    target_field: 24
+    auto:
+      BVAL: 4
+      DAL: 6
+      EBAL: 6
+    fill:
+      count: 8
+      pool: "next best marks from all 3 league championships"
+    at_large:
+      allowed: true
+      standards: null                 # referenced but no table in hand (D3)
+      discrepancy: D3
+
+  bay-shore:
+    target_field: 24
+    auto:
+      MVAL: 4
+      TCAL: 6
+      WACC: 6
+    fill:
+      count: 8
+      pool: "next best marks from all 3 league championships"
+    at_large:
+      allowed:
+        area_sheet: false             # area sheet does not mention at-large marks
+        class_a_guide_summary: true   # "Plus any at-large marks."
+      standards: null
+      discrepancy: D3
+
+  redwood-empire:
+    target_field: 24
+    lanes: 8
+    auto:
+      "HDNL (Big 5)": 3
+      MCAL: 3
+      NBL: 5
+      VVAL: 3
+    fill:
+      min: 6
+      max: 10
+      official_sheet: "next 6-10 best marks from all 4 league championships (for an 8-lane track, total of 24 entries per event)"
+      nbl_flyer: 10
+      note: >-
+        Auto total is 14, so fill 10 gives exactly 24; fill 6 gives 20. The official
+        sheet range is kept as-is; the NBL flyer states 10.
+      discrepancy: D2
+    at_large:
+      allowed: true
+      standards: null
+      discrepancy: D3
+    must_participate_in_league_final: true
+    special_pathways:
+      lower_lake:
+        competes_in: CMC
+        qualifies_by: "top 4 at CMC league meet"
+        max_per_event: 3
+        rule_ref: "NFHS 4-2-4c"
+        note: "May require an additional heat."
+    league_notes:
+      NBL: "Combined Oak + Redwood championship (11 schools); top 5 in finals auto-qualify."
+
+  class-a:
+    target_field: null                # not stated
+    auto:
+      CMC:            {individual: 8, relay: 4}
+      "Bay Counties": {individual: 8, relay: 4}
+      "HDNL (Little 5)": {individual: 4, relay: 2}
+    special_pathways:
+      branson:
+        school: "Branson"
+        competes_in: MCAL
+        qualifies_by: "top 4 at MCAL league meet"
+        max_per_event: 3
+      berean_christian:
+        school: "Berean Christian"
+        competes_in:
+          text: DVAL
+          list_header: DAL
+          discrepancy: D4
+        qualifies_by: "top 4 at league meet"
+        max_per_event: 3
+    at_large:
+      allowed: true
+      standard_basis: "average 8th-place mark over previous 3 years"
+      qualifying_rounds: [final]
+      exception:
+        applies_to: "Class A schools in large-school leagues"
+        qualifying_rounds: [prelim, final]   # "trials OR finals"
+      qualifies_to: class_a_meet_only
+      standards:
+        girls:
+          "4x100": "53.44"
+          "4x400": "4:33.96"
+          "4x800": "12:35.90"
+          "1600": "5:27.64"
+          "100H": "18.18"
+          "400": "1:03.53"
+          "100": "13.13"
+          "800": "2:27.74"
+          "300H": "52.14"
+          "200": "26.92"
+          "3200": "12:30.32"
+          HJ: "4-06"
+          PV: "6-06"
+          LJ: "14-09"
+          TJ: "31-2.75"
+          SP: "28-0.75"
+          DT: "77-08"
+        boys:
+          "4x100": "49.04"
+          "4x400": "3:44.20"
+          "4x800": "9:34.72"
+          "1600": "4:36.29"
+          "110H": "18.07"
+          "400": "53.92"
+          "100": "11.40"
+          "800": "2:04.13"
+          "300H": "45.10"
+          "200": "23.30"
+          "3200": "10:14.56"
+          HJ: "5-04"
+          PV: "7-04"
+          LJ: "18-11.50"
+          TJ: "38-8.25"
+          SP: "37-5.25"
+          DT: "112-07"
+
+# ---------------------------------------------------------------------------
+# Phase 1 (main simulation): Area / Class A meet -> Meet of Champions
+# ---------------------------------------------------------------------------
+area_to_moc:
+  applies_to: all_events_except_4x800
+  qualifying_rounds: [final]          # at-large marks must be made in Area FINALS
+  auto:
+    tri-valley: 6
+    redwood-empire: 6
+    bay-shore: 6
+    class-a: 3
+  fill:
+    moc_guide:
+      count: 3
+      pool: [tri-valley, redwood-empire, bay-shore, class-a]
+      text: "3 next best marks from the Area and Class A meets"
+    nbl_flyer:
+      count: 6
+      pool: [tri-valley, redwood-empire, bay-shore]
+      text: "next 6 best marks from all 3 NCS Area Championships"
+    authoritative: moc_guide          # stated in the source doc
+    discrepancy: D1
+  field_min: 24                       # 6+6+6+3 auto + 3 fill
+  at_large:
+    eligibility:
+      text: "any athlete finishing outside the top 6 who meets or exceeds the MOC at-large standard in the finals only of their Area meet"
+      outside_top: 6
+      note: >-
+        Text says "outside the top 6" but Class A auto spots are top 3. How Class A
+        places 4-6 are treated is not stated (D8).
+      discrepancy: D8
+    qualifying_rounds: [final]
+    wind_legal_required: null         # D6
+    standards:
+      girls:
+        "4x100": "49.40"
+        "1600": "5:13.10"
+        "100H": "15.95"
+        "400": "58.93"
+        "100": "12.45"
+        "800": "2:20.53"
+        "300H": "47.88"
+        "200": "25.85"
+        "3200": "11:05.99"
+        "4x400": "4:06.71"
+        "4x800": "9:59.55"
+        HJ: "5-0"
+        PV: "9-11"
+        LJ: "16-11.25"
+        TJ: "35-0.25"
+        SP: "35-01.75"
+        DT: "107-06"
+      boys:
+        "4x100": "43.02"
+        "1600": "4:26.14"
+        "110H": "15.40"
+        "400": "50.31"
+        "100": "10.95"
+        "800": "1:59.65"
+        "300H": "41.32"
+        "200": "22.49"
+        "3200": "9:22.61"
+        "4x400": "3:28.03"
+        "4x800": "8:19.22"
+        HJ: "6-00"
+        PV: "12-09"
+        LJ: "21-06.0"
+        TJ: "42-09.25"
+        SP: "49-02.50"
+        DT: "142-05"
+  scratches:
+    entries_close: "2026-05-17T23:59"   # Sunday after the Area meets
+    before_deadline: "non-qualifying Area/Class A finalists may be advanced into vacancies"
+    after_deadline: "subject to the Honest Effort Rule"
+
+# ---------------------------------------------------------------------------
+# MOC -> CIF State (used for downstream metric (b))
+# ---------------------------------------------------------------------------
+moc_to_state:
+  auto_places: 3
+  at_large:
+    qualifying_rounds: [final]
+    standards_table:
+      value: area_to_moc              # [inference] in the source doc (D9)
+      inference: true
+      discrepancy: D9
+  "4x800":
+    auto_places: 2
+    at_large: false
+  unified:
+    auto_places: 1                    # out of scope
+
+# ---------------------------------------------------------------------------
+# 4x800 relay: separate system, excluded from the main simulation
+# ---------------------------------------------------------------------------
+relay_4x800:
+  league_qualification: false
+  entry_basis: "verifiable FAT times from the current season on Athletic.net (league meet times allowed if the league runs the event)"
+  area_entries:
+    max_per_meet: 16
+    class-a:
+      best_n: 16
+      pool: "Class A schools"
+    redwood-empire:
+      auto: {"HDNL (Big 5)": 2, MCAL: 2, NBL: 4, VVAL: 2}
+      fill: 6
+    bay-shore:
+      auto: {MVAL: 2, TCAL: 3, WACC: 3}
+      fill: 8
+    tri-valley:
+      auto: {BVAL: 2, DAL: 3, EBAL: 3}
+      fill: 8
+  area_to_moc:
+    auto_per_meet: 2
+    fill: 8
+    field_max: 16
+    at_large: "per guide text"        # mentioned, no separate rule given
+
+# ---------------------------------------------------------------------------
+# Discrepancies and gaps — kept open on purpose
+# ---------------------------------------------------------------------------
+discrepancies:
+  D1:
+    topic: MOC fill spots
+    values: {moc_guide: "3, all four meets", nbl_flyer: "6, three Areas (omits Class A)"}
+    default: moc_guide
+    status: open
+  D2:
+    topic: Redwood Empire fill (league -> area)
+    values: {official_sheet: "6-10", nbl_flyer: 10}
+    default: null
+    status: open
+  D3:
+    topic: League -> Area at-large standards for Tri-Valley, Bay Shore, Redwood Empire
+    values: {referenced: "plus any at-large marks", table: "not in hand"}
+    also: "Bay Shore area sheet omits at-large entirely; Class A guide summary includes it"
+    status: open
+  D4:
+    topic: Berean Christian's league
+    values: {text: DVAL, list_header: DAL}
+    status: open
+  D5:
+    topic: '"Equal entries" rule vs 4/6/6 split (Tri-Valley, Bay Shore)'
+    values: {rule: "equal entries from each league", base_split: "4/6/6"}
+    probable_reading: applies to redistribution only
+    status: open
+  D6:
+    topic: Wind legality of at-large marks
+    values: {documents: unspecified}
+    handling: flag wind-aided marks, never exclude
+    status: open
+  D7:
+    topic: Earlier seasons (2019, 2022-2025)
+    values: {rules_in_hand: [2026]}
+    handling: apply 2026 rules, label outputs
+    status: open
+  D8:
+    topic: MOC at-large eligibility wording vs Class A auto spots
+    values: {at_large_text: "outside the top 6", class_a_auto: 3}
+    note: Added during YAML transcription; not in the source doc's discrepancy list.
+    status: open
+  D9:
+    topic: State at-large standards table
+    values:
+      source_doc: "[inference] same table as Area->MOC"
+      hytek_results: >-
+        2019, 2022, 2024 and 2025 MOC Hy-Tek files print separate "CIF At-Large" lines
+        whose marks are much stricter than the NCS at-large marks and change by season
+        (see docs/rules/standards_crosscheck.md). The inference looks wrong.
+    note: Added during YAML transcription; not in the source doc's discrepancy list.
+    status: open

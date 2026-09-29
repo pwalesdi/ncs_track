@@ -1,0 +1,127 @@
+season,level,meet_name,area,league,athleticnet_meet_id,date,results_complete,notes
+2019,moc,NCS Meet of Champions,,,,2019-05-17,,"Hy-Tek HTML in repo root: 2019_NCS_Meet_of_Champions_results.htm. 2-day meet, end 2019-05-18. Viking Stadium, Diablo Valley College; titled ""NCS/Les Schwab Tires Meet of Champions""."
+2019,area,NCS Tri-Valley Area Championships,Tri-Valley,,,2019-05-11,,Dublin HS. Hy-Tek HTML in repo root: 2019_NCS_Tri_Valley_Area_Championships_results.htm.
+2019,area,NCS Bay Shore Area Championships,Bay Shore,,,,,Verify area name and composition this season. No results in repo.
+2019,area,NCS Redwood Empire Area Championships,Redwood Empire,,,,,No results in repo.
+2019,area,NCS Class A Championships,Class A,,,,,Verify Class A ran as an area-level MOC qualifier under this name this season. No results in repo.
+2019,league,BVAL League Championships,Tri-Valley,BVAL,,,,No results in repo.
+2019,league,DAL League Championships,Tri-Valley,DAL,,,,Verify: DAL (est. 2018 realignment) has divisions; confirm one league final or one per division. No results in repo.
+2019,league,EBAL League Championships,Tri-Valley,EBAL,,,,Verify: EBAL has divisions; confirm one league final or one per division. No results in repo.
+2019,league,MVAL League Championships,Bay Shore,MVAL,,,,No results in repo.
+2019,league,TCAL League Championships,Bay Shore,TCAL,,,,Verify name and membership each season (realigned league). No results in repo.
+2019,league,WACC League Championships,Bay Shore,WACC,,,,No results in repo.
+2019,league,NBL League Championships,Redwood Empire,NBL,,,,Verify: NBL split into NBL-Oak / NBL-Redwood; confirm whether sub-leagues have separate finals/allocations each season. No results in repo.
+2019,league,HDNL League Championships,Redwood Empire,HDNL,,,,Big-school HDNL division only? HDNL also listed under Class A (Little 5). Area assignment must be per school. No results in repo.
+2019,league,MCAL League Championships,Redwood Empire,MCAL,,,,MCAL also listed under Class A (Branson). Area assignment must be per school. No results in repo.
+2019,league,VVAL League Championships,Redwood Empire,VVAL,,,,Verify VVAL existed under this name in 2019 (league formed in a recent realignment). No results in repo.
+2019,league,CMC League Championships,Redwood Empire,CMC,,,,Per brief: Lower Lake reaches Redwood Empire via CMC. CMC also listed under Class A; confirm which CMC schools go to which area each season. No results in repo.
+2019,league,CMC League Championships,Class A,CMC,,,,CMC also listed under Redwood Empire; confirm which CMC schools go to Class A each season. No results in repo.
+2019,league,BAC League Championships,Class A,BAC,,,,Verify BAC existed under this name and fielded NCS track teams this season. No results in repo.
+2019,league,HDNL Little 5 League Championships,Class A,HDNL Little 5,,,,Verify division name each season (Little 4 vs Little 5 varied with membership). No results in repo.
+2019,league,MCAL (Branson) League Championships,Class A,MCAL (Branson),,,,"Single-school assignment, not a separate league meet; source is the MCAL league final. Handle in schools.csv. No results in repo."
+2019,league,DVAL (Berean) League Championships,Class A,DVAL (Berean),,,,SUSPECT NAME: public-school DVAL was folded into DAL in 2018. Verify which league Berean Christian was in this season. No results in repo.
+2022,moc,NCS Meet of Champions,,,,2022-05-20,,"Hy-Tek HTML in repo root: 2022_NCS_Meet_of_Champions_results.htm. 2-day meet, end 2022-05-21. Dublin HS."
+2022,area,NCS Tri-Valley Area Championships,Tri-Valley,,,2022-05-14,,Freedom HS. Hy-Tek HTML in repo root: 2022_NCS_Tri_Valley_Area_Championships_results.htm.
+2022,area,NCS Bay Shore Area Championships,Bay Shore,,,,,Verify area name and composition this season. No results in repo.
+2022,area,NCS Redwood Empire Area Championships,Redwood Empire,,,,,No results in repo.
+2022,area,NCS Class A Championships,Class A,,,,,Verify Class A ran as an area-level MOC qualifier under this name this season. No results in repo.
+2022,league,BVAL League Championships,Tri-Valley,BVAL,,,,No results in repo.
+2022,league,DAL League Championships,Tri-Valley,DAL,,,,Verify: DAL (est. 2018 realignment) has divisions; confirm one league final or one per division. No results in repo.
+2022,league,EBAL League Championships,Tri-Valley,EBAL,,,,Verify: EBAL has divisions; confirm one league final or one per division. No results in repo.
+2022,league,MVAL League Championships,Bay Shore,MVAL,,,,No results in repo.
+2022,league,TCAL League Championships,Bay Shore,TCAL,,,,Verify name and membership each season (realigned league). No results in repo.
+2022,league,WACC League Championships,Bay Shore,WACC,,,,No results in repo.
+2022,league,NBL League Championships,Redwood Empire,NBL,,,,Verify: NBL split into NBL-Oak / NBL-Redwood; confirm whether sub-leagues have separate finals/allocations each season. No results in repo.
+2022,league,HDNL League Championships,Redwood Empire,HDNL,,,,Big-school HDNL division only? HDNL also listed under Class A (Little 5). Area assignment must be per school. No results in repo.
+2022,league,MCAL League Championships,Redwood Empire,MCAL,,,,MCAL also listed under Class A (Branson). Area assignment must be per school. No results in repo.
+2022,league,VVAL League Championships,Redwood Empire,VVAL,,,,Verify VVAL existed under this name in 2019 (league formed in a recent realignment). No results in repo.
+2022,league,CMC League Championships,Redwood Empire,CMC,,,,Per brief: Lower Lake reaches Redwood Empire via CMC. CMC also listed under Class A; confirm which CMC schools go to which area each season. No results in repo.
+2022,league,CMC League Championships,Class A,CMC,,,,CMC also listed under Redwood Empire; confirm which CMC schools go to Class A each season. No results in repo.
+2022,league,BAC League Championships,Class A,BAC,,,,Verify BAC existed under this name and fielded NCS track teams this season. No results in repo.
+2022,league,HDNL Little 5 League Championships,Class A,HDNL Little 5,,,,Verify division name each season (Little 4 vs Little 5 varied with membership). No results in repo.
+2022,league,MCAL (Branson) League Championships,Class A,MCAL (Branson),,,,"Single-school assignment, not a separate league meet; source is the MCAL league final. Handle in schools.csv. No results in repo."
+2022,league,DVAL (Berean) League Championships,Class A,DVAL (Berean),,,,SUSPECT NAME: public-school DVAL was folded into DAL in 2018. Verify which league Berean Christian was in this season. No results in repo.
+2023,moc,NCS Meet of Champions,,,,2023-05-19,,"Hy-Tek HTML in repo root: 2023_NCS_Meet_of_Champions_results.htm. 2-day meet, end 2023-05-20. Dublin HS."
+2023,area,NCS Tri-Valley Area Championships,Tri-Valley,,,2023-05-13,,Foothill HS. Hy-Tek HTML in repo root: 2023_NCS_Tri_Valley_Area_Championships_results.htm.
+2023,area,NCS Bay Shore Area Championships,Bay Shore,,,,,Verify area name and composition this season. No results in repo.
+2023,area,NCS Redwood Empire Area Championships,Redwood Empire,,,,,No results in repo.
+2023,area,NCS Class A Championships,Class A,,,,,Verify Class A ran as an area-level MOC qualifier under this name this season. No results in repo.
+2023,league,BVAL League Championships,Tri-Valley,BVAL,,,,No results in repo.
+2023,league,DAL League Championships,Tri-Valley,DAL,,,,Verify: DAL (est. 2018 realignment) has divisions; confirm one league final or one per division. No results in repo.
+2023,league,EBAL League Championships,Tri-Valley,EBAL,,,,Verify: EBAL has divisions; confirm one league final or one per division. No results in repo.
+2023,league,MVAL League Championships,Bay Shore,MVAL,,,,No results in repo.
+2023,league,TCAL League Championships,Bay Shore,TCAL,,,,Verify name and membership each season (realigned league). No results in repo.
+2023,league,WACC League Championships,Bay Shore,WACC,,,,No results in repo.
+2023,league,NBL League Championships,Redwood Empire,NBL,,,,Verify: NBL split into NBL-Oak / NBL-Redwood; confirm whether sub-leagues have separate finals/allocations each season. No results in repo.
+2023,league,HDNL League Championships,Redwood Empire,HDNL,,,,Big-school HDNL division only? HDNL also listed under Class A (Little 5). Area assignment must be per school. No results in repo.
+2023,league,MCAL League Championships,Redwood Empire,MCAL,,,,MCAL also listed under Class A (Branson). Area assignment must be per school. No results in repo.
+2023,league,VVAL League Championships,Redwood Empire,VVAL,,,,Verify VVAL existed under this name in 2019 (league formed in a recent realignment). No results in repo.
+2023,league,CMC League Championships,Redwood Empire,CMC,,,,Per brief: Lower Lake reaches Redwood Empire via CMC. CMC also listed under Class A; confirm which CMC schools go to which area each season. No results in repo.
+2023,league,CMC League Championships,Class A,CMC,,,,CMC also listed under Redwood Empire; confirm which CMC schools go to Class A each season. No results in repo.
+2023,league,BAC League Championships,Class A,BAC,,,,Verify BAC existed under this name and fielded NCS track teams this season. No results in repo.
+2023,league,HDNL Little 5 League Championships,Class A,HDNL Little 5,,,,Verify division name each season (Little 4 vs Little 5 varied with membership). No results in repo.
+2023,league,MCAL (Branson) League Championships,Class A,MCAL (Branson),,,,"Single-school assignment, not a separate league meet; source is the MCAL league final. Handle in schools.csv. No results in repo."
+2023,league,DVAL (Berean) League Championships,Class A,DVAL (Berean),,,,SUSPECT NAME: public-school DVAL was folded into DAL in 2018. Verify which league Berean Christian was in this season. No results in repo.
+2024,moc,NCS Meet of Champions,,,,2024-05-17,,"Hy-Tek HTML in repo root: 2024_NCS_Meet_of_Champions_results.htm. 2-day meet, end 2024-05-18. Dublin HS."
+2024,area,NCS Tri-Valley Area Championships,Tri-Valley,,,2024-05-11,,Pittsburg HS. Hy-Tek HTML in repo root: 2024_NCS_Tri_Valley_Area_Championships_results.htm.
+2024,area,NCS Bay Shore Area Championships,Bay Shore,,,,,Verify area name and composition this season. No results in repo.
+2024,area,NCS Redwood Empire Area Championships,Redwood Empire,,,,,No results in repo.
+2024,area,NCS Class A Championships,Class A,,,,,Verify Class A ran as an area-level MOC qualifier under this name this season. No results in repo.
+2024,league,BVAL League Championships,Tri-Valley,BVAL,,,,No results in repo.
+2024,league,DAL League Championships,Tri-Valley,DAL,,,,Verify: DAL (est. 2018 realignment) has divisions; confirm one league final or one per division. No results in repo.
+2024,league,EBAL League Championships,Tri-Valley,EBAL,,,,Verify: EBAL has divisions; confirm one league final or one per division. No results in repo.
+2024,league,MVAL League Championships,Bay Shore,MVAL,,,,No results in repo.
+2024,league,TCAL League Championships,Bay Shore,TCAL,,,,Verify name and membership each season (realigned league). No results in repo.
+2024,league,WACC League Championships,Bay Shore,WACC,,,,No results in repo.
+2024,league,NBL League Championships,Redwood Empire,NBL,,,,Verify: NBL split into NBL-Oak / NBL-Redwood; confirm whether sub-leagues have separate finals/allocations each season. No results in repo.
+2024,league,HDNL League Championships,Redwood Empire,HDNL,,,,Big-school HDNL division only? HDNL also listed under Class A (Little 5). Area assignment must be per school. No results in repo.
+2024,league,MCAL League Championships,Redwood Empire,MCAL,,,,MCAL also listed under Class A (Branson). Area assignment must be per school. No results in repo.
+2024,league,VVAL League Championships,Redwood Empire,VVAL,,,,Verify VVAL existed under this name in 2019 (league formed in a recent realignment). No results in repo.
+2024,league,CMC League Championships,Redwood Empire,CMC,,,,Per brief: Lower Lake reaches Redwood Empire via CMC. CMC also listed under Class A; confirm which CMC schools go to which area each season. No results in repo.
+2024,league,CMC League Championships,Class A,CMC,,,,CMC also listed under Redwood Empire; confirm which CMC schools go to Class A each season. No results in repo.
+2024,league,BAC League Championships,Class A,BAC,,,,Verify BAC existed under this name and fielded NCS track teams this season. No results in repo.
+2024,league,HDNL Little 5 League Championships,Class A,HDNL Little 5,,,,Verify division name each season (Little 4 vs Little 5 varied with membership). No results in repo.
+2024,league,MCAL (Branson) League Championships,Class A,MCAL (Branson),,,,"Single-school assignment, not a separate league meet; source is the MCAL league final. Handle in schools.csv. No results in repo."
+2024,league,DVAL (Berean) League Championships,Class A,DVAL (Berean),,,,SUSPECT NAME: public-school DVAL was folded into DAL in 2018. Verify which league Berean Christian was in this season. No results in repo.
+2025,moc,NCS Meet of Champions,,,,2025-05-23,,"Hy-Tek HTML in repo root: 2025_NCS_Meet_of_Champions_results.htm. 2-day meet, end 2025-05-24. Dublin HS."
+2025,area,NCS Tri-Valley Area Championships,Tri-Valley,,,2025-05-17,,Clayton Valley HS. Hy-Tek HTML in repo root: 2025_NCS_Tri_Valley_Area_Championships_results.html. FILE IS AN INDEX PAGE ONLY - NO RESULTS; per-event results linked from diablotiming.com (dir=2025-05-17).
+2025,area,NCS Bay Shore Area Championships,Bay Shore,,,,,Verify area name and composition this season. No results in repo.
+2025,area,NCS Redwood Empire Area Championships,Redwood Empire,,,,,No results in repo.
+2025,area,NCS Class A Championships,Class A,,,,,Verify Class A ran as an area-level MOC qualifier under this name this season. No results in repo.
+2025,league,BVAL League Championships,Tri-Valley,BVAL,,,,No results in repo.
+2025,league,DAL League Championships,Tri-Valley,DAL,,,,Verify: DAL (est. 2018 realignment) has divisions; confirm one league final or one per division. No results in repo.
+2025,league,EBAL League Championships,Tri-Valley,EBAL,,,,Verify: EBAL has divisions; confirm one league final or one per division. No results in repo.
+2025,league,MVAL League Championships,Bay Shore,MVAL,,,,No results in repo.
+2025,league,TCAL League Championships,Bay Shore,TCAL,,,,Verify name and membership each season (realigned league). No results in repo.
+2025,league,WACC League Championships,Bay Shore,WACC,,,,No results in repo.
+2025,league,NBL League Championships,Redwood Empire,NBL,,,,Verify: NBL split into NBL-Oak / NBL-Redwood; confirm whether sub-leagues have separate finals/allocations each season. No results in repo.
+2025,league,HDNL League Championships,Redwood Empire,HDNL,,,,Big-school HDNL division only? HDNL also listed under Class A (Little 5). Area assignment must be per school. No results in repo.
+2025,league,MCAL League Championships,Redwood Empire,MCAL,,,,MCAL also listed under Class A (Branson). Area assignment must be per school. No results in repo.
+2025,league,VVAL League Championships,Redwood Empire,VVAL,,,,Verify VVAL existed under this name in 2019 (league formed in a recent realignment). No results in repo.
+2025,league,CMC League Championships,Redwood Empire,CMC,,,,Per brief: Lower Lake reaches Redwood Empire via CMC. CMC also listed under Class A; confirm which CMC schools go to which area each season. No results in repo.
+2025,league,CMC League Championships,Class A,CMC,,,,CMC also listed under Redwood Empire; confirm which CMC schools go to Class A each season. No results in repo.
+2025,league,BAC League Championships,Class A,BAC,,,,Verify BAC existed under this name and fielded NCS track teams this season. No results in repo.
+2025,league,HDNL Little 5 League Championships,Class A,HDNL Little 5,,,,Verify division name each season (Little 4 vs Little 5 varied with membership). No results in repo.
+2025,league,MCAL (Branson) League Championships,Class A,MCAL (Branson),,,,"Single-school assignment, not a separate league meet; source is the MCAL league final. Handle in schools.csv. No results in repo."
+2025,league,DVAL (Berean) League Championships,Class A,DVAL (Berean),,,,SUSPECT NAME: public-school DVAL was folded into DAL in 2018. Verify which league Berean Christian was in this season. No results in repo.
+2026,moc,NCS Meet of Champions,,,,2026-05-22,,"Hy-Tek HTML in repo root: 2026_NCS_Meet_of_Champions_results.htm. 2-day meet, end 2026-05-23. Dublin HS."
+2026,area,NCS Tri-Valley Area Championships,Tri-Valley,,,2026-05-16,,Foothill HS. Hy-Tek HTML in repo root: 2026_NCS_Tri_Valley_Area_Championships_results.htm.
+2026,area,NCS Bay Shore Area Championships,Bay Shore,,,,,Verify area name and composition this season. No results in repo.
+2026,area,NCS Redwood Empire Area Championships,Redwood Empire,,,,,No results in repo.
+2026,area,NCS Class A Championships,Class A,,,,,Verify Class A ran as an area-level MOC qualifier under this name this season. No results in repo.
+2026,league,BVAL League Championships,Tri-Valley,BVAL,,,,No results in repo.
+2026,league,DAL League Championships,Tri-Valley,DAL,,,,Verify: DAL (est. 2018 realignment) has divisions; confirm one league final or one per division. No results in repo.
+2026,league,EBAL League Championships,Tri-Valley,EBAL,,,,Verify: EBAL has divisions; confirm one league final or one per division. No results in repo.
+2026,league,MVAL League Championships,Bay Shore,MVAL,,,,No results in repo.
+2026,league,TCAL League Championships,Bay Shore,TCAL,,,,Verify name and membership each season (realigned league). No results in repo.
+2026,league,WACC League Championships,Bay Shore,WACC,,,,No results in repo.
+2026,league,NBL League Championships,Redwood Empire,NBL,,,,Verify: NBL split into NBL-Oak / NBL-Redwood; confirm whether sub-leagues have separate finals/allocations each season. No results in repo.
+2026,league,HDNL League Championships,Redwood Empire,HDNL,,,,Big-school HDNL division only? HDNL also listed under Class A (Little 5). Area assignment must be per school. No results in repo.
+2026,league,MCAL League Championships,Redwood Empire,MCAL,,,,MCAL also listed under Class A (Branson). Area assignment must be per school. No results in repo.
+2026,league,VVAL League Championships,Redwood Empire,VVAL,,,,Verify VVAL existed under this name in 2019 (league formed in a recent realignment). No results in repo.
+2026,league,CMC League Championships,Redwood Empire,CMC,,,,Per brief: Lower Lake reaches Redwood Empire via CMC. CMC also listed under Class A; confirm which CMC schools go to which area each season. No results in repo.
+2026,league,CMC League Championships,Class A,CMC,,,,CMC also listed under Redwood Empire; confirm which CMC schools go to Class A each season. No results in repo.
+2026,league,BAC League Championships,Class A,BAC,,,,Verify BAC existed under this name and fielded NCS track teams this season. No results in repo.
+2026,league,HDNL Little 5 League Championships,Class A,HDNL Little 5,,,,Verify division name each season (Little 4 vs Little 5 varied with membership). No results in repo.
+2026,league,MCAL (Branson) League Championships,Class A,MCAL (Branson),,,,"Single-school assignment, not a separate league meet; source is the MCAL league final. Handle in schools.csv. No results in repo."
+2026,league,DVAL (Berean) League Championships,Class A,DVAL (Berean),,,,SUSPECT NAME: public-school DVAL was folded into DAL in 2018. Verify which league Berean Christian was in this season. No results in repo.

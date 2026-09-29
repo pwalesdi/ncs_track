@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Pipeline outputs (rebuildable from data/raw + data/reference)
+data/processed/
+outputs/
+
+# Scratch
+*.tmp
+.env

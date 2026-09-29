@@ -1,0 +1,122 @@
+"""Load and check data/reference/rules/{season}.yaml.
+
+Only 2026 rules exist. `load_rules_for(season)` falls back to the latest rules file and
+returns the label to stamp on outputs ("2026 rules applied").
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import yaml
+
+from . import paths
+from .events import EVENTS
+from .marks import MarkParseError, parse_mark
+
+AREAS = ("tri-valley", "bay-shore", "redwood-empire", "class-a")
+REQUIRED_TOP = ("schema_version", "season", "applied_label", "events", "wind",
+                "league_to_area", "area_to_moc", "moc_to_state", "relay_4x800", "discrepancies")
+
+
+class RulesError(ValueError):
+    pass
+
+
+def load_rules(path: Path) -> dict:
+    with open(path) as f:
+        rules = yaml.safe_load(f)
+    problems = check_rules(rules)
+    if problems:
+        raise RulesError(f"{path}: " + "; ".join(problems))
+    return rules
+
+
+def available_seasons() -> list[int]:
+    return sorted(int(p.stem) for p in paths.RULES.glob("*.yaml") if p.stem.isdigit())
+
+
+def load_rules_for(season: int) -> tuple[dict, str]:
+    """Rules for `season`, or the latest available. Returns (rules, applied_label)."""
+    seasons = available_seasons()
+    if not seasons:
+        raise RulesError("no rules files in data/reference/rules/")
+    use = season if season in seasons else max(seasons)
+    rules = load_rules(paths.rules_path(use))
+    return rules, rules["applied_label"]
+
+
+def _standards(rules: dict) -> list[tuple[str, str, str, str]]:
+    """(section, gender, event, raw mark) for every standards table in the file."""
+    out = []
+    tables = {
+        "area_to_moc": rules["area_to_moc"]["at_large"]["standards"],
+        "class_a_at_large": rules["league_to_area"]["class-a"]["at_large"]["standards"],
+    }
+    for section, table in tables.items():
+        for gender, events in table.items():
+            for event, mark in events.items():
+                out.append((section, gender, str(event), mark))
+    return out
+
+
+def standard(rules: dict, section: str, gender: str, event: str):
+    """Parsed standard as a marks.Mark, or None if the table has no entry."""
+    for sec, g, e, raw in _standards(rules):
+        if (sec, g, e) == (section, gender, event):
+            return parse_mark(raw, EVENTS[e][0])
+    return None
+
+
+def check_rules(rules: dict) -> list[str]:
+    problems: list[str] = []
+    missing = [k for k in REQUIRED_TOP if k not in rules]
+    if missing:
+        return [f"missing top-level keys {missing}"]
+
+    for gender, codes in rules["events"]["main_simulation"].items():
+        unknown = [c for c in codes if c not in EVENTS]
+        if unknown:
+            problems.append(f"unknown event codes for {gender}: {unknown}")
+
+    for section, gender, event, raw in _standards(rules):
+        if event not in EVENTS:
+            problems.append(f"{section} {gender}: unknown event {event!r}")
+            continue
+        if not isinstance(raw, str):
+            problems.append(f"{section} {gender} {event}: standard must be a quoted string, got {raw!r}")
+            continue
+        try:
+            parse_mark(raw, EVENTS[event][0])
+        except MarkParseError as e:
+            problems.append(f"{section} {gender} {event}: {e}")
+
+    moc = rules["area_to_moc"]
+    if set(moc["auto"]) != set(AREAS):
+        problems.append(f"area_to_moc.auto must cover {AREAS}")
+    for area, n in moc["auto"].items():
+        if not isinstance(n, int) or n < 0:
+            problems.append(f"area_to_moc.auto.{area} must be a non-negative int")
+    fill = moc["fill"][moc["fill"]["authoritative"]]["count"]
+    if sum(moc["auto"].values()) + fill != moc["field_min"]:
+        problems.append("area_to_moc: auto + authoritative fill != field_min")
+
+    ids = set(rules["discrepancies"])
+    for ref in _discrepancy_refs(rules):
+        if ref not in ids:
+            problems.append(f"reference to undefined discrepancy {ref}")
+    return problems
+
+
+def _discrepancy_refs(node) -> list[str]:
+    refs = []
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k == "discrepancy" and isinstance(v, str):
+                refs.append(v)
+            else:
+                refs.extend(_discrepancy_refs(v))
+    elif isinstance(node, list):
+        for v in node:
+            refs.extend(_discrepancy_refs(v))
+    return refs

@@ -34,6 +34,9 @@ MEET_NAME_PATTERNS = {
     "class-a": re.compile(r"\bclass a\b", re.I),
 }
 LEG_SEPARATORS = ("|", ";")
+LEG_PLACEHOLDERS = {"relay team"}     # Athletic.net shows this when no legs were entered
+GRADE_WORDS = {"FR": 9, "SO": 10, "JR": 11, "SR": 12}
+IN_SCOPE_DIVISIONS = {"varsity"}      # Unified, Ambulatory, Open: separate competitions
 
 
 class IngestError(ValueError):
@@ -128,10 +131,13 @@ def normalize(raw: pd.DataFrame, meet: pd.Series, source_file: str, rules: dict)
 
     for i, r in enumerate(raw.to_dict("records"), start=1):
         pid = f"{meet_key}#{i}"
+        ev = parse_event(r["event_raw"], r["division"])
+        division_ok = r["division"].strip().lower() in IN_SCOPE_DIVISIONS
         gender = parse_gender(r["gender"])
         if gender is None:
-            issue("V03", "error", f"unrecognised gender {r['gender']!r}", pid)
-        ev = parse_event(r["event_raw"], r["division"])
+            # "X" is a mixed Unified relay: out of scope, so only worth an info line.
+            sev = "info" if (ev.is_adaptive or not division_ok) else "error"
+            issue("V03", sev, f"unrecognised gender {r['gender']!r}", pid)
         if ev.code is None:
             issue("V03", "error", f"unrecognised event {r['event_raw']!r}", pid)
         rnd = parse_round(r["round_raw"])
@@ -160,7 +166,10 @@ def normalize(raw: pd.DataFrame, meet: pd.Series, source_file: str, rules: dict)
         value = mark.value if (mark and mark.ok and status == "OK") else None
 
         place = _int_or_none(r["place"])
-        if r["place"] and place is None and r["place"] not in ("--", "-"):
+        exhibition = r["place"].strip().upper() == "X"
+        if exhibition:
+            issue("V06", "warning", "place 'X': exhibition (not scored), kept out of scope", pid)
+        elif r["place"] and place is None and r["place"] not in ("--", "-"):
             issue("V06", "error", f"unparseable place {r['place']!r}", pid)
         if status != "OK" and place is not None:
             issue("V06", "error", f"place {place} on a {status} row", pid)
@@ -172,21 +181,22 @@ def normalize(raw: pd.DataFrame, meet: pd.Series, source_file: str, rules: dict)
             issue("V13", "error", f"unparseable wind {r['wind']!r}", pid)
         wind_aided = bool(ev.wind_event and wind is not None and wind > wind_max)
 
-        grade = _int_or_none(r["grade"])
-        if r["grade"] and (grade is None or not 9 <= grade <= 12):
-            issue("V11", "error", f"grade {r['grade']!r} not in 9-12", pid)
-            grade = None
-
+        grade_raw = r["grade"].strip()
+        grade = GRADE_WORDS.get(grade_raw.upper(), _int_or_none(grade_raw))
         in_scope = bool(
             gender and ev.code and (gender, ev.code) in in_scope_codes
-            and not ev.is_adaptive and ev.modifier is None
+            and not ev.is_adaptive and ev.modifier is None and division_ok and not exhibition
         )
+        if grade_raw not in ("", "-", "--") and (grade is None or not 9 <= grade <= 12):
+            issue("V11", "error" if in_scope else "warning", f"grade {grade_raw!r} not in 9-12", pid)
+            grade = None
         perf_rows.append({
             "performance_id": pid, "meet_key": meet_key, "season": season, "level": meet["level"],
             "meet_area": meet["area"] or None, "source": "athleticnet", "source_file": source_file,
             "source_row": i,
             "gender": gender, "event_raw": r["event_raw"], "division_raw": r["division"],
-            "event_code": ev.code, "event_modifier": ev.modifier, "measure": ev.measure,
+            "event_code": ev.code, "event_modifier": "exhibition" if exhibition else ev.modifier,
+            "measure": ev.measure,
             "is_relay": ev.is_relay, "is_adaptive": ev.is_adaptive, "in_scope": in_scope,
             "round_raw": r["round_raw"], "round": rnd, "heat": _int_or_none(r["heat"]),
             "place_raw": r["place"], "place": place,
@@ -206,7 +216,7 @@ def normalize(raw: pd.DataFrame, meet: pd.Series, source_file: str, rules: dict)
         if ev.is_relay:
             if r["athlete_id"]:
                 issue("V09", "warning", "relay row has athlete_id set", pid)
-            names = _split_legs(r["relay_leg_names"])
+            names = [n for n in _split_legs(r["relay_leg_names"]) if n.lower() not in LEG_PLACEHOLDERS]
             ids = _split_legs(r["relay_leg_ids"])
             if ids and len(ids) != len(names):
                 issue("V09", "error", f"{len(names)} leg names but {len(ids)} leg ids", pid)

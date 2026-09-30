@@ -169,16 +169,17 @@ One row per athlete (or relay team) per round, per event, per meet.
 | V03 | row | error | Gender, event and round each map to a canonical value |
 | V04 | row | error / warning | Mark parses; status is a known code; no numeric mark on a non-OK row; status column vs status word in mark disagree (warning) |
 | V05 | table | warning | Mark inside the loose plausibility range for the event |
-| V06 | row + table | error / warning / info | Place is an integer or `--`; no place on a non-OK row; within one race (meet, gender, division, event, modifier, round) a later place never has a better mark (error); first place in a final is 1 (warning); tied places listed (info) |
+| V06 | row + table | error / warning / info | Place is an integer or `--`; no place on a non-OK row; within one race (meet, gender, division, event, modifier, round) a later place never has a better mark (error in finals; warning in prelims, whose places can follow qualifying order); one place shared by different marks (warning); places restarting per section/heat in a final (error; Area places were checked 2026-09-29 and are overall); first place in a final is 1 (warning); tied places listed (info). In-scope rows only. |
 | V07 | table | error / warning | Individual rows without `athlete_id` → review queue (warning); non-numeric ID (error); same ID twice in one race (error) |
 | V08 | table | warning | One `athlete_id` with different names in a meet; one name + school with different IDs |
-| V09 | row + table | error / warning | Relay leg ID count equals name count (error); relay has 4 legs (warning); relay row carrying an `athlete_id` (warning) |
+| V09 | row + table | error / warning | Relay leg ID count equals name count (error); relay has 4 legs (warning); relay row carrying an `athlete_id` (warning); a meet whose relays have leg names but no leg IDs at all (warning, e.g. 2023 Class A) |
 | V10 | table | error / warning | `school_id` present (error); one `school_id` with several names in a meet (warning); `school_id` not in the schools reference, once that exists (warning) |
 | V11 | row | error | Grade in 9–12 or blank |
 | V12 | table | warning | Every main-simulation event × gender has in-scope final rows at every meet |
 | V13 | row | error / info | Wind parses (error); wind-aided counts reported (info) |
 | V14 | table | warning | Every finalist appears in that event's prelims, when prelims exist |
 | V15 | table | info | Per-meet row counts: total, out of scope, adaptive, modifier blocks, wind-aided |
+| V17 | table | warning | An in-scope Area event with more than 1.5× the meet's median rows per event (a very large field, e.g. 2025 Class A 400 m: confirm it's real) |
 | V16 | read | error | Every `meet_name` value names the filename's meet (e.g. "Meet of Champions" for `moc`, "Bayshore"/"Bay Shore" for `bay-shore`), and any year in it equals the filename season |
 
 ## 6. How to run

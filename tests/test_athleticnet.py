@@ -255,3 +255,81 @@ def test_cli_end_to_end(tmp_path, monkeypatch, capsys):
     perf = pd.read_csv(tmp_path / "processed" / "performances.csv", dtype=str)
     assert len(perf) == 29 and perf["performance_id"].is_unique
     assert (tmp_path / "review" / "validation_issues.csv").exists()
+
+
+# ---------------------------------------------------------------------------
+# Real Athletic.net (GetResultsData3) formats, 2026-09-29
+# ---------------------------------------------------------------------------
+def test_real_export_formats(tmp_path, meets, rules):
+    def m(d):
+        d.loc[5, "mark_raw"] = "11.99a"                  # a = fully automatic timing
+        d.loc[6, "mark_raw"] = "12.2h"                   # h = hand timed
+        d.loc[5, "grade"] = "So"
+        d.loc[6, "grade"] = "-"
+        extra = d.loc[[5]].assign(event_raw="400 Meters (Relay Split)", place="", mark_raw="55.10a")
+        unified = d.loc[[5]].assign(division="Unified", gender="X", grade="13", event_raw="100 Meters (Unified)")
+        exhib = d.loc[[7]].assign(place="X", mark_raw="17.27a")
+        return pd.concat([d, extra, unified, exhib], ignore_index=True)
+    p = tmp_path / MOC.name
+    m(pd.read_csv(MOC, dtype=str, keep_default_na=False)).to_csv(p, index=False)
+    perf, legs, issues = athleticnet.ingest_file(p, meets, rules)
+    assert errors(issues) == [], errors(issues)
+    r = perf.iloc[5]
+    assert r["mark_value"] == pytest.approx(11.99) and r["mark_flags"] == "a" and r["grade"] == 10
+    assert perf.iloc[6]["mark_flags"] == "h" and pd.isna(perf.iloc[6]["grade"])
+    split, uni, ex = perf.iloc[-3], perf.iloc[-2], perf.iloc[-1]
+    assert split["event_modifier"] == "relay_split" and not split["in_scope"]
+    assert uni["is_adaptive"] and not uni["in_scope"]
+    assert ex["event_modifier"] == "exhibition" and not ex["in_scope"] and pd.isna(ex["place"])
+    assert "V06" in {i.check for i in issues if i.severity == "warning"}
+
+
+def test_open_division_out_of_scope(tmp_path, meets, rules):
+    p = tmp_path / MOC.name
+    d = pd.read_csv(MOC, dtype=str, keep_default_na=False)
+    d.loc[5, "division"] = "Open"
+    d.to_csv(p, index=False)
+    perf, _, _ = athleticnet.ingest_file(p, meets, rules)
+    assert not perf.iloc[5]["in_scope"]
+
+
+def test_relay_placeholder_legs_dropped(tmp_path, meets, rules):
+    p = tmp_path / MOC.name
+    d = pd.read_csv(MOC, dtype=str, keep_default_na=False)
+    d.loc[0, ["relay_leg_names", "relay_leg_ids"]] = ["Relay Team", ""]
+    d.to_csv(p, index=False)
+    perf, legs, _ = athleticnet.ingest_file(p, meets, rules)
+    assert perf.iloc[0]["performance_id"] not in set(legs["performance_id"])
+
+
+def _area_final(places, heats, marks):
+    n = len(places)
+    return pd.DataFrame({
+        "performance_id": [f"x#{i}" for i in range(n)], "meet_key": "2026-area-tri-valley", "level": "area",
+        "gender": "girls", "division_raw": "Varsity", "event_code": "100", "event_modifier": None,
+        "round": "final", "in_scope": True, "status": "OK", "measure": "time",
+        "place": pd.array(places, dtype="Int64"), "heat": heats, "mark_value": marks,
+        "mark_raw": [f"{m:.2f}" for m in marks]})
+
+
+def test_place_basis_overall_ok_per_section_error():
+    marks = [12.0, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7]
+    heats = [2, 1, 2, 1, 2, 1, 2, 1]
+    overall = _area_final([1, 2, 3, 4, 5, 6, 7, 8], heats, marks)
+    assert validate.check_place_basis(overall) == []
+    per_section = _area_final([1, 1, 2, 2, 3, 3, 4, 4], heats, marks)
+    assert [i.severity for i in validate.check_place_basis(per_section)] == ["error"]
+
+
+def test_shared_place_different_marks_warns():
+    df = _area_final([1, 1, 3], [1, 1, 1], [12.0, 12.1, 12.2])
+    msgs = [i.message for i in validate.check_place_order(df) if i.severity == "warning"]
+    assert any("shared by different marks" in m for m in msgs)
+
+
+def test_field_size_warning():
+    rows = []
+    for ev, n in (("100", 20), ("200", 20), ("400", 35)):
+        rows.append(_area_final(list(range(1, n + 1)), [1] * n, [12 + i / 100 for i in range(n)]).assign(event_code=ev))
+    msgs = [i.message for i in validate.check_field_size(pd.concat(rows))]
+    assert msgs == ["girls 400: 35 rows vs typical 20 per event in this meet"]

@@ -15,8 +15,8 @@ from .marks import sort_key
 # Loose sanity bounds, seconds or meters, either gender. Outside -> warning.
 PLAUSIBLE: dict[str, tuple[float, float]] = {
     "100": (9.5, 20), "200": (19, 40), "400": (43, 90), "800": (100, 240),
-    "1600": (230, 480), "3200": (500, 1000), "100H": (12, 25), "110H": (12.5, 25),
-    "300H": (34, 70), "4x100": (40, 65), "4x400": (190, 300), "4x800": (440, 720),
+    "1600": (230, 480), "3200": (500, 1100), "100H": (12, 25), "110H": (12.5, 25),
+    "300H": (34, 70), "4x100": (40, 65), "4x400": (190, 360), "4x800": (440, 720),
     "HJ": (1.0, 2.4), "PV": (1.5, 6.0), "LJ": (3.0, 8.5), "TJ": (7, 17),
     "SP": (5, 22), "DT": (15, 70),
 }
@@ -37,7 +37,7 @@ def _entrant(row) -> str:
 
 def check_plausible(perf: pd.DataFrame) -> list[Issue]:
     out = []
-    ok = perf[perf["mark_value"].notna() & perf["event_code"].notna()]
+    ok = perf[perf["in_scope"] & perf["mark_value"].notna() & perf["event_code"].notna()]
     for r in ok.itertuples():
         lo, hi = PLAUSIBLE[r.event_code]
         if not lo <= r.mark_value <= hi:
@@ -48,9 +48,10 @@ def check_plausible(perf: pd.DataFrame) -> list[Issue]:
 
 
 def check_place_order(perf: pd.DataFrame) -> list[Issue]:
-    """Places must not contradict marks; ties are reported as info."""
+    """Places must not contradict marks; ties are reported as info. In-scope rows only:
+    Unified events are placed on combined marks and exhibition rows are unplaced."""
     out = []
-    placed = perf[(perf["status"] == "OK") & perf["place"].notna() & perf["mark_value"].notna()]
+    placed = perf[perf["in_scope"] & (perf["status"] == "OK") & perf["place"].notna() & perf["mark_value"].notna()]
     for key, g in _groups(placed):
         g = g.sort_values("place")
         measure = g["measure"].iloc[0]
@@ -58,16 +59,44 @@ def check_place_order(perf: pd.DataFrame) -> list[Issue]:
         for r in g.itertuples():
             k = sort_key(r.mark_value, measure)
             if prev is not None and k < prev[0] - 1e-9 and r.place > prev[1]:
-                out.append(Issue("V06", "error", r.meet_key,
-                                 f"{key[1:]}: place {r.place} ({r.mark_raw}) beats place {prev[1]} ({prev[2]})",
+                # Prelim places can follow qualifying order (heat qualifiers first), as in
+                # the 2026 MOC; only finals must be in mark order.
+                sev, why = ("warning", " (prelim: places may follow qualifying order)") if key[5] == "prelim" else ("error", "")
+                out.append(Issue("V06", sev, r.meet_key,
+                                 f"{key[1:]}: place {r.place} ({r.mark_raw}) beats place {prev[1]} ({prev[2]}){why}",
                                  r.performance_id))
             prev = (k, r.place, r.mark_raw)
         dup = g[g.duplicated("place", keep=False)]
+        mixed = dup.groupby("place")["mark_value"].nunique()
+        for place in mixed[mixed > 1].index:
+            out.append(Issue("V06", "warning", g["meet_key"].iloc[0],
+                             f"{key[1:]}: place {place} shared by different marks {sorted(dup.loc[dup['place'] == place, 'mark_raw'])}"))
         if len(dup):
             out.append(Issue("V06", "info", g["meet_key"].iloc[0],
                              f"{key[1:]}: tied places {sorted(dup['place'].unique().tolist())}"))
         if g["round"].iloc[0] == "final" and g["place"].min() != 1:
             out.append(Issue("V06", "warning", g["meet_key"].iloc[0], f"{key[1:]}: first place is {g['place'].min()}"))
+    return out
+
+
+def check_place_basis(perf: pd.DataFrame) -> list[Issue]:
+    """V06: places must be overall across sections/heats of a final, not restarted per section.
+
+    Athletic.net Area meets run sprints as sections of one Finals round. If a file ever
+    numbers places per section, the replay's top-N cut would be wrong, so stop it here.
+    """
+    out = []
+    fin = perf[perf["in_scope"] & (perf["round"] == "final") & (perf["status"] == "OK")
+               & perf["place"].notna() & perf["mark_value"].notna() & perf["heat"].notna()]
+    for key, g in fin.groupby(["meet_key", "gender", "event_code"]):
+        if g["heat"].nunique() < 2 or len(g) < 6:
+            continue
+        k = g["mark_value"].where(g["measure"] == "time", -g["mark_value"])
+        overall = k.rank(method="min")
+        in_heat = k.groupby(g["heat"]).rank(method="min")
+        if (g["place"] == in_heat).mean() > 0.9 and (g["place"] == overall).mean() < 0.5:
+            out.append(Issue("V06", "error", key[0],
+                             f"{key[1:]}: places look per-section (restart in each heat); overall place needed"))
     return out
 
 
@@ -100,6 +129,14 @@ def check_identity(perf: pd.DataFrame) -> list[Issue]:
 
 def check_relays(perf: pd.DataFrame, legs: pd.DataFrame) -> list[Issue]:
     out = []
+    # A meet where most relays have no leg IDs (2023 Class A lists "Relay Team" instead of legs).
+    rel = perf[perf["is_relay"].fillna(False).astype(bool) & perf["in_scope"]]
+    with_ids = set(legs.loc[legs["athlete_id"].notna(), "performance_id"])
+    for meet, g in rel.groupby("meet_key"):
+        n_ids = g["performance_id"].isin(with_ids).sum()
+        if n_ids < 0.5 * len(g):
+            out.append(Issue("V09", "warning", meet,
+                             f"relay leg IDs missing: {n_ids} of {len(g)} relays have any leg ID"))
     counts = legs.groupby("performance_id").size()
     relays = perf[perf["is_relay"].fillna(False).astype(bool) & (perf["status"] == "OK")]
     for r in relays.itertuples():
@@ -150,6 +187,23 @@ def check_rounds(perf: pd.DataFrame) -> list[Issue]:
     return out
 
 
+FIELD_SIZE_FACTOR = 1.5
+
+
+def check_field_size(perf: pd.DataFrame) -> list[Issue]:
+    """V17: an Area event far bigger than the meet's typical event (e.g. 2025 Class A 400 m)."""
+    out = []
+    scope = perf[perf["in_scope"] & (perf["level"] == "area")]
+    for meet, g in scope.groupby("meet_key"):
+        sizes = g.groupby(["gender", "event_code"]).size()
+        typical = sizes.median()
+        for (gender, code), n in sizes.items():
+            if n > FIELD_SIZE_FACTOR * typical:
+                out.append(Issue("V17", "warning", meet,
+                                 f"{gender} {code}: {n} rows vs typical {typical:.0f} per event in this meet"))
+    return out
+
+
 def summarize(perf: pd.DataFrame) -> list[Issue]:
     out = []
     for meet, g in perf.groupby("meet_key"):
@@ -165,9 +219,9 @@ def summarize(perf: pd.DataFrame) -> list[Issue]:
 
 def run_all(perf: pd.DataFrame, legs: pd.DataFrame, rules: dict,
             known_school_ids: set[str] | None = None) -> list[Issue]:
-    return (check_plausible(perf) + check_place_order(perf) + check_identity(perf)
+    return (check_plausible(perf) + check_place_order(perf) + check_place_basis(perf) + check_identity(perf)
             + check_relays(perf, legs) + check_schools(perf, known_school_ids)
-            + check_coverage(perf, rules) + check_rounds(perf) + summarize(perf))
+            + check_coverage(perf, rules) + check_rounds(perf) + check_field_size(perf) + summarize(perf))
 
 
 def review_queue(perf: pd.DataFrame) -> pd.DataFrame:

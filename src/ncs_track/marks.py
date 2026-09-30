@@ -9,7 +9,8 @@ Formats handled (all seen in Hy-Tek results or expected from Athletic.net):
   feet-inch  5-04.00   31-2.75   142-05   5-0   5' 4"   17' 6.5"
   metric     12.34m
   prefixes   J  (tied height/time placed by judges or misses: J5-01.00, J15.02)
-  suffixes   Q q R NCS CIF h and combinations glued on: 47.20QCIF, 11.60RNCS, 11.6h
+  suffixes   Q q R NCS CIF h a and combinations glued on: 47.20QCIF, 11.60RNCS, 11.6h,
+             10.55a (Athletic.net: a = fully automatic timing, h = hand timed)
   statuses   DNS DNF DQ FS SCR NH NM ND FOUL NT
 """
 
@@ -25,7 +26,7 @@ STATUSES = ("OK", "DNS", "DNF", "DQ", "FS", "SCR", "NH", "NM", "FOUL", "NT")
 _STATUS_ALIASES = {"ND": "NM", "SCRATCH": "SCR", "FALSE START": "FS"}
 
 # Longest first so "CIF" wins over "C"-anything and "NCS" is taken whole.
-_FLAG_TOKENS = ("CIF", "NCS", "Q", "q", "R", "h", "*", "#", "@")
+_FLAG_TOKENS = ("CIF", "NCS", "Q", "q", "R", "h", "a", "*", "#", "@")
 
 _TIME = re.compile(r"^(?:(?:(\d+):)?(\d{1,2}):)?(\d{1,2}(?:\.\d{1,3})?)$")
 _FEET_INCH = re.compile(r"^(\d{1,3})-(\d{1,2}(?:\.\d{1,2})?)$")

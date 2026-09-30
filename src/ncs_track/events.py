@@ -38,6 +38,8 @@ MODIFIERS = {
     "exhibition": re.compile(r"\bexhibition\b"),
     "rerun": re.compile(r"\bre-?run\b"),
     "jump_off": re.compile(r"\bjump[- ]?off\b"),
+    # Athletic.net lists relay legs as "400 Meters (Relay Split)"; not an individual race.
+    "relay_split": re.compile(r"\brelay split\b"),
 }
 
 # Ordered: hurdles and relays before flat distances so "100 Meter Hurdles" != "100".

@@ -23,7 +23,7 @@ from pathlib import Path
 import pandas as pd
 
 MAX_TOKENS = 6
-GENERIC_PHRASES = {"relay team", "team relay"}
+GENERIC_PHRASES = {"relay team", "team relay"}      # Athletic.net placeholder for missing relay legs
 _SUFFIX = re.compile(r"\b(jr|sr|ii|iii|iv)\b\.?", re.I)
 
 

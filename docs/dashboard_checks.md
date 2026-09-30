@@ -21,22 +21,29 @@ syntax-checked, because there is no browser here. Checked 2026-09-30; all pass.
 | 5 | Spot utilization; 2026, all | Redwood Empire empty lanes 17 of 216; no-shows 3 of 193 | `spot_utilization_by_area.csv`: 17, 216, 3, 193 | ✓ |
 | 6 | Left out; 2026, all | Tri-Valley 0 of 96 (3 of 96 before the all-rounds cutoff, 2026-09-30) | `left_out.csv`: 0 of 96 | ✓ |
 | 7 | Makeup, girls 100, 2026; utilization, boys throws, 2026 | Per-Area totals | `field_makeup.csv`, `spot_utilization.csv` filtered | ✓ |
-| 9 | Panel 6, 2026, all | Class A lowest autos 1 of 28; every Area/group count and median | `core_comparison.csv` (2026, all events) | ✓ |
+| 9 | Core question, 2026, all | Class A lowest autos 1 of 28; every Area/group count and median (from `core_place_counts.csv`) | `core_comparison.csv` (2026, all events) | ✓ |
+| 10 | Headline cards (pooled 2022–2026) | Tri-Valley 464 of 659 at-large spots; every Area's lowest-auto and at-large top finishes; empty lanes | pandas on `at_large_share.csv`, `core_place_counts.csv` (cross-checked with `core_comparison.csv`), `spot_utilization_by_area.csv` | ✓ |
 | 8 | Utilization, all seasons pooled; flag list | Bay Shore empty lanes, 5 seasons; 22 flags | Sum of `spot_utilization_by_area.csv`; `spot_utilization_flags_empty_lanes.csv` | ✓ |
 
-## Browser check (2026-09-30)
+## Browser check (redesign, 2026-09-30)
 
 `scripts/checks/dashboard_browser.py` (also run by `tests/test_dashboard_browser.py`) opens
-the page in headless Chromium through Playwright, with **every network request blocked**:
-Chart.js 4.4.1 is inlined, so the page must work offline. At each width it checks the page
-as loaded and again after switching to the declared field, all seasons, girls and the
-throws group.
+the page in headless Chromium through Playwright, with **every network request blocked**.
+At each width it checks:
+- the page as loaded, then with every "Show numbers" table open, then after switching to
+  the declared field, all seasons, girls and the throws group;
+- that the headline cards show the numbers pandas computes from `data/summary/`;
+- that the filter bar is still at the top of the screen after scrolling to the bottom.
 
-| Width | Page-level horizontal scroll | Charts drawn | Console / page errors | Network requests |
-|---|---|---|---|---|
-| 390 px | none (scrollWidth 390 = clientWidth 390) | 6 of 6 | 0 | 0 |
-| 1400 px | none (1400 = 1400) | 6 of 6 | 0 | 0 |
+| Width | Page-level horizontal scroll | Charts drawn (4 bar + 4 donut) | Headline numbers | Sticky filters | Console / page errors | Network |
+|---|---|---|---|---|---|---|
+| 390 px | none (390 = 390) | 8 of 8 | match | yes | 0 | 0 requests |
+| 1400 px | none (1400 = 1400) | 8 of 8 | match | yes | 0 | 0 requests |
 
-Screenshots are in `outputs/dashboard_{390,1400}{,_filtered}.png` (git-ignored). Wide
-tables scroll inside their own container. The flag list is a full-width panel.
+Screenshots: `outputs/dashboard_{390,1400}{,_tables_open,_filtered}.png` (git-ignored).
 
+## Not checked here
+
+- **Real phones.** The check uses headless Chromium, not iOS Safari or Android Chrome.
+- **Canvas text.** The automated checks confirm the charts drew; they can't read the canvas
+  text. A "stray label" bug was caught by viewing the screenshots and fixed.

@@ -379,3 +379,15 @@ Newest at the bottom.
     next-best-mark declines 46 → 53, left out 8,597 → 8,587, left out who beat an automatic
     qualifier from another Area 1,582 → 1,575. Routes, fields, no-shows and the audit are
     unchanged.
+37. **Dashboard: which tabs follow the scenario.** Field makeup, Next best mark + at-large
+    spots, Left out and the Overview's "Selected allocation" card show the chosen scenario.
+    MOC performance, Spot use and the place grid show what actually happened (MOC results of
+    added athletes are unknown); under an alternative they say so in a banner, and the place
+    grid moves its "automatic cutoff" line to the scenario's cutoff. The Field toggle doesn't
+    apply to scenarios (one simulated field).
+38. **Compare tab data.** Faster-but-left-out and field share are summed from event-level
+    counts; added / removed / removed finalists / estimated gain / merit come from the
+    roll-up tables, so the small-cell blanks hold. The scenario tables are embedded as
+    column lists + row arrays and only at event level where they sum exactly (page 3.9 MB).
+39. **Place grid replaces the line charts.** Pooled when the season control is "side by side"
+    or "pooled"; a year otherwise. Event filter maps to its event group, as before.

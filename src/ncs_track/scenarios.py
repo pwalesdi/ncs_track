@@ -183,9 +183,11 @@ def tables(res: pd.DataFrame) -> dict[str, pd.DataFrame]:
             key = {"scenario": scen, "season": season, "gender": gender, "event": ev}
             f = x[x["route"].notna()]
             size = len(f)
-            for a in AREAS:
-                fa, xa = f[f["area"] == a], x[x["area"] == a]
+            for a in (*AREAS, "all"):
+                fa, xa = (f, x) if a == "all" else (f[f["area"] == a], x[x["area"] == a])
                 for rt in ("automatic", "next_best_mark", "at_large_standard"):
+                    if a == "all":
+                        break
                     n = int((fa["route"] == rt).sum())
                     makeup.append({**key, "area": a, "route": rt, "count": n, "field_size": size,
                                    "share_of_field": round(n / size, 4) if size else None})

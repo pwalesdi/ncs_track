@@ -104,6 +104,20 @@ __CHARTJS__</script>
   .donut p.al, .dgrid td span.al { font-style: italic; }
   .donut p.pd, .dgrid td span.pd { margin-top: 2px; }
 
+  /* Place grid and scenario grid */
+  table.pgrid { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 520px; }
+  table.pgrid th { font-size: .85rem; color: var(--muted); font-weight: 650; text-align: left; padding: 4px 6px; }
+  table.pgrid th.area { border-top: 5px solid var(--c); color: var(--text); }
+  table.pgrid td { border-radius: 5px; padding: 6px 8px; font-variant-numeric: tabular-nums; font-size: .9rem; position: relative; }
+  table.pgrid td.cut { border-bottom: 4px solid var(--text); padding-bottom: 16px; }
+  table.pgrid td.cut::after { content: "automatic cutoff"; position: absolute; right: 4px; bottom: 1px; font-size: .64rem;
+                              font-weight: 700; color: var(--text); letter-spacing: .02em; }
+  table.pgrid td.hid { color: var(--muted); }
+  table.cgrid td { vertical-align: top; }
+  table.cgrid td b { font-size: 1.25rem; }
+  table.cgrid td small { display: block; font-size: .76rem; color: #2b3036; }
+  .scen-note { background: #fff8e6; border: 1px solid #e8c77d; border-radius: 8px; padding: 8px 12px; font-size: .9rem; margin: 8px 0; }
+
   /* Tables */
   details { margin-top: 10px; }
   details > summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--link); padding: 4px 0; }
@@ -132,10 +146,12 @@ __CHARTJS__</script>
           <button data-v="qualified" aria-pressed="true" title="Everyone who earned a spot, whether or not they entered">All qualifiers</button>
           <button data-v="declared" aria-pressed="false" title="Athletes who entered the MOC">Actual entries</button>
         </span></label>
-      <label>Rules
-        <span class="seg" id="rules">
-          <button data-v="current" aria-pressed="true">Current rules</button>
-          <button data-v="proposed" aria-pressed="false" disabled title="Coming soon">Proposed (coming soon)</button>
+      <label>Allocation scenario
+        <span class="seg" id="scenario">
+          <button data-v="current" aria-pressed="true" title="The existing system: 6 automatic spots per Area (Class A 3) + 3 next best mark">Current (6-6-6-3)</button>
+          <button data-v="a_5553" aria-pressed="false" title="5/5/5/3 automatic + 6 next best mark">5-5-5-3</button>
+          <button data-v="b_4443" aria-pressed="false" title="4/4/4/3 automatic + 9 next best mark">4-4-4-3</button>
+          <button data-v="c_3333" aria-pressed="false" title="3/3/3/3 automatic + 12 next best mark">3-3-3-3</button>
         </span></label>
       <label>Seasons <select id="season"></select></label>
       <label>Gender <select id="gender">
@@ -156,9 +172,8 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-curve" role="tabpanel">
     <h2>Area place vs. MOC finish</h2>
-    <p class="how">Each line shows how athletes who placed 1st, 2nd, 3rd... at their Area meet typically finished at the MOC.</p>
+    <p class="how">How often athletes who placed 1st, 2nd, 3rd… at their Area meet went on to make the MOC final.</p>
     <p class="note" id="curve-note"></p>
-    <div class="legend" id="lg-curve"></div>
     <div id="curve-body"></div>
   </section>
 
@@ -217,6 +232,17 @@ __CHARTJS__</script>
     <div id="left-body"></div>
   </section>
 
+  <section class="tabpanel" id="tab-compare" role="tabpanel">
+    <h2>Compare scenarios</h2>
+    <p class="how">Each column replays every season with a different number of automatic spots per Area (Tri-Valley,
+      Bay Shore and Redwood Empire equal; Class A always 3). The field base stays 24: every removed automatic spot becomes a
+      next-best-mark spot. Real declines are kept; athletes never offered a spot are assumed to accept. The at-large standard
+      is unchanged. Follows the gender and event filters; rows are seasons.</p>
+    <label class="note" style="display:block;margin:6px 0">Metric
+      <select id="metric" style="margin-left:6px"></select></label>
+    <div id="compare-body"></div>
+  </section>
+
   <section class="tabpanel" id="tab-defs" role="tabpanel">
     <h2>Definitions</h2>
     <dl class="defs" id="defs"></dl>
@@ -272,7 +298,111 @@ function finalTxt(k, n) {
   return k + " of " + n + " entries made the final (" + pctNum(k, n) + "%)";
 }
 
+// ---------- Scenarios ----------
+function U(D, k) {                     // packed {c: columns, r: rows} -> array of objects (cached)
+  if (!D["_" + k]) {
+    var t = D[k];
+    D["_" + k] = t.r.map(function (row) { var o = {}; t.c.forEach(function (c, i) { o[c] = row[i]; }); return o; });
+  }
+  return D["_" + k];
+}
+function seasonKey(season) { return season === "all" || season === "side" ? POOLED_KEY : String(season); }
+function keepE(r, f, season) {         // event-grain scenario rows (season, gender, event code)
+  var s = season === undefined ? f.season : season;
+  if (s !== "all" && s !== "side" && String(r.season) !== String(s)) return false;
+  if (f.gender !== "all" && r.gender !== f.gender) return false;
+  var ev = eventSet(f.event);
+  return !ev || ev.indexOf(String(r.event)) >= 0;
+}
+function level(rows, f, season) {      // roll-up scenario rows at the filter's level
+  var key = seasonKey(season === undefined ? f.season : season);
+  return rows.filter(function (r) { return r.season === key && r.gender === f.gender && r.event === f.event; });
+}
+function scenMakeup(D, f, season) {
+  var rows = U(D, "scen_makeup").filter(function (r) { return r.scenario === f.scenario && keepE(r, f, season); });
+  var out = {_total: sum(rows, "count")};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    var by = function (t) { return sum(ra.filter(function (r) { return r.route === t; }), "count"); };
+    out[a] = {automatic: by("automatic"), next_best_mark: by("next_best_mark"), at_large_standard: by("at_large_standard"),
+              other: 0, total: sum(ra, "count")};
+  });
+  return out;
+}
+function scenLeft(D, f, season, scenario) {
+  var sc = scenario || f.scenario || "current";
+  var rows = U(D, "scen_left").filter(function (r) { return r.scenario === sc && keepE(r, f, season); });
+  var out = {leftOut: sum(rows, "left_out"), beatAny: sum(rows, "beat_any"), beatExclCA: sum(rows, "beat_any_excl_class_a"), areas: {}};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    var o = {leftOut: sum(ra, "left_out"), beatAny: sum(ra, "beat_any"), beatExclCA: sum(ra, "beat_any_excl_class_a"), beat: {}};
+    AREAS.forEach(function (b) { o.beat[b] = sum(ra, "beat_" + b); });
+    out.areas[a] = o;
+  });
+  return out;
+}
+var METRICS = [
+  ["flo_in", "Faster but left out (Class A qualifiers included)"],
+  ["flo_out", "Faster but left out (Class A qualifiers excluded)"],
+  ["added", "Added vs. actual, by Area"],
+  ["removed", "Removed vs. actual, by Area"],
+  ["removed_final", "Removed athletes who made the MOC final"],
+  ["gain", "Estimated gain (estimate — different meets)"],
+  ["merit", "Merit capture: 24 best Area marks per event"],
+  ["share", "Field share by Area"]];
+// One Compare cell: {value, big, unit, lines: [[area, text, value]]}.
+function compareCell(D, f, metric, scenario, season) {
+  var fs = {season: season, gender: f.gender, event: f.event, scenario: scenario};
+  var pick = function (rows) { return rows.filter(function (r) { return r.scenario === scenario; }); };
+  if (metric === "flo_in" || metric === "flo_out") {
+    var lo = scenLeft(D, fs, season, scenario), k = metric === "flo_in" ? "beatAny" : "beatExclCA";
+    return {value: lo[k], big: String(lo[k]), unit: "athletes left out who beat an automatic qualifier from another Area" +
+              (metric === "flo_out" ? " (Class A qualifiers not counted)" : ""),
+            lines: AREAS.map(function (a) { return [a, lo.areas[a][k] + " of " + lo.areas[a].leftOut + " left out", lo.areas[a][k]]; })};
+  }
+  if (metric === "merit") {
+    var m = pick(level(U(D, "scen_merit"), fs, season))[0] || {top_marks: 0, captured: 0};
+    return {value: m.top_marks ? m.captured / m.top_marks : 0, big: pctNum(m.captured, m.top_marks) + "%",
+            unit: m.captured + " of " + m.top_marks + " top-24 Area marks in the field", lines: []};
+  }
+  if (metric === "share") {
+    var mk = scenMakeup(D, fs, season);
+    return {value: mk._total ? mk["tri-valley"].total / mk._total : 0, big: pctNum(mk["tri-valley"].total, mk._total) + "%",
+            unit: "Tri-Valley's share of the field (" + mk._total + " athletes)",
+            lines: AREAS.map(function (a) { return [a, pctNum(mk[a].total, mk._total) + "% (" + mk[a].total + ")", mk._total ? 100 * mk[a].total / mk._total : 0]; })};
+  }
+  var ch = pick(level(U(D, "scen_changes"), fs, season));
+  var col = {added: "added", removed: "removed", removed_final: "removed_made_final", gain: "added_above_cutoff"}[metric];
+  var tot = ch.filter(function (r) { return r.area === "all"; })[0] || {};
+  var unit = {added: "athletes in under the scenario but not in reality",
+              removed: "athletes in reality but out under the scenario",
+              removed_final: "removed athletes who made the MOC final in reality",
+              gain: "added athletes whose Area mark was at or better than the MOC final cutoff (estimate — different meets)"}[metric];
+  var v = tot[col];
+  var shown = v !== null && v !== undefined;
+  return {value: shown ? v : 0, big: shown ? String(v) : "–",
+          unit: shown ? unit : "not shown: " + (tot.removed || 0) + " removed (fewer than 5)",
+          lines: AREAS.map(function (a) {
+            var r = ch.filter(function (x) { return x.area === a; })[0] || {};
+            var x = r[col];
+            return [a, x === null || x === undefined ? (metric === "removed_final" ? "– (" + (r.removed || 0) + " removed)" : "0") : String(x), x || 0];
+          })};
+}
+// Place grid: % of entries that made the MOC final by Area place (rows 1st-12th) and Area.
+function placeGrid(D, key, gender, group) {
+  var c = curve(D, key, gender, group), out = [];
+  for (var p = 1; p <= 12; p++) {
+    out.push(AREAS.map(function (a) {
+      var x = c[a][String(p)] || {entries: 0, final: null, median: null};
+      var shown = x.entries >= 5 && x.final !== null && x.final !== undefined;
+      return {entries: x.entries, final: shown ? x.final : null, median: shown ? x.median : null,
+              pct: shown ? pctNum(x.final, x.entries) : null};
+    }));
+  }
+  return out;
+}
 function makeup(D, f, season) {
+  if (f.scenario && f.scenario !== "current") return scenMakeup(D, f, season);
   var rows = D.field_makeup.filter(function (r) { return r.field === f.field && keep(r, f, season); });
   var total = sum(rows, "count"), out = {_total: total};
   AREAS.concat(["unknown"]).forEach(function (a) {
@@ -285,6 +415,13 @@ function makeup(D, f, season) {
   return out;
 }
 function spotShare(D, f, season) {
+  if (f.scenario && f.scenario !== "current") {
+    var m = scenMakeup(D, f, season), o = {_nbm: 0, _std: 0};
+    AREAS.forEach(function (a) { o[a] = {next_best_mark: m[a].next_best_mark, at_large_standard: m[a].at_large_standard};
+      o[a].total = o[a].next_best_mark + o[a].at_large_standard; o._nbm += m[a].next_best_mark; o._std += m[a].at_large_standard; });
+    o._total = o._nbm + o._std;
+    return o;
+  }
   var rows = D.at_large_share.filter(function (r) { return r.field === f.field && keep(r, f, season) && r.spot_type !== "at_large_combined"; });
   var out = {_nbm: sum(rows.filter(function (r) { return r.spot_type === "next_best_mark"; }), "count"),
              _std: sum(rows.filter(function (r) { return r.spot_type === "at_large_standard"; }), "count")};
@@ -482,10 +619,26 @@ function headline(D) {
   });
 
   // ---------- state, controls, tabs ----------
-  var TABS = [["overview", "Overview"], ["curve", "Area place vs. MOC finish"], ["makeup", "Field makeup"],
+  var TABS = [["overview", "Overview"], ["compare", "Compare scenarios"], ["curve", "Area place vs. MOC finish"], ["makeup", "Field makeup"],
               ["spots", "Next best mark + at-large spots"], ["perf", "MOC performance"], ["use", "Spot use"],
               ["left", "Left out"], ["defs", "Definitions"]];
-  var state = {tab: "overview", field: "qualified", season: "side", gender: "all", event: "all"};
+  var state = {tab: "overview", field: "qualified", season: "side", gender: "all", event: "all", scenario: "current", metric: "flo_in"};
+  var SCEN = {}; D.scenarios.forEach(function (x) { SCEN[x[0]] = x[1]; });
+  var SCEN_COLOR = {current: "#0d3a63", a_5553: "#2a5f96", b_4443: "#5588c0", c_3333: "#8fb4dc"};
+  document.querySelectorAll("#scenario button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.scenario = b.dataset.v;
+      document.querySelectorAll("#scenario button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+      render();
+    });
+  });
+  var metricSel = document.getElementById("metric");
+  METRICS.forEach(function (m) { metricSel.add(new Option(m[1], m[0])); });
+  metricSel.addEventListener("change", function () { state.metric = metricSel.value; render(); });
+  function scenNote(what) {
+    return state.scenario === "current" ? "" : '<p class="scen-note">Scenario <b>' + SCEN[state.scenario] + "</b>: " + what + "</p>";
+  }
+  var REALITY = "this tab shows what actually happened at the MOC. A scenario changes who qualifies; the MOC results of athletes it adds are unknown. See Compare scenarios.";
   var seasonSel = document.getElementById("season");
   seasonSel.add(new Option("All seasons side by side", "side"));
   D.seasons.forEach(function (s) { seasonSel.add(new Option("Focus on " + s, String(s))); });
@@ -551,13 +704,23 @@ function headline(D) {
         layout: {padding: {right: Math.min(NARROW() ? 0.45 * window.innerWidth : 330, longest * (NARROW() ? 6.2 : 7.2) + 10)}},
         plugins: {legend: {display: false}, valueLabels: {on: true, totals: opts.totals},
                   tooltip: {callbacks: {label: function (c) { return c.dataset.label + ": " + (c.dataset.tips || [])[c.dataIndex]; }}}},
-        scales: {x: {stacked: !!opts.stacked, min: 0, max: opts.max, grid: {color: LINE}, ticks: {color: MUTED, callback: function (v) { return v + "%"; }}},
+        scales: {x: {stacked: !!opts.stacked, min: 0, max: opts.max, grid: {color: LINE}, ticks: {color: MUTED, callback: function (v) { return opts.count ? v : v + "%"; }}},
                  y: {stacked: !!opts.stacked, grid: {display: false}, ticks: {color: TEXT, font: {size: NARROW() ? 12 : 14, weight: "600"}, autoSkip: false, minRotation: 0, maxRotation: 0}}}}
     });
   }
   function short(txt) { return NARROW() ? txt.replace(/ \(\d+%\)$/, "").replace(" MOC spots", "").replace(" entries made the final", " made final") : txt; }
 
   // ---------- Overview ----------
+  function scenCard() {
+    var f = {gender: "all", event: "all"}, sc = state.scenario;
+    var c = function (m) { return compareCell(D, f, m, sc, "all"); };
+    var fin = c("flo_in"), fout = c("flo_out"), add = c("added"), rem = c("removed");
+    return '<div class="card" id="card-scen" data-scenario="' + sc + '" data-flo="' + fin.value + '"><p class="cap" style="margin:0"><b>Selected allocation: ' + SCEN[sc] + "</b></p>" +
+      '<div class="big">' + fin.big + '</div><p class="cap">left-out athletes beat an automatic qualifier from another Area (' + fout.big +
+      " with Class A qualifiers excluded), 2022–2026 pooled</p>" +
+      '<p class="cnt">' + (sc === "current" ? "Pick another allocation above to compare; the Compare scenarios tab shows all four side by side." :
+        add.big + " athletes added and " + rem.big + " removed vs. what actually happened.") + "</p></div>";
+  }
   function renderOverview() {
     var h = headline(D);
     var li = function (a) {
@@ -585,6 +748,7 @@ function headline(D) {
       '%</div><p class="cap">of next-best-mark + at-large spots went to Tri-Valley athletes</p><p class="cnt">' + h.tv_spots.k + " of " + h.tv_spots.n +
       " next-best-mark + at-large spots among all qualifiers (before declarations); " + h.tv_entries.k + " of " + h.tv_entries.n +
       " (" + pctNum(h.tv_entries.k, h.tv_entries.n) + "%) among actual entries.</p></div>" +
+      scenCard() +
       '<div class="card" id="card-noshow" data-k="' + h.noshow.k + '" data-n="' + h.noshow.n + '"><div class="big">' + h.noshow.k +
       '</div><p class="cap">no-shows over five seasons</p><p class="cnt">' + h.noshow.k + " of " + h.noshow.n +
       " entries (" + pctNum(h.noshow.k, h.noshow.n) + "%) were in the MOC program for an event but didn't compete in it. " +
@@ -592,80 +756,71 @@ function headline(D) {
   }
 
   // ---------- Area place vs MOC finish ----------
-  function curveDatasets(c, metric) {
-    return AREAS.map(function (a) {
-      var pts = [];
-      for (var p = 1; p <= 12; p++) {
-        var cell = c[a][String(p)] || {entries: 0};
-        var ok = cell.entries >= 5 && cell.median !== null && cell.median !== undefined;
-        var y = !ok ? null : (metric === "median" ? cell.median : 100 * cell.final / cell.entries);
-        pts.push({x: p, y: y, cell: cell});
-      }
-      return {label: AREA_NAME[a], data: pts, borderColor: COLOR[a], backgroundColor: COLOR[a], pointRadius: 4,
-              spanGaps: false, tension: 0, borderWidth: 2.5};
-    });
-  }
-  function curveChart(id, c, metric, small) {
-    var tip = function (ctx) {
-      var cell = ctx.raw.cell, place = ordinal(ctx.raw.x);
-      return ctx.dataset.label + " " + place + " place: " + cell.entries + " entries, " + cell.final + " made the final, median MOC place " + ordinal(cell.median);
-    };
-    charts[id] = new Chart(el(id), {
-      type: "line", data: {datasets: curveDatasets(c, metric)},
-      options: {responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
-        plugins: {legend: {display: false}, tooltip: {callbacks: {label: tip, title: function () { return ""; }}}},
-        scales: {
-          x: {type: "linear", min: 1, max: 12,
-              ticks: {stepSize: (small || NARROW()) ? 2 : 1, color: MUTED, maxRotation: 0, minRotation: 0, autoSkip: true,
-                      callback: function (v) { return ordinal(v); }},
-              title: {display: !small, text: "Place at the Area meet", color: MUTED}, grid: {color: LINE}},
-          y: metric === "median"
-            ? {reverse: true, min: 1, suggestedMax: 30, ticks: {color: MUTED, maxRotation: 0, callback: function (v) { return ordinal(v); }},
-               title: {display: !small, text: "Typical MOC finish (median place)", color: MUTED}, grid: {color: LINE}}
-            : {min: 0, max: 100, ticks: {color: MUTED, callback: function (v) { return v + "%"; }},
-               title: {display: !small, text: "% of entries that made the final", color: MUTED}, grid: {color: LINE}}}}
-    });
-  }
   function renderCurve() {
     var g = groupOf(state.event), gender = state.gender;
-    legend("lg-curve", AREAS.map(function (a) { return [AREA_NAME[a], COLOR[a]]; }));
-    var parts = [];
-    parts.push("Points with fewer than 5 entries are hidden. Entries are athlete-events (one athlete in two events counts twice).");
+    var key = state.season === "side" || state.season === "all" ? POOLED_KEY : state.season;
+    var auto = D.scen_auto[state.scenario];
+    var parts = [(key === POOLED_KEY ? "2022–2026 pooled" : key) + ". Cells with fewer than 5 entries are hidden (–)." +
+                 " Entries are athlete-events (one athlete in two events counts twice)."];
     if (state.event !== "all" && state.event.indexOf("group:") !== 0) parts.push("Single events aren't shown here for privacy; showing its event group (" + GROUP_NAME[g] + ").");
-    if (state.field === "qualified") parts.push("The Field toggle doesn't apply: only athletes who competed at the MOC have an MOC place.");
+    if (state.scenario !== "current") parts.push("The heavy line marks the " + SCEN[state.scenario] + " automatic cutoff; the percentages are what actually happened.");
     el("curve-note").textContent = parts.join(" ");
-    var body = el("curve-body");
-    if (state.season === "side") {
-      body.innerHTML = '<div class="panel"><p class="note">Typical MOC finish (median place, higher on the chart is better), by season. Shared scale.</p><div class="multiples">' +
-        D.seasons.map(function (s) { return '<div class="m"><h3>' + s + '</h3><div class="chart"><canvas id="cv-' + s + '"></canvas></div></div>'; }).join("") +
-        '</div></div><div class="panel"><p class="note">% of entries that made the final, by season. Shared scale.</p><div class="multiples">' +
-        D.seasons.map(function (s) { return '<div class="m"><h3>' + s + '</h3><div class="chart"><canvas id="ct-' + s + '"></canvas></div></div>'; }).join("") + "</div></div>";
-      D.seasons.forEach(function (s) {
-        var c = curve(D, String(s), gender, g);
-        curveChart("cv-" + s, c, "median", true);
-        curveChart("ct-" + s, c, "final", true);
-      });
-    } else {
-      var key = state.season === "all" ? POOLED_KEY : state.season;
-      body.innerHTML = '<div class="panel"><div class="chart" style="height:380px"><canvas id="cv-main"></canvas></div></div>' +
-        '<div class="panel"><div class="chart" style="height:230px"><canvas id="ct-main"></canvas></div>' +
-        details(numTable(["Area place"].concat(AREAS.map(function (a) { return AREA_NAME[a]; })), (function () {
-          var c = curve(D, key, gender, g), rows = [];
-          for (var p = 1; p <= 12; p++) rows.push([ordinal(p)].concat(AREAS.map(function (a) {
-            var x = c[a][String(p)] || {entries: 0};
-            return x.entries >= 5 && x.median !== null ? x.entries + " entries · median " + ordinal(x.median) + " · " + x.final + " made the final" : x.entries + " entries";
-          })));
-          return rows;
-        })())) + "</div>";
-      var c = curve(D, key, gender, g);
-      curveChart("cv-main", c, "median", false);
-      curveChart("ct-main", c, "final", false);
-    }
+    var grid = placeGrid(D, key, gender, g);
+    el("curve-body").innerHTML = '<div class="panel"><div class="gridwrap"><table class="pgrid" id="place-grid"><thead><tr><th>Place at Area meet</th>' +
+      AREAS.map(function (a) { return '<th class="area" style="--c:' + COLOR[a] + '">' + AREA_NAME[a] + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      grid.map(function (row, i) {
+        var p = i + 1;
+        return "<tr><th>" + ordinal(p) + "</th>" + row.map(function (x, j) {
+          var a = AREAS[j], cut = p === auto[a] ? " cut" : "";
+          if (x.pct === null) return '<td class="hid' + cut + '" style="background:' + tint(COLOR[a], 0.04) + '">– <small>' + x.entries + " entries</small></td>";
+          return '<td class="' + cut.trim() + '" style="background:' + tint(COLOR[a], 0.06 + 0.6 * x.pct / 100) + '"><b>' + x.pct + "%</b> · " + x.final + " of " + x.entries + "</td>";
+        }).join("") + "</tr>";
+      }).join("") + "</tbody></table></div>" +
+      '<p class="note">Cell: % of entries that made the MOC final (top 8; top 9 in LJ/TJ/SP/DT), with counts. Shading follows the %.</p>' +
+      details(numTable(["Area place"].concat(AREAS.map(function (a) { return AREA_NAME[a]; })), grid.map(function (row, i) {
+        return [ordinal(i + 1)].concat(row.map(function (x) { return x.pct === null ? x.entries + " entries" : x.entries + " entries · median MOC place " + ordinal(x.median); }));
+      }))) + "</div>";
+  }
+
+  // ---------- Compare scenarios ----------
+  function renderCompare() {
+    metricSel.value = state.metric;
+    var f = {gender: state.gender, event: state.event};
+    var rows = D.seasons.map(String).concat(["all"]);
+    var cells = {}, max = 0;
+    rows.forEach(function (s) { D.scenarios.forEach(function (sc) {
+      var c = compareCell(D, f, state.metric, sc[0], s); cells[s + "|" + sc[0]] = c; max = Math.max(max, c.value); }); });
+    var body = '<div class="panel"><div class="gridwrap"><table class="grid cgrid" id="compare-grid"><thead><tr><th></th>' +
+      D.scenarios.map(function (sc) { return "<th>" + sc[1] + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function (s) {
+        return "<tr><th>" + (s === "all" ? "All seasons" : s) + "</th>" + D.scenarios.map(function (sc) {
+          var c = cells[s + "|" + sc[0]];
+          return '<td style="background:' + tint(SCEN_COLOR.current, 0.05 + 0.45 * (max ? c.value / max : 0)) + '"><b>' + c.big + "</b><span>" + c.unit + "</span>" +
+            c.lines.map(function (l) { return "<small>" + AREA_NAME[l[0]] + ": " + l[1] + "</small>"; }).join("") + "</td>";
+        }).join("") + "</tr>";
+      }).join("") + '</tbody></table></div><p class="note">Shading follows the value within this grid. ' +
+      (state.metric === "gain" ? "Estimate — different meets: an Area mark at or better than the season's MOC final cutoff (8th-best mark across rounds; 9th in LJ/TJ/SP/DT) doesn't mean the athlete would have made the final. " : "") +
+      (state.metric === "removed_final" ? "Counts are blank when fewer than 5 athletes were removed (privacy). " : "") + "</p></div>";
+    // pooled chart: scenarios x Area (merit: one bar per scenario)
+    var byArea = state.metric !== "merit";
+    var labels = byArea ? AREAS.map(function (a) { return AREA_NAME[a]; }) : ["All events"];
+    var sets = D.scenarios.map(function (sc) {
+      var c = cells["all|" + sc[0]];
+      var vals = byArea ? c.lines.map(function (l) { return l[2]; }) : [100 * c.value];
+      return {label: sc[1], data: vals, backgroundColor: SCEN_COLOR[sc[0]],
+              endLabels: byArea ? c.lines.map(function (l) { return state.metric === "share" ? l[1] : String(l[2]); }) : [c.big],
+              tips: byArea ? c.lines.map(function (l) { return l[1]; }) : [c.unit]};
+    });
+    body += '<div class="panel"><h3 style="margin:0 0 4px;font-size:1.05rem">All seasons pooled</h3><div class="legend" id="lg-cmp"></div>' +
+      '<div class="chart" id="w-cmp"><canvas id="c-cmp"></canvas></div></div>';
+    el("compare-body").innerHTML = body;
+    legend("lg-cmp", D.scenarios.map(function (sc) { return [sc[1], SCEN_COLOR[sc[0]]]; }));
+    hbar("c-cmp", "w-cmp", labels, sets, {count: state.metric !== "share" && state.metric !== "merit"});
   }
 
   // ---------- Field makeup ----------
   function renderMakeup() {
-    el("makeup-how").innerHTML = (state.field === "qualified"
+    el("makeup-how").innerHTML = (state.scenario !== "current" ? scenNote("the field as this allocation would have built it, on real declarations (the Field toggle doesn't apply).") : "") + (state.field === "qualified"
       ? "<b>All qualifiers</b>: everyone who earned a spot, whether or not they entered."
       : "<b>Actual entries</b>: athletes who entered the MOC.") +
       " Each Area's share of MOC spots, split by route: automatic (top places at the Area meet), next best mark (the 3 fill spots per event) and at-large standard." +
@@ -701,8 +856,9 @@ function headline(D) {
   // ---------- Next best mark + at-large spots ----------
   function renderSpots() {
     var body = el("spots-body");
+    var note = scenNote("next-best-mark and at-large spots as this allocation would have given them, on real declarations.");
     if (state.season === "side") {
-      body.innerHTML = '<div class="panel">' + grid(function (a, s) {
+      body.innerHTML = note + '<div class="panel">' + grid(function (a, s) {
         var x = spotShare(D, state, s);
         return {share: x._total ? x[a].total / x._total : 0, html: "<b>" + pctNum(x[a].total, x._total) + "%</b><span>" + x[a].total + " of " + x._total +
           " next-best-mark + at-large spots</span><span>" + x[a].next_best_mark + " of " + x._nbm + " next-best-mark spots</span><span>" +
@@ -711,7 +867,7 @@ function headline(D) {
       return;
     }
     var x = spotShare(D, state), s2 = function (k) { return x._total ? 100 * k / x._total : 0; };
-    body.innerHTML = '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="legend" id="lg-sp"></div><div class="chart" id="w-sp"><canvas id="c-sp"></canvas></div>' +
+    body.innerHTML = note + '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="legend" id="lg-sp"></div><div class="chart" id="w-sp"><canvas id="c-sp"></canvas></div>' +
       details(numTable(["Area", "Next-best-mark + at-large spots", "Next-best-mark spots", "At-large spots"],
         AREAS.map(function (a) { return [AREA_NAME[a], spotsTxt(x[a].total, x._total, "spots"), spotsTxt(x[a].next_best_mark, x._nbm, "spots"), spotsTxt(x[a].at_large_standard, x._std, "spots")]; }))) + "</div>";
     legend("lg-sp", [["Next best mark (solid)", TEXT], ["At-large standard (light)", tint(TEXT, .4)]]);
@@ -726,6 +882,7 @@ function headline(D) {
   // ---------- MOC performance ----------
   function renderPerf() {
     var body = el("perf-body");
+    var note = scenNote(REALITY);
     if (state.season === "side") {
       var g = function (key, title) {
         return '<div class="panel"><h3 style="margin:0 0 6px;font-size:1.05rem">' + title + "</h3>" + grid(function (a, s) {
@@ -734,7 +891,7 @@ function headline(D) {
           return {share: shown ? x.final / x.entries : 0, html: "<b>" + (shown ? pctNum(x.final, x.entries) + "%" : "–") + "</b><span>" + finalTxt(x.final, x.entries).replace(/ \(\d+%\)$/, "") + "</span>"};
         }) + "</div>";
       };
-      body.innerHTML = g("automatic", "Automatic qualifiers") + g("nbm_std", "Next best mark + at-large standard qualifiers") +
+      body.innerHTML = note + g("automatic", "Automatic qualifiers") + g("nbm_std", "Next best mark + at-large standard qualifiers") +
         '<p class="note">Cell shading follows the made-the-final rate. Small counts swing a lot.</p>';
       return;
     }
@@ -745,7 +902,7 @@ function headline(D) {
               endLabels: AREAS.map(function (a) { var x = p[a][key]; return short(finalTxt(x.final, x.entries)); }),
               tips: AREAS.map(function (a) { var x = p[a][key]; return finalTxt(x.final, x.entries); })};
     };
-    body.innerHTML = '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="legend" id="lg-pf"></div><div class="chart" id="w-pf"><canvas id="c-pf"></canvas></div>' +
+    body.innerHTML = note + '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="legend" id="lg-pf"></div><div class="chart" id="w-pf"><canvas id="c-pf"></canvas></div>' +
       details(numTable(["Area", "Automatic qualifiers", "Next best mark + at-large standard qualifiers"],
         AREAS.map(function (a) { return [AREA_NAME[a], finalTxt(p[a].automatic.final, p[a].automatic.entries), finalTxt(p[a].nbm_std.final, p[a].nbm_std.entries)]; }))) + "</div>";
     legend("lg-pf", [["Automatic (solid)", TEXT], ["Next best mark + at-large standard (light)", tint(TEXT, .35)]]);
@@ -793,9 +950,10 @@ function headline(D) {
   function renderUse() {
     legend("lg-use", USE_SEGMENTS.map(function (s) { return [USE_LABEL[s[0]], USE_COLOR[s[0]]]; }));
     var body = el("use-body");
+    var note = scenNote(REALITY);
     if (state.season === "side") {
       var cols = D.seasons.map(String);
-      body.innerHTML = '<div class="panel"><div class="gridwrap"><table class="grid dgrid"><thead><tr><th></th>' + cols.map(function (s) { return "<th>" + s + "</th>"; }).join("") +
+      body.innerHTML = note + '<div class="panel"><div class="gridwrap"><table class="grid dgrid"><thead><tr><th></th>' + cols.map(function (s) { return "<th>" + s + "</th>"; }).join("") +
         "</tr></thead><tbody>" + AREAS.map(function (a) {
           return '<tr><th class="area" style="--c:' + COLOR[a] + '">' + AREA_NAME[a] + "</th>" + cols.map(function (s) {
             return '<td><div class="chart"><canvas id="du-' + a + "-" + s + '"></canvas></div>' + caption(spotUse(D, state, s)[a], "span") + "</td>";
@@ -804,7 +962,7 @@ function headline(D) {
       AREAS.forEach(function (a) { cols.forEach(function (s) { donut("du-" + a + "-" + s, spotUse(D, state, s)[a], false); }); });
     } else {
       var u = spotUse(D, state);
-      body.innerHTML = '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="donuts">' + AREAS.map(function (a) {
+      body.innerHTML = note + '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="donuts">' + AREAS.map(function (a) {
         return '<div class="donut"><h3>' + AREA_NAME[a] + '</h3><div class="chart"><canvas id="du-' + a + '"></canvas></div>' + caption(u[a], "p") + "</div>";
       }).join("") + "</div>" + details(numTable(["Area", "Guaranteed spots", "Competed", "No-show", "Not used", "Passed down from declines", "At-large standard qualifiers"],
         AREAS.map(function (a) { var x = u[a]; return [AREA_NAME[a], x.guaranteed_spots + " spots", x.g.competed, x.g.no_show, x.g.not_used, x.passed_down + " spots",
@@ -830,34 +988,38 @@ function headline(D) {
           AREAS.concat(["all"]).map(function (b) { var r = beatenMoc(D, season, "all", b);
             return [b === "all" ? "<b>All Areas</b>" : AREA_NAME[b], r ? r.beaten_autos + " qualifiers" : "0", mocLine(r)]; })) + "</div>";
     };
+    var cur = state.scenario === "current";
+    var note = scenNote("left out as it would be under this allocation: behind the Area's last automatic qualifier in the scenario, " +
+      "not in its field, and not a real decline. Real entrants who lose their spot in the scenario can be left out.");
     if (state.season === "side") {
-      body.innerHTML = '<div class="panel">' + grid(function (a, s) {
-        var x = leftOut(D, state, s).areas[a];
+      body.innerHTML = note + '<div class="panel">' + grid(function (a, s) {
+        var x = scenLeft(D, state, s).areas[a];
         return {share: x.leftOut ? 3 * x.beatAny / x.leftOut : 0, html: "<b>" + x.beatAny + "</b><span>of " + x.leftOut +
-          " left-out finishers beat an automatic qualifier from another Area</span>"};
-      }) + '<p class="note">Rows: the left-out athlete\'s Area.</p></div>' + mocTable("side");
+          " left-out finishers beat an automatic qualifier from another Area</span><span>" + x.beatExclCA + " excluding Class A qualifiers</span>"};
+      }) + '<p class="note">Rows: the left-out athlete\'s Area.</p></div>' + (cur ? mocTable("side") : "");
       return;
     }
-    var lo = leftOut(D, state);
-    var head = ["Left-out athletes from"].concat(AREAS.map(function (b) { return "beat a " + AREA_NAME[b] + " automatic"; }), ["beat any"]);
-    body.innerHTML = '<div class="panel" id="left-head" data-beat="' + lo.beatAny + '" data-total="' + lo.leftOut + '"><p style="font-size:1.1rem;margin:0"><b>' +
-      lo.beatAny + " of " + lo.leftOut + "</b> left-out finishers beat at least one automatic qualifier from another Area (" +
-      seasonLabel(state.season) + ").</p>" +
+    var lo = scenLeft(D, state);
+    var head = ["Left-out athletes from"].concat(AREAS.map(function (b) { return "beat a " + AREA_NAME[b] + " automatic"; }), ["beat any", "beat any, excl. Class A"]);
+    body.innerHTML = note + '<div class="panel" id="left-head" data-beat="' + lo.beatAny + '" data-beat-excl="' + lo.beatExclCA + '" data-total="' + lo.leftOut +
+      '"><p style="font-size:1.1rem;margin:0"><b>' + lo.beatAny + " of " + lo.leftOut +
+      "</b> left-out finishers beat at least one automatic qualifier from another Area, Class A qualifiers included (" + seasonLabel(state.season) + ").</p>" +
+      '<p style="font-size:1.1rem;margin:4px 0 0"><b>' + lo.beatExclCA + " of " + lo.leftOut + "</b> with Class A qualifiers excluded from the comparison.</p>" +
       '<p class="note">Each cell: left-out athletes (rows: their Area) whose Area-final mark beat at least one automatic qualifier from the column\'s Area. ' +
       "An athlete can beat qualifiers from several Areas, so a row's cells can add up to more than “beat any”.</p>" +
       numTable(head, AREAS.map(function (a) { var o = lo.areas[a];
-        return [AREA_NAME[a]].concat(AREAS.map(function (b) { return a === b ? "–" : o.beat[b] + (o.beat[b] ? " (" + o.beatenAutos[b] + " qualifiers beaten)" : ""); }),
-          [o.beatAny + " of " + o.leftOut]); })) + "</div>" + mocTable(state.season);
+        return [AREA_NAME[a]].concat(AREAS.map(function (b) { return a === b ? "–" : String(o.beat[b]); }),
+          [o.beatAny + " of " + o.leftOut, o.beatExclCA + " of " + o.leftOut]); })) + "</div>" + (cur ? mocTable(state.season) : "");
   }
 
   // ---------- render ----------
-  var RENDER = {overview: renderOverview, curve: renderCurve, makeup: renderMakeup, spots: renderSpots,
+  var RENDER = {overview: renderOverview, compare: renderCompare, curve: renderCurve, makeup: renderMakeup, spots: renderSpots,
                 perf: renderPerf, use: renderUse, left: renderLeft, defs: function () {}};
   function render() {
     destroyAll();
     document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.toggle("active", p.id === "tab-" + state.tab); });
     tabs.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.tab === state.tab); });
-    el("fsum").textContent = (state.field === "qualified" ? "All qualifiers" : "Actual entries") + " · " +
+    el("fsum").textContent = SCEN[state.scenario] + " · " + (state.field === "qualified" ? "All qualifiers" : "Actual entries") + " · " +
       seasonSel.options[seasonSel.selectedIndex].text + " · " + document.getElementById("gender").selectedOptions[0].text + " · " +
       eventSel.options[eventSel.selectedIndex].text;
     RENDER[state.tab]();

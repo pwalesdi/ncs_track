@@ -12,6 +12,7 @@ import json
 from datetime import date
 
 import pandas as pd
+import yaml
 
 from ncs_track import paths
 from ncs_track.analysis import SPOT_USE
@@ -61,6 +62,20 @@ DEFINITIONS = [
                                    "shorter) than the left-out athlete's. Only automatic qualifiers are compared: by "
                                    "design, nobody left out has a better mark than a next-best-mark qualifier."),
     ("Left out: caveat", "Marks come from different Area meets."),
+    ("Allocation scenario", "Current (6-6-6-3), 5-5-5-3, 4-4-4-3 or 3-3-3-3: automatic spots for Tri-Valley, Bay Shore and "
+                            "Redwood Empire (equal) and Class A (always 3). The field base stays 24, so every removed "
+                            "automatic spot becomes a next-best-mark spot. Routes by pass-down; athletes who declined in "
+                            "reality decline again, athletes never offered a spot are assumed to accept; the at-large "
+                            "standard is unchanged. Tabs about MOC results show what actually happened."),
+    ("Added / removed", "Added: in the field under a scenario but not in reality. Removed: in reality but not under the "
+                        "scenario."),
+    ("Faster but left out", "Left-out athletes (as in Left out, under the scenario's routes) whose Area-final mark beat at "
+                            "least one automatic qualifier from another Area; shown with Class A qualifiers included and "
+                            "excluded as the beaten group."),
+    ("Estimated gain", "Added athletes whose Area mark was at or better than that season's MOC final cutoff (the 8th-best "
+                       "MOC mark across rounds; 9th in LJ/TJ/SP/DT). An estimate: the marks come from different meets."),
+    ("Merit capture", "Of the 24 best Area-final marks per event (among athletes who didn't decline), how many are in the "
+                      "field."),
     ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
                            "are computed from all five seasons' entries, not averaged."),
     ("Source", "Athletic.net Area and MOC results; MOC programs (Diablo Timing); rules per season. Pre-2026 "
@@ -81,6 +96,26 @@ CAVEATS = [
     "Statistical tests of the lowest-automatic vs. next-best-mark + at-large comparison (docs/findings_v1.md §4) "
     "support a consistent direction pooled over five seasons, not a precise gap, and say nothing about causes.",
 ]
+
+
+SCEN_LABEL = {"current": "Current (6-6-6-3)", "a_5553": "5-5-5-3", "b_4443": "4-4-4-3", "c_3333": "3-3-3-3"}
+
+
+def scen_auto(name: str) -> dict:
+    return yaml.safe_load((paths.ROOT / "configs" / "allocation" / f"{name}.yaml").read_text())["auto_spots"]
+
+
+def event_grain(df: pd.DataFrame) -> pd.DataFrame:
+    """Plain counts sum exactly, so only single-season, single-gender, single-event rows (and no
+    all-Areas rows) are embedded; the page adds them up for any filter."""
+    x = df[~df["season"].str.contains("pooled") & (df["gender"] != "all") & (df["event"] != "all")
+           & ~df["event"].str.startswith("group:")]
+    return x[x["area"] != "all"] if "area" in x else x
+
+
+def packed(df: pd.DataFrame, cols: list[str]) -> dict:
+    """Column names once, then one array per row; the page expands it (unpack in the agg script)."""
+    return {"c": cols, "r": json.loads(df[cols].to_json(orient="values"))}
 
 
 def records(df: pd.DataFrame, cols: list[str]) -> list[dict]:
@@ -115,6 +150,19 @@ def build() -> dict:
         "left_out_beaten_moc": records(pd.read_csv(S / "left_out_beaten_moc.csv", dtype={"season": str, "made_final": "Int64"}),
                                        ["season", "area", "beaten_area", "beaten_autos", "competed", "made_final",
                                         "median_moc_place"]),
+        "scenarios": [[k, v] for k, v in SCEN_LABEL.items()],
+        "scen_auto": {k: scen_auto(k) for k in SCEN_LABEL},
+        "scen_makeup": packed(event_grain(pd.read_csv(S / "scenario_field_makeup.csv", dtype={"season": str})),
+                               ["scenario", "season", "gender", "event", "area", "route", "count"]),
+        "scen_changes": packed(pd.read_csv(S / "scenario_changes.csv", dtype={"season": str, "removed_made_final": "Int64"}),
+                                ["scenario", "season", "gender", "event", "area", "added", "removed",
+                                 "removed_made_final", "added_above_cutoff"]),
+        "scen_left": packed(event_grain(pd.read_csv(S / "scenario_left_out.csv", dtype={"season": str})),
+                             ["scenario", "season", "gender", "event", "area", "left_out", "beat_any",
+                              "beat_any_excl_class_a", "beat_tri-valley", "beat_bay-shore", "beat_redwood-empire",
+                              "beat_class-a"]),
+        "scen_merit": packed(pd.read_csv(S / "scenario_merit.csv", dtype={"season": str}),
+                              ["scenario", "season", "gender", "event", "top_marks", "captured"]),
         "caveats": CAVEATS,
     }
 

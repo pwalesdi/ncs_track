@@ -13,7 +13,9 @@ pooled:
   - below 700 px the filters are behind the "Filters" button
   - Spot use: every donut caption's counts sum to its total, and the legend swatches are the
     colors the donuts draw
-Screenshots: outputs/tabs/{width}_{tab}.png (default view) and {width}_{tab}_{mode}.png.
+Screenshots: outputs/tabs/{width}_{tab}.png (default view), {width}_{tab}_{mode}.png (2026, pooled),
+{width}_{tab}_{scenario}.png (every tab under each alternative allocation) and
+{width}_compare_{metric}.png (every metric of the Compare scenarios tab).
 Exit 1 on any failure.
 """
 
@@ -26,7 +28,9 @@ from ncs_track import paths
 HTML = paths.ROOT / "dashboard" / "index.html"
 SHOTS = paths.OUTPUTS / "tabs"
 WIDTHS = (390, 1400)
-TABS = ["overview", "curve", "makeup", "spots", "perf", "use", "left", "defs"]
+TABS = ["overview", "compare", "curve", "makeup", "spots", "perf", "use", "left", "defs"]
+SCENARIOS = ["a_5553", "b_4443", "c_3333"]
+METRICS = ["flo_in", "flo_out", "added", "removed", "removed_final", "gain", "merit", "share"]
 MODES = {"2026": "2026", "pooled": "all"}
 
 STATE_JS = """() => {
@@ -140,6 +144,15 @@ def set_season(page, width: int, value: str):
     page.wait_for_timeout(150)
 
 
+def set_scenario(page, width: int, value: str):
+    if width < 700:
+        page.click("#fbtn")
+    page.click(f'#scenario button[data-v="{value}"]')
+    if width < 700:
+        page.click("#fbtn")
+    page.wait_for_timeout(150)
+
+
 def run() -> dict:
     SHOTS.mkdir(parents=True, exist_ok=True)
     results = {}
@@ -183,6 +196,23 @@ def run() -> dict:
                         charts_seen[f"use_{mode}_captions_checked"] = s["nCaptions"]
                     page.screenshot(path=str(SHOTS / f"{width}_{tab}_{mode}.png"), full_page=True)
             set_season(page, width, "side")
+            for scen in SCENARIOS:                     # every tab under every alternative allocation
+                set_scenario(page, width, scen)
+                for tab in TABS:
+                    goto_tab(page, tab)
+                    pr, s = check(page, f"{width}px {tab} {scen}")
+                    problems += pr
+                    charts_seen[f"{tab}_{scen}"] = s["nCharts"]
+                    page.screenshot(path=str(SHOTS / f"{width}_{tab}_{scen}.png"), full_page=True)
+            set_scenario(page, width, "current")
+            goto_tab(page, "compare")
+            for m in METRICS:                          # every metric of the Compare tab
+                page.select_option("#metric", m)
+                page.wait_for_timeout(150)
+                pr, s = check(page, f"{width}px compare {m}")
+                problems += pr
+                charts_seen[f"compare_{m}"] = s["nCharts"]
+                page.screenshot(path=str(SHOTS / f"{width}_compare_{m}.png"), full_page=True)
             results[width] = {"problems": problems + errors, "blocked_network_requests": requests, "charts": charts_seen}
             page.close()
         browser.close()

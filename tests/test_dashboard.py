@@ -192,3 +192,34 @@ def test_11_left_out(tmp_path):
     assert lo["areas"]["redwood-empire"]["beat"]["bay-shore"] == 2 and lo["areas"]["tri-valley"]["beat"]["bay-shore"] == 7
     pooled = js('leftOut(D, {season:"all", gender:"all", event:"all"})', tmp_path)
     assert pooled["beatAny"] == summary("left_out_counts.csv").query("beaten_area == 'any'")["beat_any"].sum()
+
+
+def test_12_scenarios_match_tables(tmp_path):
+    ch = summary("scenario_changes.csv", dtype={"season": str})
+    lo = summary("scenario_left_out.csv", dtype={"season": str})
+    me = summary("scenario_merit.csv", dtype={"season": str})
+    lvl = lambda d, sc: d[(d["scenario"] == sc) & d["season"].str.contains("pooled") & (d["gender"] == "all") & (d["event"] == "all")]
+    f = '{gender:"all", event:"all"}'
+    for sc in ("current", "a_5553", "b_4443", "c_3333"):
+        got = js(f'["flo_in","flo_out","added","removed","gain","merit"].map(function (m) {{ return compareCell(D, {f}, m, "{sc}", "all"); }})', tmp_path)
+        l, c, m = lvl(lo, sc), lvl(ch, sc), lvl(me, sc).iloc[0]
+        tot = c[c["area"] == "all"].iloc[0]
+        assert got[0]["value"] == l[l["area"] != "all"]["beat_any"].sum()
+        assert got[1]["value"] == l[l["area"] != "all"]["beat_any_excl_class_a"].sum()
+        assert (got[2]["value"], got[3]["value"], got[4]["value"]) == (tot["added"], tot["removed"], tot["added_above_cutoff"])
+        assert got[5]["big"] == f"{round(100 * m['captured'] / m['top_marks'])}%"
+    cur = js(f'[compareCell(D, {f}, "added", "current", "all").value, compareCell(D, {f}, "removed", "current", "all").value]', tmp_path)
+    assert cur == [0, 0]
+    # the current scenario's left out equals the Left out tab's
+    a = js('scenLeft(D, {season:"all", gender:"all", event:"all", scenario:"current"})', tmp_path)
+    b = js('leftOut(D, {season:"all", gender:"all", event:"all"})', tmp_path)
+    assert (a["leftOut"], a["beatAny"]) == (b["leftOut"], b["beatAny"])
+
+
+def test_13_place_grid(tmp_path):
+    g = js('placeGrid(D, "2022-2026 pooled", "all", "all")', tmp_path)
+    t = summary("core_place_curve.csv", dtype={"season": str, "area_place": str})
+    t = t[t["season"].str.contains("pooled") & (t["gender"] == "all") & (t["event_group"] == "all") & (t["area"] == "tri-valley")]
+    sixth = t[t["area_place"] == "6"].iloc[0]
+    assert g[5][0]["final"] == sixth["made_final_count"] and g[5][0]["entries"] == sixth["entries"]
+    assert all(c["pct"] is None for row in g for c in row if c["entries"] < 5)

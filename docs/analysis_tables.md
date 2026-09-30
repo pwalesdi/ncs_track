@@ -218,3 +218,27 @@ against the real MOC programs, pass-down matched entries and unexplained entries
   unknown`: 15 in 2022 and 5 in 2023.
 - **Assumed allocations.** Allocation numbers before 2026 are assumed from 2026; standards
   come from each season's results (2023: assumed). See `docs/decisions.md`.
+
+## Scenarios (decision #35; `python -m ncs_track scenarios`, after `analysis`)
+
+Every table: `scenario` (`current`, `a_5553`, `b_4443`, `c_3333`) × `season` (each, plus
+`2022-2026 pooled`) × `gender` (`girls`, `boys`, `all`) × `event` (event code, `group:<name>`,
+`all`). Athletes are Area finalists with a valid mark and place; program entrants the
+pass-down couldn't place are outside every scenario.
+
+- **`scenario_field_makeup.csv`:** × area × `route` (`automatic`, `next_best_mark`,
+  `at_large_standard`): `count`, `field_size` (athletes with a route), `share_of_field`.
+- **`scenario_changes.csv`:** × area: `added` (in the scenario's field, not in reality's),
+  `removed` (the reverse), `removed_made_final` (removed athletes who made the MOC final in
+  reality; blank when 1–4 removed), `added_above_cutoff` (added athletes whose Area mark is
+  at or better than that season's MOC final cutoff, the 8th-best / 9th-best MOC mark across
+  rounds — an estimate, different meets).
+- **`scenario_left_out.csv`:** × area (the left-out athlete's): `left_out`, `beat_any` (beat at
+  least one automatic qualifier from another Area), `beat_any_excl_class_a` (same, Class A
+  qualifiers not counted as beaten), `beat_<area>` per beaten Area, and
+  `beats_a_next_best_mark` (always 0: checked).
+- **`scenario_merit.csv`:** `top_marks` (the 24 best Area-final marks per event among
+  finishers who didn't decline, summed over events) and `captured` (of those, in the field).
+
+Named versions (outputs/, local): `scenario_athletes.csv` (every finalist × scenario),
+`scenario_left_out.csv`, `scenario_removed_finalists.csv`.

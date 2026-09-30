@@ -190,7 +190,7 @@ def tables(res: pd.DataFrame) -> dict[str, pd.DataFrame]:
                     makeup.append({**key, "area": a, "route": rt, "count": n, "field_size": size,
                                    "share_of_field": round(n / size, 4) if size else None})
                 rem = xa[xa["removed"]]
-                ok = len(rem) >= MIN_CELL
+                ok = len(rem) >= MIN_CELL or len(rem) == 0
                 changes.append({**key, "area": a, "added": int(xa["added"].sum()), "removed": len(rem),
                                 "removed_made_final": int(rem["real_made_final"].fillna(0).sum()) if ok else None,
                                 "added_above_cutoff": int((xa["added"] & xa["above_cutoff"]).sum())})

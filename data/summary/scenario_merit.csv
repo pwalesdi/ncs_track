@@ -1,0 +1,1681 @@
+scenario,season,gender,event,top_marks,captured
+current,2022,girls,100,24,22
+current,2022,girls,100H,24,24
+current,2022,girls,1600,24,22
+current,2022,girls,200,24,20
+current,2022,girls,300H,24,24
+current,2022,girls,3200,24,23
+current,2022,girls,400,24,20
+current,2022,girls,4x100,24,21
+current,2022,girls,4x400,24,20
+current,2022,girls,800,24,19
+current,2022,girls,DT,24,18
+current,2022,girls,HJ,24,23
+current,2022,girls,LJ,24,23
+current,2022,girls,PV,24,24
+current,2022,girls,SP,24,19
+current,2022,girls,TJ,23,23
+current,2022,girls,group:sprints_hurdles,96,90
+current,2022,girls,group:400_800,48,39
+current,2022,girls,group:distance,48,45
+current,2022,girls,group:jumps,95,93
+current,2022,girls,group:throws,48,37
+current,2022,girls,group:relays,48,41
+current,2022,girls,all,383,345
+current,2022,boys,100,24,20
+current,2022,boys,110H,23,23
+current,2022,boys,1600,24,22
+current,2022,boys,200,24,24
+current,2022,boys,300H,23,23
+current,2022,boys,3200,24,20
+current,2022,boys,400,24,20
+current,2022,boys,4x100,24,22
+current,2022,boys,4x400,24,20
+current,2022,boys,800,24,21
+current,2022,boys,DT,24,22
+current,2022,boys,HJ,24,23
+current,2022,boys,LJ,24,23
+current,2022,boys,PV,24,20
+current,2022,boys,SP,24,22
+current,2022,boys,TJ,24,23
+current,2022,boys,group:sprints_hurdles,94,90
+current,2022,boys,group:400_800,48,41
+current,2022,boys,group:distance,48,42
+current,2022,boys,group:jumps,96,89
+current,2022,boys,group:throws,48,44
+current,2022,boys,group:relays,48,42
+current,2022,boys,all,382,348
+current,2022,all,100,48,42
+current,2022,all,100H,24,24
+current,2022,all,110H,23,23
+current,2022,all,1600,48,44
+current,2022,all,200,48,44
+current,2022,all,300H,47,47
+current,2022,all,3200,48,43
+current,2022,all,400,48,40
+current,2022,all,4x100,48,43
+current,2022,all,4x400,48,40
+current,2022,all,800,48,40
+current,2022,all,DT,48,40
+current,2022,all,HJ,48,46
+current,2022,all,LJ,48,46
+current,2022,all,PV,48,44
+current,2022,all,SP,48,41
+current,2022,all,TJ,47,46
+current,2022,all,group:sprints_hurdles,190,180
+current,2022,all,group:400_800,96,80
+current,2022,all,group:distance,96,87
+current,2022,all,group:jumps,191,182
+current,2022,all,group:throws,96,81
+current,2022,all,group:relays,96,83
+current,2022,all,all,765,693
+current,2023,girls,100,24,23
+current,2023,girls,100H,24,20
+current,2023,girls,1600,24,21
+current,2023,girls,200,24,21
+current,2023,girls,300H,24,21
+current,2023,girls,3200,24,22
+current,2023,girls,400,24,22
+current,2023,girls,4x100,24,20
+current,2023,girls,4x400,24,21
+current,2023,girls,800,24,21
+current,2023,girls,DT,24,20
+current,2023,girls,HJ,24,24
+current,2023,girls,LJ,24,24
+current,2023,girls,PV,24,21
+current,2023,girls,SP,24,21
+current,2023,girls,TJ,24,24
+current,2023,girls,group:sprints_hurdles,96,85
+current,2023,girls,group:400_800,48,43
+current,2023,girls,group:distance,48,43
+current,2023,girls,group:jumps,96,93
+current,2023,girls,group:throws,48,41
+current,2023,girls,group:relays,48,41
+current,2023,girls,all,384,346
+current,2023,boys,100,24,16
+current,2023,boys,110H,24,24
+current,2023,boys,1600,24,24
+current,2023,boys,200,24,22
+current,2023,boys,300H,24,21
+current,2023,boys,3200,24,24
+current,2023,boys,400,24,21
+current,2023,boys,4x100,24,18
+current,2023,boys,4x400,24,21
+current,2023,boys,800,24,20
+current,2023,boys,DT,24,22
+current,2023,boys,HJ,24,24
+current,2023,boys,LJ,24,24
+current,2023,boys,PV,24,20
+current,2023,boys,SP,24,23
+current,2023,boys,TJ,24,23
+current,2023,boys,group:sprints_hurdles,96,83
+current,2023,boys,group:400_800,48,41
+current,2023,boys,group:distance,48,48
+current,2023,boys,group:jumps,96,91
+current,2023,boys,group:throws,48,45
+current,2023,boys,group:relays,48,39
+current,2023,boys,all,384,347
+current,2023,all,100,48,39
+current,2023,all,100H,24,20
+current,2023,all,110H,24,24
+current,2023,all,1600,48,45
+current,2023,all,200,48,43
+current,2023,all,300H,48,42
+current,2023,all,3200,48,46
+current,2023,all,400,48,43
+current,2023,all,4x100,48,38
+current,2023,all,4x400,48,42
+current,2023,all,800,48,41
+current,2023,all,DT,48,42
+current,2023,all,HJ,48,48
+current,2023,all,LJ,48,48
+current,2023,all,PV,48,41
+current,2023,all,SP,48,44
+current,2023,all,TJ,48,47
+current,2023,all,group:sprints_hurdles,192,168
+current,2023,all,group:400_800,96,84
+current,2023,all,group:distance,96,91
+current,2023,all,group:jumps,192,184
+current,2023,all,group:throws,96,86
+current,2023,all,group:relays,96,80
+current,2023,all,all,768,693
+current,2024,girls,100,24,19
+current,2024,girls,100H,24,21
+current,2024,girls,1600,24,24
+current,2024,girls,200,24,23
+current,2024,girls,300H,24,22
+current,2024,girls,3200,24,23
+current,2024,girls,400,24,24
+current,2024,girls,4x100,24,21
+current,2024,girls,4x400,24,21
+current,2024,girls,800,24,20
+current,2024,girls,DT,23,23
+current,2024,girls,HJ,24,24
+current,2024,girls,LJ,24,20
+current,2024,girls,PV,24,20
+current,2024,girls,SP,24,22
+current,2024,girls,TJ,24,23
+current,2024,girls,group:sprints_hurdles,96,85
+current,2024,girls,group:400_800,48,44
+current,2024,girls,group:distance,48,47
+current,2024,girls,group:jumps,96,87
+current,2024,girls,group:throws,47,45
+current,2024,girls,group:relays,48,42
+current,2024,girls,all,383,350
+current,2024,boys,100,24,24
+current,2024,boys,110H,24,21
+current,2024,boys,1600,24,24
+current,2024,boys,200,24,22
+current,2024,boys,300H,24,23
+current,2024,boys,3200,24,23
+current,2024,boys,400,24,21
+current,2024,boys,4x100,24,22
+current,2024,boys,4x400,24,22
+current,2024,boys,800,24,24
+current,2024,boys,DT,24,20
+current,2024,boys,HJ,24,24
+current,2024,boys,LJ,24,23
+current,2024,boys,PV,24,22
+current,2024,boys,SP,24,22
+current,2024,boys,TJ,24,23
+current,2024,boys,group:sprints_hurdles,96,90
+current,2024,boys,group:400_800,48,45
+current,2024,boys,group:distance,48,47
+current,2024,boys,group:jumps,96,92
+current,2024,boys,group:throws,48,42
+current,2024,boys,group:relays,48,44
+current,2024,boys,all,384,360
+current,2024,all,100,48,43
+current,2024,all,100H,24,21
+current,2024,all,110H,24,21
+current,2024,all,1600,48,48
+current,2024,all,200,48,45
+current,2024,all,300H,48,45
+current,2024,all,3200,48,46
+current,2024,all,400,48,45
+current,2024,all,4x100,48,43
+current,2024,all,4x400,48,43
+current,2024,all,800,48,44
+current,2024,all,DT,47,43
+current,2024,all,HJ,48,48
+current,2024,all,LJ,48,43
+current,2024,all,PV,48,42
+current,2024,all,SP,48,44
+current,2024,all,TJ,48,46
+current,2024,all,group:sprints_hurdles,192,175
+current,2024,all,group:400_800,96,89
+current,2024,all,group:distance,96,94
+current,2024,all,group:jumps,192,179
+current,2024,all,group:throws,95,87
+current,2024,all,group:relays,96,86
+current,2024,all,all,767,710
+current,2025,girls,100,24,21
+current,2025,girls,100H,24,23
+current,2025,girls,1600,24,19
+current,2025,girls,200,24,22
+current,2025,girls,300H,24,23
+current,2025,girls,3200,24,22
+current,2025,girls,400,24,21
+current,2025,girls,4x100,24,21
+current,2025,girls,4x400,24,21
+current,2025,girls,800,24,19
+current,2025,girls,DT,24,22
+current,2025,girls,HJ,24,20
+current,2025,girls,LJ,24,20
+current,2025,girls,PV,24,24
+current,2025,girls,SP,24,21
+current,2025,girls,TJ,24,23
+current,2025,girls,group:sprints_hurdles,96,89
+current,2025,girls,group:400_800,48,40
+current,2025,girls,group:distance,48,41
+current,2025,girls,group:jumps,96,87
+current,2025,girls,group:throws,48,43
+current,2025,girls,group:relays,48,42
+current,2025,girls,all,384,342
+current,2025,boys,100,24,24
+current,2025,boys,110H,24,21
+current,2025,boys,1600,24,18
+current,2025,boys,200,24,23
+current,2025,boys,300H,24,21
+current,2025,boys,3200,24,21
+current,2025,boys,400,24,20
+current,2025,boys,4x100,24,21
+current,2025,boys,4x400,24,19
+current,2025,boys,800,24,22
+current,2025,boys,DT,24,20
+current,2025,boys,HJ,24,24
+current,2025,boys,LJ,24,20
+current,2025,boys,PV,24,18
+current,2025,boys,SP,24,21
+current,2025,boys,TJ,24,22
+current,2025,boys,group:sprints_hurdles,96,89
+current,2025,boys,group:400_800,48,42
+current,2025,boys,group:distance,48,39
+current,2025,boys,group:jumps,96,84
+current,2025,boys,group:throws,48,41
+current,2025,boys,group:relays,48,40
+current,2025,boys,all,384,335
+current,2025,all,100,48,45
+current,2025,all,100H,24,23
+current,2025,all,110H,24,21
+current,2025,all,1600,48,37
+current,2025,all,200,48,45
+current,2025,all,300H,48,44
+current,2025,all,3200,48,43
+current,2025,all,400,48,41
+current,2025,all,4x100,48,42
+current,2025,all,4x400,48,40
+current,2025,all,800,48,41
+current,2025,all,DT,48,42
+current,2025,all,HJ,48,44
+current,2025,all,LJ,48,40
+current,2025,all,PV,48,42
+current,2025,all,SP,48,42
+current,2025,all,TJ,48,45
+current,2025,all,group:sprints_hurdles,192,178
+current,2025,all,group:400_800,96,82
+current,2025,all,group:distance,96,80
+current,2025,all,group:jumps,192,171
+current,2025,all,group:throws,96,84
+current,2025,all,group:relays,96,82
+current,2025,all,all,768,677
+current,2026,girls,100,24,18
+current,2026,girls,100H,24,19
+current,2026,girls,1600,24,24
+current,2026,girls,200,24,19
+current,2026,girls,300H,24,24
+current,2026,girls,3200,24,19
+current,2026,girls,400,24,20
+current,2026,girls,4x100,24,21
+current,2026,girls,4x400,24,20
+current,2026,girls,800,24,20
+current,2026,girls,DT,24,22
+current,2026,girls,HJ,24,24
+current,2026,girls,LJ,24,22
+current,2026,girls,PV,24,24
+current,2026,girls,SP,24,23
+current,2026,girls,TJ,24,24
+current,2026,girls,group:sprints_hurdles,96,80
+current,2026,girls,group:400_800,48,40
+current,2026,girls,group:distance,48,43
+current,2026,girls,group:jumps,96,94
+current,2026,girls,group:throws,48,45
+current,2026,girls,group:relays,48,41
+current,2026,girls,all,384,343
+current,2026,boys,100,24,21
+current,2026,boys,110H,24,20
+current,2026,boys,1600,24,21
+current,2026,boys,200,24,24
+current,2026,boys,300H,24,21
+current,2026,boys,3200,24,22
+current,2026,boys,400,24,22
+current,2026,boys,4x100,24,21
+current,2026,boys,4x400,24,21
+current,2026,boys,800,24,23
+current,2026,boys,DT,24,22
+current,2026,boys,HJ,24,23
+current,2026,boys,LJ,24,24
+current,2026,boys,PV,24,19
+current,2026,boys,SP,24,21
+current,2026,boys,TJ,24,22
+current,2026,boys,group:sprints_hurdles,96,86
+current,2026,boys,group:400_800,48,45
+current,2026,boys,group:distance,48,43
+current,2026,boys,group:jumps,96,88
+current,2026,boys,group:throws,48,43
+current,2026,boys,group:relays,48,42
+current,2026,boys,all,384,347
+current,2026,all,100,48,39
+current,2026,all,100H,24,19
+current,2026,all,110H,24,20
+current,2026,all,1600,48,45
+current,2026,all,200,48,43
+current,2026,all,300H,48,45
+current,2026,all,3200,48,41
+current,2026,all,400,48,42
+current,2026,all,4x100,48,42
+current,2026,all,4x400,48,41
+current,2026,all,800,48,43
+current,2026,all,DT,48,44
+current,2026,all,HJ,48,47
+current,2026,all,LJ,48,46
+current,2026,all,PV,48,43
+current,2026,all,SP,48,44
+current,2026,all,TJ,48,46
+current,2026,all,group:sprints_hurdles,192,166
+current,2026,all,group:400_800,96,85
+current,2026,all,group:distance,96,86
+current,2026,all,group:jumps,192,182
+current,2026,all,group:throws,96,88
+current,2026,all,group:relays,96,83
+current,2026,all,all,768,690
+current,2022-2026 pooled,girls,100,120,103
+current,2022-2026 pooled,girls,100H,120,107
+current,2022-2026 pooled,girls,1600,120,110
+current,2022-2026 pooled,girls,200,120,105
+current,2022-2026 pooled,girls,300H,120,114
+current,2022-2026 pooled,girls,3200,120,109
+current,2022-2026 pooled,girls,400,120,107
+current,2022-2026 pooled,girls,4x100,120,104
+current,2022-2026 pooled,girls,4x400,120,103
+current,2022-2026 pooled,girls,800,120,99
+current,2022-2026 pooled,girls,DT,119,105
+current,2022-2026 pooled,girls,HJ,120,115
+current,2022-2026 pooled,girls,LJ,120,109
+current,2022-2026 pooled,girls,PV,120,113
+current,2022-2026 pooled,girls,SP,120,106
+current,2022-2026 pooled,girls,TJ,119,117
+current,2022-2026 pooled,girls,group:sprints_hurdles,480,429
+current,2022-2026 pooled,girls,group:400_800,240,206
+current,2022-2026 pooled,girls,group:distance,240,219
+current,2022-2026 pooled,girls,group:jumps,479,454
+current,2022-2026 pooled,girls,group:throws,239,211
+current,2022-2026 pooled,girls,group:relays,240,207
+current,2022-2026 pooled,girls,all,1918,1726
+current,2022-2026 pooled,boys,100,120,105
+current,2022-2026 pooled,boys,110H,119,109
+current,2022-2026 pooled,boys,1600,120,109
+current,2022-2026 pooled,boys,200,120,115
+current,2022-2026 pooled,boys,300H,119,109
+current,2022-2026 pooled,boys,3200,120,110
+current,2022-2026 pooled,boys,400,120,104
+current,2022-2026 pooled,boys,4x100,120,104
+current,2022-2026 pooled,boys,4x400,120,103
+current,2022-2026 pooled,boys,800,120,110
+current,2022-2026 pooled,boys,DT,120,106
+current,2022-2026 pooled,boys,HJ,120,118
+current,2022-2026 pooled,boys,LJ,120,114
+current,2022-2026 pooled,boys,PV,120,99
+current,2022-2026 pooled,boys,SP,120,109
+current,2022-2026 pooled,boys,TJ,120,113
+current,2022-2026 pooled,boys,group:sprints_hurdles,478,438
+current,2022-2026 pooled,boys,group:400_800,240,214
+current,2022-2026 pooled,boys,group:distance,240,219
+current,2022-2026 pooled,boys,group:jumps,480,444
+current,2022-2026 pooled,boys,group:throws,240,215
+current,2022-2026 pooled,boys,group:relays,240,207
+current,2022-2026 pooled,boys,all,1918,1737
+current,2022-2026 pooled,all,100,240,208
+current,2022-2026 pooled,all,100H,120,107
+current,2022-2026 pooled,all,110H,119,109
+current,2022-2026 pooled,all,1600,240,219
+current,2022-2026 pooled,all,200,240,220
+current,2022-2026 pooled,all,300H,239,223
+current,2022-2026 pooled,all,3200,240,219
+current,2022-2026 pooled,all,400,240,211
+current,2022-2026 pooled,all,4x100,240,208
+current,2022-2026 pooled,all,4x400,240,206
+current,2022-2026 pooled,all,800,240,209
+current,2022-2026 pooled,all,DT,239,211
+current,2022-2026 pooled,all,HJ,240,233
+current,2022-2026 pooled,all,LJ,240,223
+current,2022-2026 pooled,all,PV,240,212
+current,2022-2026 pooled,all,SP,240,215
+current,2022-2026 pooled,all,TJ,239,230
+current,2022-2026 pooled,all,group:sprints_hurdles,958,867
+current,2022-2026 pooled,all,group:400_800,480,420
+current,2022-2026 pooled,all,group:distance,480,438
+current,2022-2026 pooled,all,group:jumps,959,898
+current,2022-2026 pooled,all,group:throws,479,426
+current,2022-2026 pooled,all,group:relays,480,414
+current,2022-2026 pooled,all,all,3836,3463
+a_5553,2022,girls,100,24,24
+a_5553,2022,girls,100H,24,24
+a_5553,2022,girls,1600,24,23
+a_5553,2022,girls,200,24,21
+a_5553,2022,girls,300H,24,24
+a_5553,2022,girls,3200,24,24
+a_5553,2022,girls,400,24,21
+a_5553,2022,girls,4x100,24,22
+a_5553,2022,girls,4x400,24,22
+a_5553,2022,girls,800,24,21
+a_5553,2022,girls,DT,24,19
+a_5553,2022,girls,HJ,24,23
+a_5553,2022,girls,LJ,24,24
+a_5553,2022,girls,PV,24,24
+a_5553,2022,girls,SP,24,21
+a_5553,2022,girls,TJ,23,23
+a_5553,2022,girls,group:sprints_hurdles,96,93
+a_5553,2022,girls,group:400_800,48,42
+a_5553,2022,girls,group:distance,48,47
+a_5553,2022,girls,group:jumps,95,94
+a_5553,2022,girls,group:throws,48,40
+a_5553,2022,girls,group:relays,48,44
+a_5553,2022,girls,all,383,360
+a_5553,2022,boys,100,24,21
+a_5553,2022,boys,110H,23,23
+a_5553,2022,boys,1600,24,23
+a_5553,2022,boys,200,24,24
+a_5553,2022,boys,300H,23,23
+a_5553,2022,boys,3200,24,21
+a_5553,2022,boys,400,24,21
+a_5553,2022,boys,4x100,24,23
+a_5553,2022,boys,4x400,24,21
+a_5553,2022,boys,800,24,21
+a_5553,2022,boys,DT,24,23
+a_5553,2022,boys,HJ,24,23
+a_5553,2022,boys,LJ,24,24
+a_5553,2022,boys,PV,24,22
+a_5553,2022,boys,SP,24,23
+a_5553,2022,boys,TJ,24,23
+a_5553,2022,boys,group:sprints_hurdles,94,91
+a_5553,2022,boys,group:400_800,48,42
+a_5553,2022,boys,group:distance,48,44
+a_5553,2022,boys,group:jumps,96,92
+a_5553,2022,boys,group:throws,48,46
+a_5553,2022,boys,group:relays,48,44
+a_5553,2022,boys,all,382,359
+a_5553,2022,all,100,48,45
+a_5553,2022,all,100H,24,24
+a_5553,2022,all,110H,23,23
+a_5553,2022,all,1600,48,46
+a_5553,2022,all,200,48,45
+a_5553,2022,all,300H,47,47
+a_5553,2022,all,3200,48,45
+a_5553,2022,all,400,48,42
+a_5553,2022,all,4x100,48,45
+a_5553,2022,all,4x400,48,43
+a_5553,2022,all,800,48,42
+a_5553,2022,all,DT,48,42
+a_5553,2022,all,HJ,48,46
+a_5553,2022,all,LJ,48,48
+a_5553,2022,all,PV,48,46
+a_5553,2022,all,SP,48,44
+a_5553,2022,all,TJ,47,46
+a_5553,2022,all,group:sprints_hurdles,190,184
+a_5553,2022,all,group:400_800,96,84
+a_5553,2022,all,group:distance,96,91
+a_5553,2022,all,group:jumps,191,186
+a_5553,2022,all,group:throws,96,86
+a_5553,2022,all,group:relays,96,88
+a_5553,2022,all,all,765,719
+a_5553,2023,girls,100,24,23
+a_5553,2023,girls,100H,24,22
+a_5553,2023,girls,1600,24,22
+a_5553,2023,girls,200,24,23
+a_5553,2023,girls,300H,24,23
+a_5553,2023,girls,3200,24,23
+a_5553,2023,girls,400,24,23
+a_5553,2023,girls,4x100,24,21
+a_5553,2023,girls,4x400,24,22
+a_5553,2023,girls,800,24,23
+a_5553,2023,girls,DT,24,22
+a_5553,2023,girls,HJ,24,24
+a_5553,2023,girls,LJ,24,24
+a_5553,2023,girls,PV,24,21
+a_5553,2023,girls,SP,24,22
+a_5553,2023,girls,TJ,24,24
+a_5553,2023,girls,group:sprints_hurdles,96,91
+a_5553,2023,girls,group:400_800,48,46
+a_5553,2023,girls,group:distance,48,45
+a_5553,2023,girls,group:jumps,96,93
+a_5553,2023,girls,group:throws,48,44
+a_5553,2023,girls,group:relays,48,43
+a_5553,2023,girls,all,384,362
+a_5553,2023,boys,100,24,19
+a_5553,2023,boys,110H,24,24
+a_5553,2023,boys,1600,24,24
+a_5553,2023,boys,200,24,22
+a_5553,2023,boys,300H,24,22
+a_5553,2023,boys,3200,24,24
+a_5553,2023,boys,400,24,22
+a_5553,2023,boys,4x100,24,19
+a_5553,2023,boys,4x400,24,23
+a_5553,2023,boys,800,24,21
+a_5553,2023,boys,DT,24,23
+a_5553,2023,boys,HJ,24,24
+a_5553,2023,boys,LJ,24,24
+a_5553,2023,boys,PV,24,24
+a_5553,2023,boys,SP,24,23
+a_5553,2023,boys,TJ,24,23
+a_5553,2023,boys,group:sprints_hurdles,96,87
+a_5553,2023,boys,group:400_800,48,43
+a_5553,2023,boys,group:distance,48,48
+a_5553,2023,boys,group:jumps,96,95
+a_5553,2023,boys,group:throws,48,46
+a_5553,2023,boys,group:relays,48,42
+a_5553,2023,boys,all,384,361
+a_5553,2023,all,100,48,42
+a_5553,2023,all,100H,24,22
+a_5553,2023,all,110H,24,24
+a_5553,2023,all,1600,48,46
+a_5553,2023,all,200,48,45
+a_5553,2023,all,300H,48,45
+a_5553,2023,all,3200,48,47
+a_5553,2023,all,400,48,45
+a_5553,2023,all,4x100,48,40
+a_5553,2023,all,4x400,48,45
+a_5553,2023,all,800,48,44
+a_5553,2023,all,DT,48,45
+a_5553,2023,all,HJ,48,48
+a_5553,2023,all,LJ,48,48
+a_5553,2023,all,PV,48,45
+a_5553,2023,all,SP,48,45
+a_5553,2023,all,TJ,48,47
+a_5553,2023,all,group:sprints_hurdles,192,178
+a_5553,2023,all,group:400_800,96,89
+a_5553,2023,all,group:distance,96,93
+a_5553,2023,all,group:jumps,192,188
+a_5553,2023,all,group:throws,96,90
+a_5553,2023,all,group:relays,96,85
+a_5553,2023,all,all,768,723
+a_5553,2024,girls,100,24,21
+a_5553,2024,girls,100H,24,23
+a_5553,2024,girls,1600,24,24
+a_5553,2024,girls,200,24,24
+a_5553,2024,girls,300H,24,24
+a_5553,2024,girls,3200,24,24
+a_5553,2024,girls,400,24,24
+a_5553,2024,girls,4x100,24,22
+a_5553,2024,girls,4x400,24,23
+a_5553,2024,girls,800,24,20
+a_5553,2024,girls,DT,23,23
+a_5553,2024,girls,HJ,24,24
+a_5553,2024,girls,LJ,24,21
+a_5553,2024,girls,PV,24,22
+a_5553,2024,girls,SP,24,23
+a_5553,2024,girls,TJ,24,24
+a_5553,2024,girls,group:sprints_hurdles,96,92
+a_5553,2024,girls,group:400_800,48,44
+a_5553,2024,girls,group:distance,48,48
+a_5553,2024,girls,group:jumps,96,91
+a_5553,2024,girls,group:throws,47,46
+a_5553,2024,girls,group:relays,48,45
+a_5553,2024,girls,all,383,366
+a_5553,2024,boys,100,24,24
+a_5553,2024,boys,110H,24,22
+a_5553,2024,boys,1600,24,24
+a_5553,2024,boys,200,24,23
+a_5553,2024,boys,300H,24,23
+a_5553,2024,boys,3200,24,23
+a_5553,2024,boys,400,24,21
+a_5553,2024,boys,4x100,24,22
+a_5553,2024,boys,4x400,24,23
+a_5553,2024,boys,800,24,24
+a_5553,2024,boys,DT,24,21
+a_5553,2024,boys,HJ,24,24
+a_5553,2024,boys,LJ,24,24
+a_5553,2024,boys,PV,24,24
+a_5553,2024,boys,SP,24,22
+a_5553,2024,boys,TJ,24,23
+a_5553,2024,boys,group:sprints_hurdles,96,92
+a_5553,2024,boys,group:400_800,48,45
+a_5553,2024,boys,group:distance,48,47
+a_5553,2024,boys,group:jumps,96,95
+a_5553,2024,boys,group:throws,48,43
+a_5553,2024,boys,group:relays,48,45
+a_5553,2024,boys,all,384,367
+a_5553,2024,all,100,48,45
+a_5553,2024,all,100H,24,23
+a_5553,2024,all,110H,24,22
+a_5553,2024,all,1600,48,48
+a_5553,2024,all,200,48,47
+a_5553,2024,all,300H,48,47
+a_5553,2024,all,3200,48,47
+a_5553,2024,all,400,48,45
+a_5553,2024,all,4x100,48,44
+a_5553,2024,all,4x400,48,46
+a_5553,2024,all,800,48,44
+a_5553,2024,all,DT,47,44
+a_5553,2024,all,HJ,48,48
+a_5553,2024,all,LJ,48,45
+a_5553,2024,all,PV,48,46
+a_5553,2024,all,SP,48,45
+a_5553,2024,all,TJ,48,47
+a_5553,2024,all,group:sprints_hurdles,192,184
+a_5553,2024,all,group:400_800,96,89
+a_5553,2024,all,group:distance,96,95
+a_5553,2024,all,group:jumps,192,186
+a_5553,2024,all,group:throws,95,89
+a_5553,2024,all,group:relays,96,90
+a_5553,2024,all,all,767,733
+a_5553,2025,girls,100,24,21
+a_5553,2025,girls,100H,24,24
+a_5553,2025,girls,1600,24,20
+a_5553,2025,girls,200,24,22
+a_5553,2025,girls,300H,24,24
+a_5553,2025,girls,3200,24,22
+a_5553,2025,girls,400,24,22
+a_5553,2025,girls,4x100,24,22
+a_5553,2025,girls,4x400,24,23
+a_5553,2025,girls,800,24,20
+a_5553,2025,girls,DT,24,22
+a_5553,2025,girls,HJ,24,24
+a_5553,2025,girls,LJ,24,22
+a_5553,2025,girls,PV,24,24
+a_5553,2025,girls,SP,24,22
+a_5553,2025,girls,TJ,24,23
+a_5553,2025,girls,group:sprints_hurdles,96,91
+a_5553,2025,girls,group:400_800,48,42
+a_5553,2025,girls,group:distance,48,42
+a_5553,2025,girls,group:jumps,96,93
+a_5553,2025,girls,group:throws,48,44
+a_5553,2025,girls,group:relays,48,45
+a_5553,2025,girls,all,384,357
+a_5553,2025,boys,100,24,24
+a_5553,2025,boys,110H,24,22
+a_5553,2025,boys,1600,24,19
+a_5553,2025,boys,200,24,23
+a_5553,2025,boys,300H,24,21
+a_5553,2025,boys,3200,24,22
+a_5553,2025,boys,400,24,22
+a_5553,2025,boys,4x100,24,21
+a_5553,2025,boys,4x400,24,21
+a_5553,2025,boys,800,24,22
+a_5553,2025,boys,DT,24,21
+a_5553,2025,boys,HJ,24,24
+a_5553,2025,boys,LJ,24,21
+a_5553,2025,boys,PV,24,20
+a_5553,2025,boys,SP,24,21
+a_5553,2025,boys,TJ,24,23
+a_5553,2025,boys,group:sprints_hurdles,96,90
+a_5553,2025,boys,group:400_800,48,44
+a_5553,2025,boys,group:distance,48,41
+a_5553,2025,boys,group:jumps,96,88
+a_5553,2025,boys,group:throws,48,42
+a_5553,2025,boys,group:relays,48,42
+a_5553,2025,boys,all,384,347
+a_5553,2025,all,100,48,45
+a_5553,2025,all,100H,24,24
+a_5553,2025,all,110H,24,22
+a_5553,2025,all,1600,48,39
+a_5553,2025,all,200,48,45
+a_5553,2025,all,300H,48,45
+a_5553,2025,all,3200,48,44
+a_5553,2025,all,400,48,44
+a_5553,2025,all,4x100,48,43
+a_5553,2025,all,4x400,48,44
+a_5553,2025,all,800,48,42
+a_5553,2025,all,DT,48,43
+a_5553,2025,all,HJ,48,48
+a_5553,2025,all,LJ,48,43
+a_5553,2025,all,PV,48,44
+a_5553,2025,all,SP,48,43
+a_5553,2025,all,TJ,48,46
+a_5553,2025,all,group:sprints_hurdles,192,181
+a_5553,2025,all,group:400_800,96,86
+a_5553,2025,all,group:distance,96,83
+a_5553,2025,all,group:jumps,192,181
+a_5553,2025,all,group:throws,96,86
+a_5553,2025,all,group:relays,96,87
+a_5553,2025,all,all,768,704
+a_5553,2026,girls,100,24,19
+a_5553,2026,girls,100H,24,21
+a_5553,2026,girls,1600,24,24
+a_5553,2026,girls,200,24,20
+a_5553,2026,girls,300H,24,23
+a_5553,2026,girls,3200,24,21
+a_5553,2026,girls,400,24,22
+a_5553,2026,girls,4x100,24,22
+a_5553,2026,girls,4x400,24,21
+a_5553,2026,girls,800,24,21
+a_5553,2026,girls,DT,24,23
+a_5553,2026,girls,HJ,24,24
+a_5553,2026,girls,LJ,24,24
+a_5553,2026,girls,PV,24,24
+a_5553,2026,girls,SP,24,23
+a_5553,2026,girls,TJ,24,24
+a_5553,2026,girls,group:sprints_hurdles,96,83
+a_5553,2026,girls,group:400_800,48,43
+a_5553,2026,girls,group:distance,48,45
+a_5553,2026,girls,group:jumps,96,96
+a_5553,2026,girls,group:throws,48,46
+a_5553,2026,girls,group:relays,48,43
+a_5553,2026,girls,all,384,356
+a_5553,2026,boys,100,24,24
+a_5553,2026,boys,110H,24,22
+a_5553,2026,boys,1600,24,21
+a_5553,2026,boys,200,24,24
+a_5553,2026,boys,300H,24,22
+a_5553,2026,boys,3200,24,23
+a_5553,2026,boys,400,24,22
+a_5553,2026,boys,4x100,24,22
+a_5553,2026,boys,4x400,24,21
+a_5553,2026,boys,800,24,23
+a_5553,2026,boys,DT,24,23
+a_5553,2026,boys,HJ,24,24
+a_5553,2026,boys,LJ,24,24
+a_5553,2026,boys,PV,24,20
+a_5553,2026,boys,SP,24,22
+a_5553,2026,boys,TJ,24,22
+a_5553,2026,boys,group:sprints_hurdles,96,92
+a_5553,2026,boys,group:400_800,48,45
+a_5553,2026,boys,group:distance,48,44
+a_5553,2026,boys,group:jumps,96,90
+a_5553,2026,boys,group:throws,48,45
+a_5553,2026,boys,group:relays,48,43
+a_5553,2026,boys,all,384,359
+a_5553,2026,all,100,48,43
+a_5553,2026,all,100H,24,21
+a_5553,2026,all,110H,24,22
+a_5553,2026,all,1600,48,45
+a_5553,2026,all,200,48,44
+a_5553,2026,all,300H,48,45
+a_5553,2026,all,3200,48,44
+a_5553,2026,all,400,48,44
+a_5553,2026,all,4x100,48,44
+a_5553,2026,all,4x400,48,42
+a_5553,2026,all,800,48,44
+a_5553,2026,all,DT,48,46
+a_5553,2026,all,HJ,48,48
+a_5553,2026,all,LJ,48,48
+a_5553,2026,all,PV,48,44
+a_5553,2026,all,SP,48,45
+a_5553,2026,all,TJ,48,46
+a_5553,2026,all,group:sprints_hurdles,192,175
+a_5553,2026,all,group:400_800,96,88
+a_5553,2026,all,group:distance,96,89
+a_5553,2026,all,group:jumps,192,186
+a_5553,2026,all,group:throws,96,91
+a_5553,2026,all,group:relays,96,86
+a_5553,2026,all,all,768,715
+a_5553,2022-2026 pooled,girls,100,120,108
+a_5553,2022-2026 pooled,girls,100H,120,114
+a_5553,2022-2026 pooled,girls,1600,120,113
+a_5553,2022-2026 pooled,girls,200,120,110
+a_5553,2022-2026 pooled,girls,300H,120,118
+a_5553,2022-2026 pooled,girls,3200,120,114
+a_5553,2022-2026 pooled,girls,400,120,112
+a_5553,2022-2026 pooled,girls,4x100,120,109
+a_5553,2022-2026 pooled,girls,4x400,120,111
+a_5553,2022-2026 pooled,girls,800,120,105
+a_5553,2022-2026 pooled,girls,DT,119,109
+a_5553,2022-2026 pooled,girls,HJ,120,119
+a_5553,2022-2026 pooled,girls,LJ,120,115
+a_5553,2022-2026 pooled,girls,PV,120,115
+a_5553,2022-2026 pooled,girls,SP,120,111
+a_5553,2022-2026 pooled,girls,TJ,119,118
+a_5553,2022-2026 pooled,girls,group:sprints_hurdles,480,450
+a_5553,2022-2026 pooled,girls,group:400_800,240,217
+a_5553,2022-2026 pooled,girls,group:distance,240,227
+a_5553,2022-2026 pooled,girls,group:jumps,479,467
+a_5553,2022-2026 pooled,girls,group:throws,239,220
+a_5553,2022-2026 pooled,girls,group:relays,240,220
+a_5553,2022-2026 pooled,girls,all,1918,1801
+a_5553,2022-2026 pooled,boys,100,120,112
+a_5553,2022-2026 pooled,boys,110H,119,113
+a_5553,2022-2026 pooled,boys,1600,120,111
+a_5553,2022-2026 pooled,boys,200,120,116
+a_5553,2022-2026 pooled,boys,300H,119,111
+a_5553,2022-2026 pooled,boys,3200,120,113
+a_5553,2022-2026 pooled,boys,400,120,108
+a_5553,2022-2026 pooled,boys,4x100,120,107
+a_5553,2022-2026 pooled,boys,4x400,120,109
+a_5553,2022-2026 pooled,boys,800,120,111
+a_5553,2022-2026 pooled,boys,DT,120,111
+a_5553,2022-2026 pooled,boys,HJ,120,119
+a_5553,2022-2026 pooled,boys,LJ,120,117
+a_5553,2022-2026 pooled,boys,PV,120,110
+a_5553,2022-2026 pooled,boys,SP,120,111
+a_5553,2022-2026 pooled,boys,TJ,120,114
+a_5553,2022-2026 pooled,boys,group:sprints_hurdles,478,452
+a_5553,2022-2026 pooled,boys,group:400_800,240,219
+a_5553,2022-2026 pooled,boys,group:distance,240,224
+a_5553,2022-2026 pooled,boys,group:jumps,480,460
+a_5553,2022-2026 pooled,boys,group:throws,240,222
+a_5553,2022-2026 pooled,boys,group:relays,240,216
+a_5553,2022-2026 pooled,boys,all,1918,1793
+a_5553,2022-2026 pooled,all,100,240,220
+a_5553,2022-2026 pooled,all,100H,120,114
+a_5553,2022-2026 pooled,all,110H,119,113
+a_5553,2022-2026 pooled,all,1600,240,224
+a_5553,2022-2026 pooled,all,200,240,226
+a_5553,2022-2026 pooled,all,300H,239,229
+a_5553,2022-2026 pooled,all,3200,240,227
+a_5553,2022-2026 pooled,all,400,240,220
+a_5553,2022-2026 pooled,all,4x100,240,216
+a_5553,2022-2026 pooled,all,4x400,240,220
+a_5553,2022-2026 pooled,all,800,240,216
+a_5553,2022-2026 pooled,all,DT,239,220
+a_5553,2022-2026 pooled,all,HJ,240,238
+a_5553,2022-2026 pooled,all,LJ,240,232
+a_5553,2022-2026 pooled,all,PV,240,225
+a_5553,2022-2026 pooled,all,SP,240,222
+a_5553,2022-2026 pooled,all,TJ,239,232
+a_5553,2022-2026 pooled,all,group:sprints_hurdles,958,902
+a_5553,2022-2026 pooled,all,group:400_800,480,436
+a_5553,2022-2026 pooled,all,group:distance,480,451
+a_5553,2022-2026 pooled,all,group:jumps,959,927
+a_5553,2022-2026 pooled,all,group:throws,479,442
+a_5553,2022-2026 pooled,all,group:relays,480,436
+a_5553,2022-2026 pooled,all,all,3836,3594
+b_4443,2022,girls,100,24,24
+b_4443,2022,girls,100H,24,24
+b_4443,2022,girls,1600,24,24
+b_4443,2022,girls,200,24,22
+b_4443,2022,girls,300H,24,24
+b_4443,2022,girls,3200,24,24
+b_4443,2022,girls,400,24,22
+b_4443,2022,girls,4x100,24,23
+b_4443,2022,girls,4x400,24,24
+b_4443,2022,girls,800,24,22
+b_4443,2022,girls,DT,24,20
+b_4443,2022,girls,HJ,24,24
+b_4443,2022,girls,LJ,24,24
+b_4443,2022,girls,PV,24,24
+b_4443,2022,girls,SP,24,21
+b_4443,2022,girls,TJ,23,23
+b_4443,2022,girls,group:sprints_hurdles,96,94
+b_4443,2022,girls,group:400_800,48,44
+b_4443,2022,girls,group:distance,48,48
+b_4443,2022,girls,group:jumps,95,95
+b_4443,2022,girls,group:throws,48,41
+b_4443,2022,girls,group:relays,48,47
+b_4443,2022,girls,all,383,369
+b_4443,2022,boys,100,24,21
+b_4443,2022,boys,110H,23,23
+b_4443,2022,boys,1600,24,24
+b_4443,2022,boys,200,24,23
+b_4443,2022,boys,300H,23,23
+b_4443,2022,boys,3200,24,21
+b_4443,2022,boys,400,24,21
+b_4443,2022,boys,4x100,24,23
+b_4443,2022,boys,4x400,24,21
+b_4443,2022,boys,800,24,21
+b_4443,2022,boys,DT,24,24
+b_4443,2022,boys,HJ,24,23
+b_4443,2022,boys,LJ,24,24
+b_4443,2022,boys,PV,24,22
+b_4443,2022,boys,SP,24,23
+b_4443,2022,boys,TJ,24,23
+b_4443,2022,boys,group:sprints_hurdles,94,90
+b_4443,2022,boys,group:400_800,48,42
+b_4443,2022,boys,group:distance,48,45
+b_4443,2022,boys,group:jumps,96,92
+b_4443,2022,boys,group:throws,48,47
+b_4443,2022,boys,group:relays,48,44
+b_4443,2022,boys,all,382,360
+b_4443,2022,all,100,48,45
+b_4443,2022,all,100H,24,24
+b_4443,2022,all,110H,23,23
+b_4443,2022,all,1600,48,48
+b_4443,2022,all,200,48,45
+b_4443,2022,all,300H,47,47
+b_4443,2022,all,3200,48,45
+b_4443,2022,all,400,48,43
+b_4443,2022,all,4x100,48,46
+b_4443,2022,all,4x400,48,45
+b_4443,2022,all,800,48,43
+b_4443,2022,all,DT,48,44
+b_4443,2022,all,HJ,48,47
+b_4443,2022,all,LJ,48,48
+b_4443,2022,all,PV,48,46
+b_4443,2022,all,SP,48,44
+b_4443,2022,all,TJ,47,46
+b_4443,2022,all,group:sprints_hurdles,190,184
+b_4443,2022,all,group:400_800,96,86
+b_4443,2022,all,group:distance,96,93
+b_4443,2022,all,group:jumps,191,187
+b_4443,2022,all,group:throws,96,88
+b_4443,2022,all,group:relays,96,91
+b_4443,2022,all,all,765,729
+b_4443,2023,girls,100,24,23
+b_4443,2023,girls,100H,24,22
+b_4443,2023,girls,1600,24,23
+b_4443,2023,girls,200,24,23
+b_4443,2023,girls,300H,24,23
+b_4443,2023,girls,3200,24,24
+b_4443,2023,girls,400,24,23
+b_4443,2023,girls,4x100,24,21
+b_4443,2023,girls,4x400,24,23
+b_4443,2023,girls,800,24,24
+b_4443,2023,girls,DT,24,23
+b_4443,2023,girls,HJ,24,24
+b_4443,2023,girls,LJ,24,24
+b_4443,2023,girls,PV,24,24
+b_4443,2023,girls,SP,24,23
+b_4443,2023,girls,TJ,24,24
+b_4443,2023,girls,group:sprints_hurdles,96,91
+b_4443,2023,girls,group:400_800,48,47
+b_4443,2023,girls,group:distance,48,47
+b_4443,2023,girls,group:jumps,96,96
+b_4443,2023,girls,group:throws,48,46
+b_4443,2023,girls,group:relays,48,44
+b_4443,2023,girls,all,384,371
+b_4443,2023,boys,100,24,19
+b_4443,2023,boys,110H,24,24
+b_4443,2023,boys,1600,24,24
+b_4443,2023,boys,200,24,22
+b_4443,2023,boys,300H,24,23
+b_4443,2023,boys,3200,24,24
+b_4443,2023,boys,400,24,22
+b_4443,2023,boys,4x100,24,20
+b_4443,2023,boys,4x400,24,23
+b_4443,2023,boys,800,24,23
+b_4443,2023,boys,DT,24,23
+b_4443,2023,boys,HJ,24,24
+b_4443,2023,boys,LJ,24,24
+b_4443,2023,boys,PV,24,24
+b_4443,2023,boys,SP,24,23
+b_4443,2023,boys,TJ,24,23
+b_4443,2023,boys,group:sprints_hurdles,96,88
+b_4443,2023,boys,group:400_800,48,45
+b_4443,2023,boys,group:distance,48,48
+b_4443,2023,boys,group:jumps,96,95
+b_4443,2023,boys,group:throws,48,46
+b_4443,2023,boys,group:relays,48,43
+b_4443,2023,boys,all,384,365
+b_4443,2023,all,100,48,42
+b_4443,2023,all,100H,24,22
+b_4443,2023,all,110H,24,24
+b_4443,2023,all,1600,48,47
+b_4443,2023,all,200,48,45
+b_4443,2023,all,300H,48,46
+b_4443,2023,all,3200,48,48
+b_4443,2023,all,400,48,45
+b_4443,2023,all,4x100,48,41
+b_4443,2023,all,4x400,48,46
+b_4443,2023,all,800,48,47
+b_4443,2023,all,DT,48,46
+b_4443,2023,all,HJ,48,48
+b_4443,2023,all,LJ,48,48
+b_4443,2023,all,PV,48,48
+b_4443,2023,all,SP,48,46
+b_4443,2023,all,TJ,48,47
+b_4443,2023,all,group:sprints_hurdles,192,179
+b_4443,2023,all,group:400_800,96,92
+b_4443,2023,all,group:distance,96,95
+b_4443,2023,all,group:jumps,192,191
+b_4443,2023,all,group:throws,96,92
+b_4443,2023,all,group:relays,96,87
+b_4443,2023,all,all,768,736
+b_4443,2024,girls,100,24,21
+b_4443,2024,girls,100H,24,24
+b_4443,2024,girls,1600,24,24
+b_4443,2024,girls,200,24,24
+b_4443,2024,girls,300H,24,24
+b_4443,2024,girls,3200,24,24
+b_4443,2024,girls,400,24,24
+b_4443,2024,girls,4x100,24,23
+b_4443,2024,girls,4x400,24,24
+b_4443,2024,girls,800,24,21
+b_4443,2024,girls,DT,23,23
+b_4443,2024,girls,HJ,24,24
+b_4443,2024,girls,LJ,24,22
+b_4443,2024,girls,PV,24,24
+b_4443,2024,girls,SP,24,24
+b_4443,2024,girls,TJ,24,24
+b_4443,2024,girls,group:sprints_hurdles,96,93
+b_4443,2024,girls,group:400_800,48,45
+b_4443,2024,girls,group:distance,48,48
+b_4443,2024,girls,group:jumps,96,94
+b_4443,2024,girls,group:throws,47,47
+b_4443,2024,girls,group:relays,48,47
+b_4443,2024,girls,all,383,374
+b_4443,2024,boys,100,24,24
+b_4443,2024,boys,110H,24,23
+b_4443,2024,boys,1600,24,24
+b_4443,2024,boys,200,24,24
+b_4443,2024,boys,300H,24,23
+b_4443,2024,boys,3200,24,23
+b_4443,2024,boys,400,24,21
+b_4443,2024,boys,4x100,24,22
+b_4443,2024,boys,4x400,24,23
+b_4443,2024,boys,800,24,24
+b_4443,2024,boys,DT,24,21
+b_4443,2024,boys,HJ,24,24
+b_4443,2024,boys,LJ,24,24
+b_4443,2024,boys,PV,24,24
+b_4443,2024,boys,SP,24,22
+b_4443,2024,boys,TJ,24,23
+b_4443,2024,boys,group:sprints_hurdles,96,94
+b_4443,2024,boys,group:400_800,48,45
+b_4443,2024,boys,group:distance,48,47
+b_4443,2024,boys,group:jumps,96,95
+b_4443,2024,boys,group:throws,48,43
+b_4443,2024,boys,group:relays,48,45
+b_4443,2024,boys,all,384,369
+b_4443,2024,all,100,48,45
+b_4443,2024,all,100H,24,24
+b_4443,2024,all,110H,24,23
+b_4443,2024,all,1600,48,48
+b_4443,2024,all,200,48,48
+b_4443,2024,all,300H,48,47
+b_4443,2024,all,3200,48,47
+b_4443,2024,all,400,48,45
+b_4443,2024,all,4x100,48,45
+b_4443,2024,all,4x400,48,47
+b_4443,2024,all,800,48,45
+b_4443,2024,all,DT,47,44
+b_4443,2024,all,HJ,48,48
+b_4443,2024,all,LJ,48,46
+b_4443,2024,all,PV,48,48
+b_4443,2024,all,SP,48,46
+b_4443,2024,all,TJ,48,47
+b_4443,2024,all,group:sprints_hurdles,192,187
+b_4443,2024,all,group:400_800,96,90
+b_4443,2024,all,group:distance,96,95
+b_4443,2024,all,group:jumps,192,189
+b_4443,2024,all,group:throws,95,90
+b_4443,2024,all,group:relays,96,92
+b_4443,2024,all,all,767,743
+b_4443,2025,girls,100,24,22
+b_4443,2025,girls,100H,24,24
+b_4443,2025,girls,1600,24,21
+b_4443,2025,girls,200,24,23
+b_4443,2025,girls,300H,24,24
+b_4443,2025,girls,3200,24,22
+b_4443,2025,girls,400,24,23
+b_4443,2025,girls,4x100,24,22
+b_4443,2025,girls,4x400,24,24
+b_4443,2025,girls,800,24,21
+b_4443,2025,girls,DT,24,23
+b_4443,2025,girls,HJ,24,24
+b_4443,2025,girls,LJ,24,22
+b_4443,2025,girls,PV,24,24
+b_4443,2025,girls,SP,24,23
+b_4443,2025,girls,TJ,24,23
+b_4443,2025,girls,group:sprints_hurdles,96,93
+b_4443,2025,girls,group:400_800,48,44
+b_4443,2025,girls,group:distance,48,43
+b_4443,2025,girls,group:jumps,96,93
+b_4443,2025,girls,group:throws,48,46
+b_4443,2025,girls,group:relays,48,46
+b_4443,2025,girls,all,384,365
+b_4443,2025,boys,100,24,24
+b_4443,2025,boys,110H,24,23
+b_4443,2025,boys,1600,24,20
+b_4443,2025,boys,200,24,23
+b_4443,2025,boys,300H,24,21
+b_4443,2025,boys,3200,24,23
+b_4443,2025,boys,400,24,24
+b_4443,2025,boys,4x100,24,21
+b_4443,2025,boys,4x400,24,22
+b_4443,2025,boys,800,24,22
+b_4443,2025,boys,DT,24,22
+b_4443,2025,boys,HJ,24,24
+b_4443,2025,boys,LJ,24,22
+b_4443,2025,boys,PV,24,22
+b_4443,2025,boys,SP,24,21
+b_4443,2025,boys,TJ,24,24
+b_4443,2025,boys,group:sprints_hurdles,96,91
+b_4443,2025,boys,group:400_800,48,46
+b_4443,2025,boys,group:distance,48,43
+b_4443,2025,boys,group:jumps,96,92
+b_4443,2025,boys,group:throws,48,43
+b_4443,2025,boys,group:relays,48,43
+b_4443,2025,boys,all,384,358
+b_4443,2025,all,100,48,46
+b_4443,2025,all,100H,24,24
+b_4443,2025,all,110H,24,23
+b_4443,2025,all,1600,48,41
+b_4443,2025,all,200,48,46
+b_4443,2025,all,300H,48,45
+b_4443,2025,all,3200,48,45
+b_4443,2025,all,400,48,47
+b_4443,2025,all,4x100,48,43
+b_4443,2025,all,4x400,48,46
+b_4443,2025,all,800,48,43
+b_4443,2025,all,DT,48,45
+b_4443,2025,all,HJ,48,48
+b_4443,2025,all,LJ,48,44
+b_4443,2025,all,PV,48,46
+b_4443,2025,all,SP,48,44
+b_4443,2025,all,TJ,48,47
+b_4443,2025,all,group:sprints_hurdles,192,184
+b_4443,2025,all,group:400_800,96,90
+b_4443,2025,all,group:distance,96,86
+b_4443,2025,all,group:jumps,192,185
+b_4443,2025,all,group:throws,96,89
+b_4443,2025,all,group:relays,96,89
+b_4443,2025,all,all,768,723
+b_4443,2026,girls,100,24,20
+b_4443,2026,girls,100H,24,22
+b_4443,2026,girls,1600,24,24
+b_4443,2026,girls,200,24,21
+b_4443,2026,girls,300H,24,23
+b_4443,2026,girls,3200,24,22
+b_4443,2026,girls,400,24,24
+b_4443,2026,girls,4x100,24,22
+b_4443,2026,girls,4x400,24,22
+b_4443,2026,girls,800,24,22
+b_4443,2026,girls,DT,24,23
+b_4443,2026,girls,HJ,24,24
+b_4443,2026,girls,LJ,24,24
+b_4443,2026,girls,PV,24,23
+b_4443,2026,girls,SP,24,23
+b_4443,2026,girls,TJ,24,24
+b_4443,2026,girls,group:sprints_hurdles,96,86
+b_4443,2026,girls,group:400_800,48,46
+b_4443,2026,girls,group:distance,48,46
+b_4443,2026,girls,group:jumps,96,95
+b_4443,2026,girls,group:throws,48,46
+b_4443,2026,girls,group:relays,48,44
+b_4443,2026,girls,all,384,363
+b_4443,2026,boys,100,24,24
+b_4443,2026,boys,110H,24,24
+b_4443,2026,boys,1600,24,22
+b_4443,2026,boys,200,24,24
+b_4443,2026,boys,300H,24,24
+b_4443,2026,boys,3200,24,23
+b_4443,2026,boys,400,24,22
+b_4443,2026,boys,4x100,24,22
+b_4443,2026,boys,4x400,24,21
+b_4443,2026,boys,800,24,23
+b_4443,2026,boys,DT,24,24
+b_4443,2026,boys,HJ,24,24
+b_4443,2026,boys,LJ,24,24
+b_4443,2026,boys,PV,24,22
+b_4443,2026,boys,SP,24,23
+b_4443,2026,boys,TJ,24,22
+b_4443,2026,boys,group:sprints_hurdles,96,96
+b_4443,2026,boys,group:400_800,48,45
+b_4443,2026,boys,group:distance,48,45
+b_4443,2026,boys,group:jumps,96,92
+b_4443,2026,boys,group:throws,48,47
+b_4443,2026,boys,group:relays,48,43
+b_4443,2026,boys,all,384,368
+b_4443,2026,all,100,48,44
+b_4443,2026,all,100H,24,22
+b_4443,2026,all,110H,24,24
+b_4443,2026,all,1600,48,46
+b_4443,2026,all,200,48,45
+b_4443,2026,all,300H,48,47
+b_4443,2026,all,3200,48,45
+b_4443,2026,all,400,48,46
+b_4443,2026,all,4x100,48,44
+b_4443,2026,all,4x400,48,43
+b_4443,2026,all,800,48,45
+b_4443,2026,all,DT,48,47
+b_4443,2026,all,HJ,48,48
+b_4443,2026,all,LJ,48,48
+b_4443,2026,all,PV,48,45
+b_4443,2026,all,SP,48,46
+b_4443,2026,all,TJ,48,46
+b_4443,2026,all,group:sprints_hurdles,192,182
+b_4443,2026,all,group:400_800,96,91
+b_4443,2026,all,group:distance,96,91
+b_4443,2026,all,group:jumps,192,187
+b_4443,2026,all,group:throws,96,93
+b_4443,2026,all,group:relays,96,87
+b_4443,2026,all,all,768,731
+b_4443,2022-2026 pooled,girls,100,120,110
+b_4443,2022-2026 pooled,girls,100H,120,116
+b_4443,2022-2026 pooled,girls,1600,120,116
+b_4443,2022-2026 pooled,girls,200,120,113
+b_4443,2022-2026 pooled,girls,300H,120,118
+b_4443,2022-2026 pooled,girls,3200,120,116
+b_4443,2022-2026 pooled,girls,400,120,116
+b_4443,2022-2026 pooled,girls,4x100,120,111
+b_4443,2022-2026 pooled,girls,4x400,120,117
+b_4443,2022-2026 pooled,girls,800,120,110
+b_4443,2022-2026 pooled,girls,DT,119,112
+b_4443,2022-2026 pooled,girls,HJ,120,120
+b_4443,2022-2026 pooled,girls,LJ,120,116
+b_4443,2022-2026 pooled,girls,PV,120,119
+b_4443,2022-2026 pooled,girls,SP,120,114
+b_4443,2022-2026 pooled,girls,TJ,119,118
+b_4443,2022-2026 pooled,girls,group:sprints_hurdles,480,457
+b_4443,2022-2026 pooled,girls,group:400_800,240,226
+b_4443,2022-2026 pooled,girls,group:distance,240,232
+b_4443,2022-2026 pooled,girls,group:jumps,479,473
+b_4443,2022-2026 pooled,girls,group:throws,239,226
+b_4443,2022-2026 pooled,girls,group:relays,240,228
+b_4443,2022-2026 pooled,girls,all,1918,1842
+b_4443,2022-2026 pooled,boys,100,120,112
+b_4443,2022-2026 pooled,boys,110H,119,117
+b_4443,2022-2026 pooled,boys,1600,120,114
+b_4443,2022-2026 pooled,boys,200,120,116
+b_4443,2022-2026 pooled,boys,300H,119,114
+b_4443,2022-2026 pooled,boys,3200,120,114
+b_4443,2022-2026 pooled,boys,400,120,110
+b_4443,2022-2026 pooled,boys,4x100,120,108
+b_4443,2022-2026 pooled,boys,4x400,120,110
+b_4443,2022-2026 pooled,boys,800,120,113
+b_4443,2022-2026 pooled,boys,DT,120,114
+b_4443,2022-2026 pooled,boys,HJ,120,119
+b_4443,2022-2026 pooled,boys,LJ,120,118
+b_4443,2022-2026 pooled,boys,PV,120,114
+b_4443,2022-2026 pooled,boys,SP,120,112
+b_4443,2022-2026 pooled,boys,TJ,120,115
+b_4443,2022-2026 pooled,boys,group:sprints_hurdles,478,459
+b_4443,2022-2026 pooled,boys,group:400_800,240,223
+b_4443,2022-2026 pooled,boys,group:distance,240,228
+b_4443,2022-2026 pooled,boys,group:jumps,480,466
+b_4443,2022-2026 pooled,boys,group:throws,240,226
+b_4443,2022-2026 pooled,boys,group:relays,240,218
+b_4443,2022-2026 pooled,boys,all,1918,1820
+b_4443,2022-2026 pooled,all,100,240,222
+b_4443,2022-2026 pooled,all,100H,120,116
+b_4443,2022-2026 pooled,all,110H,119,117
+b_4443,2022-2026 pooled,all,1600,240,230
+b_4443,2022-2026 pooled,all,200,240,229
+b_4443,2022-2026 pooled,all,300H,239,232
+b_4443,2022-2026 pooled,all,3200,240,230
+b_4443,2022-2026 pooled,all,400,240,226
+b_4443,2022-2026 pooled,all,4x100,240,219
+b_4443,2022-2026 pooled,all,4x400,240,227
+b_4443,2022-2026 pooled,all,800,240,223
+b_4443,2022-2026 pooled,all,DT,239,226
+b_4443,2022-2026 pooled,all,HJ,240,239
+b_4443,2022-2026 pooled,all,LJ,240,234
+b_4443,2022-2026 pooled,all,PV,240,233
+b_4443,2022-2026 pooled,all,SP,240,226
+b_4443,2022-2026 pooled,all,TJ,239,233
+b_4443,2022-2026 pooled,all,group:sprints_hurdles,958,916
+b_4443,2022-2026 pooled,all,group:400_800,480,449
+b_4443,2022-2026 pooled,all,group:distance,480,460
+b_4443,2022-2026 pooled,all,group:jumps,959,939
+b_4443,2022-2026 pooled,all,group:throws,479,452
+b_4443,2022-2026 pooled,all,group:relays,480,446
+b_4443,2022-2026 pooled,all,all,3836,3662
+c_3333,2022,girls,100,24,24
+c_3333,2022,girls,100H,24,24
+c_3333,2022,girls,1600,24,24
+c_3333,2022,girls,200,24,23
+c_3333,2022,girls,300H,24,24
+c_3333,2022,girls,3200,24,24
+c_3333,2022,girls,400,24,23
+c_3333,2022,girls,4x100,24,23
+c_3333,2022,girls,4x400,24,23
+c_3333,2022,girls,800,24,23
+c_3333,2022,girls,DT,24,21
+c_3333,2022,girls,HJ,24,24
+c_3333,2022,girls,LJ,24,24
+c_3333,2022,girls,PV,24,24
+c_3333,2022,girls,SP,24,22
+c_3333,2022,girls,TJ,23,23
+c_3333,2022,girls,group:sprints_hurdles,96,95
+c_3333,2022,girls,group:400_800,48,46
+c_3333,2022,girls,group:distance,48,48
+c_3333,2022,girls,group:jumps,95,95
+c_3333,2022,girls,group:throws,48,43
+c_3333,2022,girls,group:relays,48,46
+c_3333,2022,girls,all,383,373
+c_3333,2022,boys,100,24,21
+c_3333,2022,boys,110H,23,23
+c_3333,2022,boys,1600,24,24
+c_3333,2022,boys,200,24,23
+c_3333,2022,boys,300H,23,23
+c_3333,2022,boys,3200,24,21
+c_3333,2022,boys,400,24,21
+c_3333,2022,boys,4x100,24,23
+c_3333,2022,boys,4x400,24,21
+c_3333,2022,boys,800,24,21
+c_3333,2022,boys,DT,24,24
+c_3333,2022,boys,HJ,24,24
+c_3333,2022,boys,LJ,24,24
+c_3333,2022,boys,PV,24,21
+c_3333,2022,boys,SP,24,23
+c_3333,2022,boys,TJ,24,23
+c_3333,2022,boys,group:sprints_hurdles,94,90
+c_3333,2022,boys,group:400_800,48,42
+c_3333,2022,boys,group:distance,48,45
+c_3333,2022,boys,group:jumps,96,92
+c_3333,2022,boys,group:throws,48,47
+c_3333,2022,boys,group:relays,48,44
+c_3333,2022,boys,all,382,360
+c_3333,2022,all,100,48,45
+c_3333,2022,all,100H,24,24
+c_3333,2022,all,110H,23,23
+c_3333,2022,all,1600,48,48
+c_3333,2022,all,200,48,46
+c_3333,2022,all,300H,47,47
+c_3333,2022,all,3200,48,45
+c_3333,2022,all,400,48,44
+c_3333,2022,all,4x100,48,46
+c_3333,2022,all,4x400,48,44
+c_3333,2022,all,800,48,44
+c_3333,2022,all,DT,48,45
+c_3333,2022,all,HJ,48,48
+c_3333,2022,all,LJ,48,48
+c_3333,2022,all,PV,48,45
+c_3333,2022,all,SP,48,45
+c_3333,2022,all,TJ,47,46
+c_3333,2022,all,group:sprints_hurdles,190,185
+c_3333,2022,all,group:400_800,96,88
+c_3333,2022,all,group:distance,96,93
+c_3333,2022,all,group:jumps,191,187
+c_3333,2022,all,group:throws,96,90
+c_3333,2022,all,group:relays,96,90
+c_3333,2022,all,all,765,733
+c_3333,2023,girls,100,24,23
+c_3333,2023,girls,100H,24,23
+c_3333,2023,girls,1600,24,24
+c_3333,2023,girls,200,24,24
+c_3333,2023,girls,300H,24,23
+c_3333,2023,girls,3200,24,24
+c_3333,2023,girls,400,24,23
+c_3333,2023,girls,4x100,24,21
+c_3333,2023,girls,4x400,24,24
+c_3333,2023,girls,800,24,24
+c_3333,2023,girls,DT,24,23
+c_3333,2023,girls,HJ,24,24
+c_3333,2023,girls,LJ,24,24
+c_3333,2023,girls,PV,24,22
+c_3333,2023,girls,SP,24,24
+c_3333,2023,girls,TJ,24,24
+c_3333,2023,girls,group:sprints_hurdles,96,93
+c_3333,2023,girls,group:400_800,48,47
+c_3333,2023,girls,group:distance,48,48
+c_3333,2023,girls,group:jumps,96,94
+c_3333,2023,girls,group:throws,48,47
+c_3333,2023,girls,group:relays,48,45
+c_3333,2023,girls,all,384,374
+c_3333,2023,boys,100,24,19
+c_3333,2023,boys,110H,24,24
+c_3333,2023,boys,1600,24,24
+c_3333,2023,boys,200,24,22
+c_3333,2023,boys,300H,24,24
+c_3333,2023,boys,3200,24,24
+c_3333,2023,boys,400,24,22
+c_3333,2023,boys,4x100,24,21
+c_3333,2023,boys,4x400,24,23
+c_3333,2023,boys,800,24,24
+c_3333,2023,boys,DT,24,23
+c_3333,2023,boys,HJ,24,24
+c_3333,2023,boys,LJ,24,24
+c_3333,2023,boys,PV,24,24
+c_3333,2023,boys,SP,24,23
+c_3333,2023,boys,TJ,24,23
+c_3333,2023,boys,group:sprints_hurdles,96,89
+c_3333,2023,boys,group:400_800,48,46
+c_3333,2023,boys,group:distance,48,48
+c_3333,2023,boys,group:jumps,96,95
+c_3333,2023,boys,group:throws,48,46
+c_3333,2023,boys,group:relays,48,44
+c_3333,2023,boys,all,384,368
+c_3333,2023,all,100,48,42
+c_3333,2023,all,100H,24,23
+c_3333,2023,all,110H,24,24
+c_3333,2023,all,1600,48,48
+c_3333,2023,all,200,48,46
+c_3333,2023,all,300H,48,47
+c_3333,2023,all,3200,48,48
+c_3333,2023,all,400,48,45
+c_3333,2023,all,4x100,48,42
+c_3333,2023,all,4x400,48,47
+c_3333,2023,all,800,48,48
+c_3333,2023,all,DT,48,46
+c_3333,2023,all,HJ,48,48
+c_3333,2023,all,LJ,48,48
+c_3333,2023,all,PV,48,46
+c_3333,2023,all,SP,48,47
+c_3333,2023,all,TJ,48,47
+c_3333,2023,all,group:sprints_hurdles,192,182
+c_3333,2023,all,group:400_800,96,93
+c_3333,2023,all,group:distance,96,96
+c_3333,2023,all,group:jumps,192,189
+c_3333,2023,all,group:throws,96,93
+c_3333,2023,all,group:relays,96,89
+c_3333,2023,all,all,768,742
+c_3333,2024,girls,100,24,23
+c_3333,2024,girls,100H,24,24
+c_3333,2024,girls,1600,24,24
+c_3333,2024,girls,200,24,24
+c_3333,2024,girls,300H,24,24
+c_3333,2024,girls,3200,24,24
+c_3333,2024,girls,400,24,24
+c_3333,2024,girls,4x100,24,23
+c_3333,2024,girls,4x400,24,24
+c_3333,2024,girls,800,24,22
+c_3333,2024,girls,DT,23,23
+c_3333,2024,girls,HJ,24,24
+c_3333,2024,girls,LJ,24,23
+c_3333,2024,girls,PV,24,23
+c_3333,2024,girls,SP,24,24
+c_3333,2024,girls,TJ,24,24
+c_3333,2024,girls,group:sprints_hurdles,96,95
+c_3333,2024,girls,group:400_800,48,46
+c_3333,2024,girls,group:distance,48,48
+c_3333,2024,girls,group:jumps,96,94
+c_3333,2024,girls,group:throws,47,47
+c_3333,2024,girls,group:relays,48,47
+c_3333,2024,girls,all,383,377
+c_3333,2024,boys,100,24,24
+c_3333,2024,boys,110H,24,24
+c_3333,2024,boys,1600,24,24
+c_3333,2024,boys,200,24,24
+c_3333,2024,boys,300H,24,23
+c_3333,2024,boys,3200,24,23
+c_3333,2024,boys,400,24,21
+c_3333,2024,boys,4x100,24,22
+c_3333,2024,boys,4x400,24,23
+c_3333,2024,boys,800,24,24
+c_3333,2024,boys,DT,24,21
+c_3333,2024,boys,HJ,24,24
+c_3333,2024,boys,LJ,24,24
+c_3333,2024,boys,PV,24,24
+c_3333,2024,boys,SP,24,22
+c_3333,2024,boys,TJ,24,23
+c_3333,2024,boys,group:sprints_hurdles,96,95
+c_3333,2024,boys,group:400_800,48,45
+c_3333,2024,boys,group:distance,48,47
+c_3333,2024,boys,group:jumps,96,95
+c_3333,2024,boys,group:throws,48,43
+c_3333,2024,boys,group:relays,48,45
+c_3333,2024,boys,all,384,370
+c_3333,2024,all,100,48,47
+c_3333,2024,all,100H,24,24
+c_3333,2024,all,110H,24,24
+c_3333,2024,all,1600,48,48
+c_3333,2024,all,200,48,48
+c_3333,2024,all,300H,48,47
+c_3333,2024,all,3200,48,47
+c_3333,2024,all,400,48,45
+c_3333,2024,all,4x100,48,45
+c_3333,2024,all,4x400,48,47
+c_3333,2024,all,800,48,46
+c_3333,2024,all,DT,47,44
+c_3333,2024,all,HJ,48,48
+c_3333,2024,all,LJ,48,47
+c_3333,2024,all,PV,48,47
+c_3333,2024,all,SP,48,46
+c_3333,2024,all,TJ,48,47
+c_3333,2024,all,group:sprints_hurdles,192,190
+c_3333,2024,all,group:400_800,96,91
+c_3333,2024,all,group:distance,96,95
+c_3333,2024,all,group:jumps,192,189
+c_3333,2024,all,group:throws,95,90
+c_3333,2024,all,group:relays,96,92
+c_3333,2024,all,all,767,747
+c_3333,2025,girls,100,24,23
+c_3333,2025,girls,100H,24,24
+c_3333,2025,girls,1600,24,22
+c_3333,2025,girls,200,24,24
+c_3333,2025,girls,300H,24,24
+c_3333,2025,girls,3200,24,22
+c_3333,2025,girls,400,24,24
+c_3333,2025,girls,4x100,24,22
+c_3333,2025,girls,4x400,24,24
+c_3333,2025,girls,800,24,22
+c_3333,2025,girls,DT,24,24
+c_3333,2025,girls,HJ,24,24
+c_3333,2025,girls,LJ,24,23
+c_3333,2025,girls,PV,24,24
+c_3333,2025,girls,SP,24,24
+c_3333,2025,girls,TJ,24,23
+c_3333,2025,girls,group:sprints_hurdles,96,95
+c_3333,2025,girls,group:400_800,48,46
+c_3333,2025,girls,group:distance,48,44
+c_3333,2025,girls,group:jumps,96,94
+c_3333,2025,girls,group:throws,48,48
+c_3333,2025,girls,group:relays,48,46
+c_3333,2025,girls,all,384,373
+c_3333,2025,boys,100,24,24
+c_3333,2025,boys,110H,24,23
+c_3333,2025,boys,1600,24,21
+c_3333,2025,boys,200,24,23
+c_3333,2025,boys,300H,24,22
+c_3333,2025,boys,3200,24,24
+c_3333,2025,boys,400,24,24
+c_3333,2025,boys,4x100,24,21
+c_3333,2025,boys,4x400,24,22
+c_3333,2025,boys,800,24,22
+c_3333,2025,boys,DT,24,23
+c_3333,2025,boys,HJ,24,24
+c_3333,2025,boys,LJ,24,23
+c_3333,2025,boys,PV,24,22
+c_3333,2025,boys,SP,24,21
+c_3333,2025,boys,TJ,24,24
+c_3333,2025,boys,group:sprints_hurdles,96,92
+c_3333,2025,boys,group:400_800,48,46
+c_3333,2025,boys,group:distance,48,45
+c_3333,2025,boys,group:jumps,96,93
+c_3333,2025,boys,group:throws,48,44
+c_3333,2025,boys,group:relays,48,43
+c_3333,2025,boys,all,384,363
+c_3333,2025,all,100,48,47
+c_3333,2025,all,100H,24,24
+c_3333,2025,all,110H,24,23
+c_3333,2025,all,1600,48,43
+c_3333,2025,all,200,48,47
+c_3333,2025,all,300H,48,46
+c_3333,2025,all,3200,48,46
+c_3333,2025,all,400,48,48
+c_3333,2025,all,4x100,48,43
+c_3333,2025,all,4x400,48,46
+c_3333,2025,all,800,48,44
+c_3333,2025,all,DT,48,47
+c_3333,2025,all,HJ,48,48
+c_3333,2025,all,LJ,48,46
+c_3333,2025,all,PV,48,46
+c_3333,2025,all,SP,48,45
+c_3333,2025,all,TJ,48,47
+c_3333,2025,all,group:sprints_hurdles,192,187
+c_3333,2025,all,group:400_800,96,92
+c_3333,2025,all,group:distance,96,89
+c_3333,2025,all,group:jumps,192,187
+c_3333,2025,all,group:throws,96,92
+c_3333,2025,all,group:relays,96,89
+c_3333,2025,all,all,768,736
+c_3333,2026,girls,100,24,21
+c_3333,2026,girls,100H,24,22
+c_3333,2026,girls,1600,24,24
+c_3333,2026,girls,200,24,22
+c_3333,2026,girls,300H,24,24
+c_3333,2026,girls,3200,24,23
+c_3333,2026,girls,400,24,24
+c_3333,2026,girls,4x100,24,22
+c_3333,2026,girls,4x400,24,23
+c_3333,2026,girls,800,24,23
+c_3333,2026,girls,DT,24,23
+c_3333,2026,girls,HJ,24,24
+c_3333,2026,girls,LJ,24,23
+c_3333,2026,girls,PV,24,23
+c_3333,2026,girls,SP,24,23
+c_3333,2026,girls,TJ,24,24
+c_3333,2026,girls,group:sprints_hurdles,96,89
+c_3333,2026,girls,group:400_800,48,47
+c_3333,2026,girls,group:distance,48,47
+c_3333,2026,girls,group:jumps,96,94
+c_3333,2026,girls,group:throws,48,46
+c_3333,2026,girls,group:relays,48,45
+c_3333,2026,girls,all,384,368
+c_3333,2026,boys,100,24,23
+c_3333,2026,boys,110H,24,24
+c_3333,2026,boys,1600,24,23
+c_3333,2026,boys,200,24,24
+c_3333,2026,boys,300H,24,24
+c_3333,2026,boys,3200,24,23
+c_3333,2026,boys,400,24,22
+c_3333,2026,boys,4x100,24,22
+c_3333,2026,boys,4x400,24,21
+c_3333,2026,boys,800,24,23
+c_3333,2026,boys,DT,24,24
+c_3333,2026,boys,HJ,24,24
+c_3333,2026,boys,LJ,24,24
+c_3333,2026,boys,PV,24,24
+c_3333,2026,boys,SP,24,23
+c_3333,2026,boys,TJ,24,22
+c_3333,2026,boys,group:sprints_hurdles,96,95
+c_3333,2026,boys,group:400_800,48,45
+c_3333,2026,boys,group:distance,48,46
+c_3333,2026,boys,group:jumps,96,94
+c_3333,2026,boys,group:throws,48,47
+c_3333,2026,boys,group:relays,48,43
+c_3333,2026,boys,all,384,370
+c_3333,2026,all,100,48,44
+c_3333,2026,all,100H,24,22
+c_3333,2026,all,110H,24,24
+c_3333,2026,all,1600,48,47
+c_3333,2026,all,200,48,46
+c_3333,2026,all,300H,48,48
+c_3333,2026,all,3200,48,46
+c_3333,2026,all,400,48,46
+c_3333,2026,all,4x100,48,44
+c_3333,2026,all,4x400,48,44
+c_3333,2026,all,800,48,46
+c_3333,2026,all,DT,48,47
+c_3333,2026,all,HJ,48,48
+c_3333,2026,all,LJ,48,47
+c_3333,2026,all,PV,48,47
+c_3333,2026,all,SP,48,46
+c_3333,2026,all,TJ,48,46
+c_3333,2026,all,group:sprints_hurdles,192,184
+c_3333,2026,all,group:400_800,96,92
+c_3333,2026,all,group:distance,96,93
+c_3333,2026,all,group:jumps,192,188
+c_3333,2026,all,group:throws,96,93
+c_3333,2026,all,group:relays,96,88
+c_3333,2026,all,all,768,738
+c_3333,2022-2026 pooled,girls,100,120,114
+c_3333,2022-2026 pooled,girls,100H,120,117
+c_3333,2022-2026 pooled,girls,1600,120,118
+c_3333,2022-2026 pooled,girls,200,120,117
+c_3333,2022-2026 pooled,girls,300H,120,119
+c_3333,2022-2026 pooled,girls,3200,120,117
+c_3333,2022-2026 pooled,girls,400,120,118
+c_3333,2022-2026 pooled,girls,4x100,120,111
+c_3333,2022-2026 pooled,girls,4x400,120,118
+c_3333,2022-2026 pooled,girls,800,120,114
+c_3333,2022-2026 pooled,girls,DT,119,114
+c_3333,2022-2026 pooled,girls,HJ,120,120
+c_3333,2022-2026 pooled,girls,LJ,120,117
+c_3333,2022-2026 pooled,girls,PV,120,116
+c_3333,2022-2026 pooled,girls,SP,120,117
+c_3333,2022-2026 pooled,girls,TJ,119,118
+c_3333,2022-2026 pooled,girls,group:sprints_hurdles,480,467
+c_3333,2022-2026 pooled,girls,group:400_800,240,232
+c_3333,2022-2026 pooled,girls,group:distance,240,235
+c_3333,2022-2026 pooled,girls,group:jumps,479,471
+c_3333,2022-2026 pooled,girls,group:throws,239,231
+c_3333,2022-2026 pooled,girls,group:relays,240,229
+c_3333,2022-2026 pooled,girls,all,1918,1865
+c_3333,2022-2026 pooled,boys,100,120,111
+c_3333,2022-2026 pooled,boys,110H,119,118
+c_3333,2022-2026 pooled,boys,1600,120,116
+c_3333,2022-2026 pooled,boys,200,120,116
+c_3333,2022-2026 pooled,boys,300H,119,116
+c_3333,2022-2026 pooled,boys,3200,120,115
+c_3333,2022-2026 pooled,boys,400,120,110
+c_3333,2022-2026 pooled,boys,4x100,120,109
+c_3333,2022-2026 pooled,boys,4x400,120,110
+c_3333,2022-2026 pooled,boys,800,120,114
+c_3333,2022-2026 pooled,boys,DT,120,115
+c_3333,2022-2026 pooled,boys,HJ,120,120
+c_3333,2022-2026 pooled,boys,LJ,120,119
+c_3333,2022-2026 pooled,boys,PV,120,115
+c_3333,2022-2026 pooled,boys,SP,120,112
+c_3333,2022-2026 pooled,boys,TJ,120,115
+c_3333,2022-2026 pooled,boys,group:sprints_hurdles,478,461
+c_3333,2022-2026 pooled,boys,group:400_800,240,224
+c_3333,2022-2026 pooled,boys,group:distance,240,231
+c_3333,2022-2026 pooled,boys,group:jumps,480,469
+c_3333,2022-2026 pooled,boys,group:throws,240,227
+c_3333,2022-2026 pooled,boys,group:relays,240,219
+c_3333,2022-2026 pooled,boys,all,1918,1831
+c_3333,2022-2026 pooled,all,100,240,225
+c_3333,2022-2026 pooled,all,100H,120,117
+c_3333,2022-2026 pooled,all,110H,119,118
+c_3333,2022-2026 pooled,all,1600,240,234
+c_3333,2022-2026 pooled,all,200,240,233
+c_3333,2022-2026 pooled,all,300H,239,235
+c_3333,2022-2026 pooled,all,3200,240,232
+c_3333,2022-2026 pooled,all,400,240,228
+c_3333,2022-2026 pooled,all,4x100,240,220
+c_3333,2022-2026 pooled,all,4x400,240,228
+c_3333,2022-2026 pooled,all,800,240,228
+c_3333,2022-2026 pooled,all,DT,239,229
+c_3333,2022-2026 pooled,all,HJ,240,240
+c_3333,2022-2026 pooled,all,LJ,240,236
+c_3333,2022-2026 pooled,all,PV,240,231
+c_3333,2022-2026 pooled,all,SP,240,229
+c_3333,2022-2026 pooled,all,TJ,239,233
+c_3333,2022-2026 pooled,all,group:sprints_hurdles,958,928
+c_3333,2022-2026 pooled,all,group:400_800,480,456
+c_3333,2022-2026 pooled,all,group:distance,480,466
+c_3333,2022-2026 pooled,all,group:jumps,959,940
+c_3333,2022-2026 pooled,all,group:throws,479,458
+c_3333,2022-2026 pooled,all,group:relays,480,448
+c_3333,2022-2026 pooled,all,all,3836,3696

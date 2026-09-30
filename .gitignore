@@ -19,7 +19,9 @@ data/raw/athleticnet/
 data/raw/hytek/
 data/reference/entries/
 data/processed/
-data/review/
+data/review/*
+# Exception: school spellings only, no athletes.
+!data/review/school_aliases_review.csv
 outputs/
 
 # Scratch

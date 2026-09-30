@@ -529,3 +529,173 @@ def switch_effects(table: pd.DataFrame, axes: dict, metric: str = "raw_mismatche
                     "predicted_list_changes_in": changed,
                     "delta_min": min(deltas), "delta_max": max(deltas)})
     return pd.DataFrame(out)
+
+
+# ---------------------------------------------------------------------------
+# Pass-down: routes assigned after declarations (decision #32)
+# ---------------------------------------------------------------------------
+PASS_DOWN_COLUMNS = ["gender", "event_code", "meet_area", "area", "place", "status", "mark_raw", "mark_value",
+                     "athlete_id", "athlete_name", "school_name", "is_relay", "identity", "performance_id",
+                     "meets_standard", "declared", "program_name", "route", "declined", "left_out"]
+
+
+def _program_matches(perf_ids: list[str], entry_ids: list[str]) -> dict[str, str]:
+    """perf identity -> program identity: exact, else one unambiguous name variant at the
+    same school (the rule `compare` uses), else a near-identical spelling (_in_program)."""
+    entry_set = set(entry_ids)
+    out = {i: i for i in perf_ids if i in entry_set}
+    left = [e for e in entry_ids if e not in set(out.values()) and not e.startswith("relay|")]
+    for pi in perf_ids:
+        if pi in out or pi.startswith("relay|"):
+            continue
+        hits = [e for e in left if e not in out.values()
+                and (_variant_of(pi, e) or _in_program("", pi, {("", e)}))]
+        if len(hits) == 1:
+            rivals = [p for p in perf_ids if p not in out and p != pi and _variant_of(p, hits[0])]
+            if not rivals:
+                out[pi] = hits[0]
+    return out
+
+
+def _norm_school(s) -> str:
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
+
+
+def _match_unresolved(x: pd.DataFrame, en: pd.DataFrame, match: dict) -> None:
+    """Program entries whose school didn't resolve (truncated or unknown names): link an
+    individual to the one unmatched Area finalist with the same name, and a relay to the one
+    Area relay team whose school name starts with the program's (decision #32)."""
+    used = set(match.values())
+    for r in en[en["identity"].str.endswith("|None") & ~en["identity"].isin(used)].itertuples():
+        free = x[~x["identity"].isin(match)]
+        if r.is_relay:
+            pre = _norm_school(r.school_name)
+            hits = free[free["is_relay"].astype(bool) & free["school_name_raw"].map(lambda s: _norm_school(s).startswith(pre))]
+        else:
+            name = r.identity.rsplit("|", 1)[0]
+            hits = free[free["identity"].map(lambda i: i.rsplit("|", 1)[0] == name)]
+        if len(hits) == 1:
+            match[hits["identity"].iloc[0]] = r.identity
+            used.add(r.identity)
+
+
+def pass_down(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
+              school_key: Callable[[str], str | None], school_area: Callable[[str], str | None],
+              interp: Interpretation = Interpretation()) -> tuple[pd.DataFrame, Comparison]:
+    """Routes as NCS assigns them, after declarations (the MOC program).
+
+    Per event and Area, finishers (valid mark and place) are walked in Area-place order:
+    each one in the program takes an automatic spot until the Area's 6 (Class A 3) are used;
+    everyone ahead of the last automatic qualifier who is not in the program declined, and
+    the spot passed down. Then the next-best-mark spots go down the list of remaining marks
+    (all fill-pool meets; not automatic, not declined): a remaining athlete in the program
+    takes one, one who isn't declined it and it passes on; ties at the last spot follow
+    `interp.fill_ties_include`. Everyone still remaining who met the at-large standard
+    (wind rule as `interp`) is an at-large qualifier if in the program, else declined it.
+    Left out: finished behind the Area's last automatic qualifier, no route, and not in the
+    program. Program entrants with no route are "unexplained".
+
+    `evaluated` supplies marks, standards and the fill pool (`evaluate` with the same
+    interpretation); its pre-declaration `qualified_by` is ignored here."""
+    auto_n = rules["area_to_moc"]["auto"]
+    fill_n, _ = _fill_rule(rules, interp)
+    areas = set(evaluated["meet_area"].dropna().unique())
+    events = set(main_events(rules))
+    ev = evaluated.copy()
+    ev["identity"] = [_identity(n, school_key(s), r) for n, s, r in
+                      zip(ev["athlete_name_raw"], ev["school_name_raw"], ev["is_relay"])]
+    ent = entries[~entries["is_adaptive"].astype(bool) & entries["event_modifier"].isna()].copy()
+    ent = ent[[(g, e) in events for g, e in zip(ent["gender"], ent["event_code"])]]
+    ent["identity"] = [_identity(n, school_key(s), r) for n, s, r in
+                       zip(ent["athlete_name"], ent["school_name"], ent["is_relay"])]
+    ent["area"] = ent["school_name"].map(school_area)
+    declared_ids = _declared_anywhere(entries, school_key)
+
+    frames, comp_rows = [], []
+    for g, e in sorted(events):
+        measure = EVENTS[e][0]
+        x = ev[(ev["gender"] == g) & (ev["event_code"] == e)].copy()
+        en = ent[(ent["gender"] == g) & (ent["event_code"] == e)]
+        match = _program_matches(list(x["identity"]), list(en["identity"]))
+        _match_unresolved(x, en, match)
+        prog_name = dict(zip(en["identity"], en["athlete_name"]))
+        x["declared"] = x["identity"].isin(match)
+        x["program_name"] = x["identity"].map(lambda i: prog_name.get(match.get(i)))
+        x["route"], x["declined"], x["left_out"] = None, None, False
+        ok = (x["status"] == "OK") & x["mark_value"].notna() & x["place"].notna()
+        remaining = pd.Series(False, index=x.index)
+        for area, xa in x[ok].sort_values("place", kind="stable").groupby("meet_area"):
+            n, taken, skipped, last_place = auto_n.get(area, 0), 0, [], None
+            for i, r in xa.iterrows():
+                tied = taken >= n and last_place is not None and r["place"] == last_place   # tie at the last spot
+                if (taken < n or tied) and r["declared"]:
+                    x.at[i, "route"] = "auto"
+                    taken += 1
+                    last_place = r["place"]
+                    for j in skipped:                   # ahead of an automatic qualifier: declined
+                        x.at[j, "declined"] = "auto"
+                    skipped = []
+                elif taken < n:
+                    skipped.append(i)
+                else:
+                    remaining[i] = True
+            for j in skipped:                           # behind the last automatic qualifier (spots unused)
+                remaining[j] = True
+        # next best mark: walk remaining marks in the fill pool, best first
+        pool = x[remaining & x["fill_candidate"]]
+        keyed = pool["mark_value"].map(lambda v: sort_key(v, measure)).sort_values(kind="stable")
+        got, cut, skipped = 0, None, []
+        for i, k in keyed.items():
+            if got >= fill_n and not (interp.fill_ties_include and cut is not None and abs(k - cut) < EPS):
+                break
+            if x.at[i, "declared"]:
+                x.at[i, "route"] = "fill"
+                got += 1
+                cut = k
+                for j in skipped:                       # a better mark not in the program: declined
+                    x.at[j, "declined"] = "fill"
+                skipped = []
+            else:
+                skipped.append(i)
+        # at-large standard: everyone else remaining who met it
+        wind_ok = (~x["wind_aided"].fillna(False).astype(bool)) if not interp.wind_aided_at_large else True
+        rest = remaining & x["route"].isna() & x["declined"].isna()
+        al = rest & x["meets_standard"] & wind_ok
+        x.loc[al & x["declared"], "route"] = "at_large"
+        x.loc[al & ~x["declared"], "declined"] = "at_large"
+        x["left_out"] = rest & ~al & ~x["declared"]
+        x["athlete_name"], x["school_name"], x["area"] = x["athlete_name_raw"], x["school_name_raw"], x["meet_area"]
+        frames.append(x)
+
+        choice = lambda i: "chose_other_events" if _in_program(g, i, declared_ids) else "did_not_declare"
+        for r in x.itertuples():
+            base = dict(athlete_name=r.athlete_name_raw, school_name=r.school_name_raw, area=r.meet_area,
+                        place=r.place, mark_raw=r.mark_raw, meets_standard=r.meets_standard, fill_rank=r.fill_rank,
+                        athlete_id=r.athlete_id, identity=r.identity, program_name=r.program_name)
+            if r.declared and r.route:
+                comp_rows.append(_row(g, e, "match", "match", qualified_by=r.route, **base))
+            elif r.declared:
+                comp_rows.append(_row(g, e, "entered_not_predicted", "no_route_after_pass_down", **base))
+            elif r.declined == "at_large":
+                c = choice(r.identity)
+                comp_rows.append(_row(g, e, "predicted_not_entered", "declined_at_large", qualified_by="at_large",
+                                      choice_tag=c, explained_by=c, **base))
+        matched_entries = set(match.values())
+        for r in en[~en["identity"].isin(matched_entries)].itertuples():
+            if r.area not in areas:
+                continue                                   # no Area results to compare with
+            comp_rows.append(_row(g, e, "entered_not_predicted", "not_in_area_final", athlete_name=r.athlete_name,
+                                  school_name=r.school_name, area=r.area, mark_raw=r.seed_mark_raw,
+                                  program_name=r.athlete_name, identity=r.identity))
+            frames.append(pd.DataFrame([{"gender": g, "event_code": e, "meet_area": None, "area": r.area,
+                                         "athlete_name": r.athlete_name, "school_name": r.school_name,
+                                         "is_relay": bool(r.is_relay), "identity": r.identity, "declared": True,
+                                         "program_name": r.athlete_name, "route": None, "declined": None,
+                                         "left_out": False}]))
+    routes = pd.concat(frames, ignore_index=True)
+    for c in PASS_DOWN_COLUMNS:
+        if c not in routes:
+            routes[c] = None
+    out = pd.DataFrame(comp_rows, columns=ROW_COLUMNS)
+    summary = out.groupby("outcome").size().reindex(OUTCOMES, fill_value=0).rename("n").reset_index()
+    return routes[PASS_DOWN_COLUMNS + ["fill_candidate", "fill_rank"]], Comparison(out, summary, ["pass_down"])

@@ -289,3 +289,31 @@ Newest at the bottom.
       group is a new pseudo-Area (`bay-shore+redwood-empire`) in `core_place_curve.csv`;
       a combined cell is published only when each Area's own cell has ≥ 5 entries, so no
       suppressed cell can be recovered by subtraction.
+32. **Pass-down routes: routes are assigned after declarations** (2026-09-30, rule confirmed by
+    Patrick, audited on 2025 girls 1600).
+    - **Automatic:** per Area and event, finishers (valid mark and place) are walked in Area
+      place order; each one in the MOC program takes an automatic spot until the Area's 6
+      (Class A 3) are used. Athletes tied at the last automatic place are all automatic.
+    - **Declined:** finished ahead of the Area's last automatic qualifier but not in the
+      program. When an Area has fewer entrants than spots, finishers behind its last
+      automatic qualifier are not counted as declines (the spot simply went unused).
+    - **Next best mark:** after declarations, down the list of remaining Area-final marks
+      (all four meets; not automatic, not declined). A remaining athlete in the program takes
+      a spot; a better mark not in the program declined it; ties at the last spot all in.
+    - **At-large standard:** anyone still remaining who met the standard (wind-aided allowed);
+      in the program = at-large qualifier, otherwise declined at-large.
+    - **Program matching:** exact name + school, else one unambiguous name variant at the same
+      school, else a near-identical spelling (#27). Program entries whose school didn't
+      resolve (truncated "St. Joseph N", "West County", …) are linked to an Area finalist
+      with the identical name, unique within the event, and relay entries to the one relay team
+      whose school starts with the program's text. This doesn't settle the West County alias.
+    - **Two views:** "All qualifiers" keeps the pre-declaration replay (`qualifier_type`); "Actual
+      entries" uses pass-down routes (`route`). The same-Area replacement overlay is retired:
+      pass-down replaces it.
+    - **Audit** (`scripts/checks/audit_routes.py`, expectations in outputs/verify/): 2025 girls
+      1600 reproduces all 24 entrants, routes and marks, field 24, 0 no-shows.
+    - **Match to real MOC entries (RULES):** pre-declaration 97.9–99.1% per season; pass-down
+      99.5–100% (2022 100%, 2023 99.5%, 2024 99.7%, 2025 100%, 2026 100%). Remaining
+      unexplained entrants: 6 (2023 Tri-Valley 100 m ×3 and 4x100, 2024 ×2). The pass-down
+      rate is not an independent test: automatic and next-best-mark routes are defined from the
+      program, so only extra entrants per Area can fail.

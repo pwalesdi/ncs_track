@@ -1,0 +1,6 @@
+season,pre_declaration_rules_match,pre_declaration_raw_match,pass_down_rules_match,pass_down_raw_match,pass_down_matched,pass_down_unexplained_entries
+2022,0.9876,0.8712,1.0,1.0,773,0
+2023,0.9868,0.8806,0.9949,0.9911,782,4
+2024,0.9793,0.8842,0.9975,0.9925,796,2
+2025,0.9907,0.8853,1.0,1.0,789,0
+2026,0.9808,0.8926,1.0,0.9988,804,0

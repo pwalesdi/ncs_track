@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from ncs_track import paths
-from ncs_track.replay import (DEFAULT_GRID, Interpretation, _in_program, compare, evaluate, interpretation_grid,
+from ncs_track.replay import (DEFAULT_GRID, Interpretation, _in_program, compare, pass_down, evaluate, interpretation_grid,
                               predict, rates, score, sweep, switch_effects)
 from ncs_track.rules import load_rules
 
@@ -274,3 +274,50 @@ def test_in_program_accepts_one_letter_spellings_only():
     assert not _in_program("boys", "jonas renwik|granada", declared)       # other school
     assert not _in_program("boys", "renwick tobias|foothill", declared)    # sibling, same school
     assert not _in_program("boys", "mara renwik|foothill", declared)       # other gender
+
+
+def _routes(rules, ent, res=None):
+    ev = evaluate(res if res is not None else results(), rules)
+    routes, comp = pass_down(ev, ent, rules, school_key=key, school_area=area)
+    r = routes[routes["meet_area"].notna()].copy()
+    r["who"] = r["athlete_name"].str.split(",").str[0]
+    return r.set_index("who"), comp
+
+
+def test_pass_down_moves_declined_spots_down_the_area(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    # TV2 and TV3 decline; TV7 and TV8 (fill before) become automatic; TV9 enters too.
+    ent = entries_from(pred, drop={"TV2", "TV3"}, add=[("TV9, Runner", "TV School 9", "12.50")])
+    r, comp = _routes(rules, ent)
+    auto = sorted(r.index[r["route"] == "auto"])
+    assert auto == sorted(["TV1", "TV4", "TV5", "TV6", "TV7", "TV8"] + [f"{a}{i}" for a in ("BS", "RE") for i in range(1, 7)]
+                          + ["CA1", "CA2", "CA3"])
+    assert sorted(r.index[r["declined"] == "auto"]) == ["TV2", "TV3"]
+    # next best mark after declarations: BS7 12.35, then RE7 and CA4 tied at 12.44 (ties in)
+    assert sorted(r.index[r["route"] == "fill"]) == ["BS7", "CA4", "RE7"]
+    assert r.loc["TV9", "declared"] and r.loc["TV9", "route"] is None          # no route: unexplained
+    assert not r.loc["TV9", "left_out"]
+    assert r.loc["TV10", "left_out"] and r.loc["CA5", "left_out"] and not r.loc["TV2", "left_out"]
+    s = score(comp)
+    assert s["matched"] == 24 and s["rules_mismatches"] == 1
+
+
+def test_pass_down_next_best_mark_decline_passes_on(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    ent = entries_from(pred, drop={"BS7"})
+    r, _ = _routes(rules, ent)
+    # TV7 12.30 takes one, BS7 12.35 isn't in the program, TV8 12.40, then RE7 / CA4 tied at 12.44
+    assert sorted(r.index[r["route"] == "fill"]) == ["CA4", "RE7", "TV7", "TV8"]
+    assert r.loc["BS7", "declined"] == "fill"            # a better mark than a taker, not in the program
+    assert r.loc["BS8", "declined"] is None              # behind every taker: not a decline
+
+
+def test_pass_down_ties_at_the_last_automatic_place(rules):
+    extra = [perf("CA", 3, 12.39, name="CA3b, Runner", school="CA School 3b")]
+    res = results(extra)
+    ev = evaluate(res, rules)
+    pred = ev[ev["qualified_by"].notna()]
+    r, _ = _routes(rules, entries_from(pred), res)
+    assert r.loc["CA3", "route"] == "auto" and r.loc["CA3b", "route"] == "auto"

@@ -24,36 +24,44 @@ def test_moc_outcome_rules():
 
 
 def q_rows():
+    """TV: an automatic who competed; an automatic no-show; a pre-declaration next-best-mark
+    qualifier who declined; a finisher further down who took an automatic spot by pass-down
+    (not a pre-declaration qualifier); an automatic who declined. BS: an at-large entrant."""
     base = dict(season=2026, gender="girls", event_code="100", athlete_name=None, is_relay=False, athlete_id=None,
                 school="S", area_place=1, area_mark="12.00", moc_status="OK", moc_final_place=None,
-                reached_final_round=0, replacement_for_area=None, state_qualified="pending")
+                reached_final_round=0, state_qualified="pending", choice_tag=None, declined=None)
     rows = [
-        dict(area="tri-valley", qualifier_type="automatic", in_qualified_field=1, in_declared_field=1, competed=1,
-             made_final=1, scored=1, choice_tag=None, vacancy_refilled_by_area=None),
-        dict(area="tri-valley", qualifier_type="automatic", in_qualified_field=1, in_declared_field=1, competed=0,
-             made_final=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
-        dict(area="tri-valley", qualifier_type="next_best_mark", in_qualified_field=1, in_declared_field=0,
-             competed=0, made_final=0, scored=0, choice_tag="chose_other_events", vacancy_refilled_by_area="tri-valley",
-             competed_other_moc_event=1),
-        dict(area="tri-valley", qualifier_type="replacement", in_qualified_field=0, in_declared_field=1, competed=1,
-             made_final=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
-        dict(area="bay-shore", qualifier_type="at_large_standard", in_qualified_field=1, in_declared_field=1,
-             competed=1, made_final=1, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
+        dict(area="tri-valley", qualifier_type="automatic", route="automatic", in_qualified_field=1,
+             in_declared_field=1, competed=1, made_final=1, scored=1),
+        dict(area="tri-valley", qualifier_type="automatic", route="automatic", in_qualified_field=1,
+             in_declared_field=1, competed=0, made_final=0, scored=0),
+        dict(area="tri-valley", qualifier_type="next_best_mark", route=None, in_qualified_field=1, in_declared_field=0,
+             competed=0, made_final=0, scored=0, declined="next_best_mark", competed_other_moc_event=1),
+        dict(area="tri-valley", qualifier_type=None, route="automatic", in_qualified_field=0, in_declared_field=1,
+             competed=1, made_final=0, scored=0),
+        dict(area="tri-valley", qualifier_type="automatic", route=None, in_qualified_field=1, in_declared_field=0,
+             competed=0, made_final=0, scored=0, declined="automatic"),
+        dict(area="bay-shore", qualifier_type="at_large_standard", route="at_large_standard", in_qualified_field=1,
+             in_declared_field=1, competed=1, made_final=1, scored=0),
     ]
     q = pd.DataFrame([{"competed_other_moc_event": None, **base, **r} for r in rows])
     q["at_large_combined"] = q["qualifier_type"].isin(analysis.AT_LARGE_TYPES).astype(int)
+    q["no_show"] = ((q["in_declared_field"] == 1) & (q["competed"] == 0)).astype(int)
     return q
 
 
 def test_spot_utilization_accounting():
     su = analysis.spot_utilization(q_rows()).set_index("area")
-    tv = su.loc["tri-valley"]
-    assert (tv["spots_earned"], tv["declared"], tv["competed"], tv["no_show"], tv["not_declared"]) == (3, 2, 1, 1, 1)
-    assert tv["unused_total"] == 2 and tv["utilization_rate"] == round(1 / 3, 4)
-    assert tv["not_declared_chose_other_events"] == 1 and tv["vacancies_refilled"] == 1
-    assert tv["refilled_by_area"] == "tri-valley:1" and tv["replacements_from_this_area"] == 1
+    tv, bs = su.loc["tri-valley"], su.loc["bay-shore"]
+    # TV: 6 automatic spots + 0 next best mark; 2 entrants competed, 1 no-show, 3 not used
+    assert (tv["guaranteed_spots"], tv["g_competed"], tv["g_no_show"], tv["g_not_used"]) == (6, 2, 1, 3)
+    assert tv["g_competed"] + tv["g_no_show"] + tv["g_not_used"] == tv["guaranteed_spots"]
+    assert (tv["passed_down"], tv["declined_nbm"], tv["entries"], tv["no_show"]) == (1, 1, 3, 1)
+    assert (bs["guaranteed_spots"], bs["g_not_used"], bs["at_large_spots"], bs["al_competed"]) == (6, 6, 1, 1)
+    assert su.loc["class-a", "guaranteed_spots"] == 3                    # every Area appears, even with no rows
     roll = analysis.spot_utilization_by_area(su.reset_index()).set_index("area")
-    assert roll.loc["bay-shore", "utilization_rate"] == 1.0
+    assert roll.loc["tri-valley", "guaranteed_used_rate"] == round(2 / 6, 4)
+    assert roll.loc["tri-valley", "no_show_rate"] == round(1 / 3, 4)
 
 
 def test_field_makeup_and_at_large_share():
@@ -61,52 +69,18 @@ def test_field_makeup_and_at_large_share():
     per_type = fm[~fm["rollup"]].groupby("field")["share_of_field"].sum().round(6)
     assert (per_type == 1).all()
     decl = fm[(fm["field"] == "declared") & ~fm["rollup"]].set_index(["area", "qualifier_type"])["count"]
-    assert decl[("tri-valley", "replacement")] == 1
+    assert decl[("tri-valley", "automatic")] == 3                 # pass-down routes in the declared field
+    qual = fm[(fm["field"] == "qualified") & ~fm["rollup"]].set_index(["area", "qualifier_type"])["count"]
+    assert qual[("tri-valley", "automatic")] == 3 and qual[("tri-valley", "next_best_mark")] == 1
     share = analysis.at_large_share(q_rows())
     comb = share[(share["field"] == "qualified") & (share["spot_type"] == "at_large_combined")].set_index("area")
     assert comb.loc["tri-valley", "area_share"] == 0.5 and comb.loc["class-a", "count"] == 0
+    decl = share[(share["field"] == "declared") & (share["spot_type"] == "at_large_combined")].set_index("area")
+    assert decl.loc["tri-valley", "count"] == 0 and decl.loc["bay-shore", "area_share"] == 1.0
     perf = analysis.moc_performance(q_rows())
     auto = perf[(perf["area"] == "tri-valley") & (perf["qualifier_type"] == "automatic")]
     assert set(auto["event"]) == {"100", "group:sprints_hurdles", "all"} and set(auto["gender"]) == {"girls", "all"}
-    assert (auto["competed"] == 1).all() and auto["made_final"].isna().all()      # 1 entry: suppressed
-
-
-def test_flags_need_three_seasons():
-    su = pd.concat([analysis.spot_utilization(q_rows().assign(season=s)) for s in (2022, 2023, 2024)])
-    flags = analysis.spot_utilization_flags(su)
-    assert list(flags["area"]) == ["tri-valley"] and flags.iloc[0]["seasons_flagged"] == 3
-    assert analysis.spot_utilization_flags(su[su["season"] != 2024]).empty
-
-
-def test_unused_not_refilled_no_show_rate_double_qualifier():
-    tv = analysis.spot_utilization(q_rows()).set_index("area").loc["tri-valley"]
-    # unused 2 (1 no-show + 1 not declared); the not-declared spot was refilled -> 1 unused, not refilled
-    assert tv["unused_not_refilled"] == 1 and tv["no_show_rate"] == 0.5
-    assert tv["not_declared_individual"] == 1 and tv["double_qualifier_share"] == 1.0
-    su = pd.concat([analysis.spot_utilization(q_rows().assign(season=s)) for s in (2022, 2023, 2024)])
-    flags = analysis.spot_utilization_flags(su, metric="unused_not_refilled")
-    assert list(flags["area"]) == ["tri-valley"] and flags.iloc[0]["metric"] == "unused_not_refilled"
-
-
-def _moc(field_size):
-    return pd.DataFrame({"gender": "girls", "event_code": "100", "round": "prelim",
-                         "status": ["OK"] * field_size})
-
-
-def test_unfilled_spots_need_a_short_field():
-    # TV: auto who competed; auto no-show; next-best-mark not declared but refilled; BS at-large-std who competed.
-    q = q_rows()
-    q.loc[1, "vacancy_refilled_by_area"] = None
-    short = analysis.mark_unfilled(q, _moc(23))
-    full = analysis.mark_unfilled(q, _moc(24))
-    # Only the TV automatic no-show counts, and only when the field ended below 24.
-    assert short["unfilled_spot"].tolist() == [False, True, False, False, False]
-    assert not full["unfilled_spot"].any()
-    tv = analysis.spot_utilization(short).set_index("area").loc["tri-valley"]
-    assert (tv["guaranteed_spots"], tv["unfilled_spots"], tv["unfilled_rate"]) == (3, 1, round(1 / 3, 4))
-    assert tv["competed"] + tv["vacancies_refilled"] + tv["unfilled_spots"] + tv["other_unused"] == tv["spots_earned"]
-    ns = analysis.no_shows_unfilled(analysis.spot_utilization(short)).set_index("area")
-    assert ns.loc["tri-valley", "unfilled_spots"] == 1
+    assert (auto["competed"] == 2).all() and auto["made_final"].isna().all()      # 2 entries: suppressed
 
 
 def test_moc_overall_places():
@@ -122,7 +96,8 @@ def test_moc_overall_places():
 def test_core_comparison_groups():
     q = q_rows()
     q.loc[0, "area_place"] = 6                                   # a TV 6th-place auto who competed
-    q["moc_overall_place"] = [3.0, None, None, 12.0, 5.0]
+    q["moc_overall_place"] = [3.0, None, None, None, None, 5.0]
+    q = q.drop(index=3)
     cc = analysis.core_comparison(q)
     tv = cc[(cc["season"] == "2026") & (cc["event_group"] == "sprints_hurdles") & (cc["area"] == "tri-valley")]
     low = tv[tv["comparison_group"] == "lowest_automatic"].iloc[0]
@@ -139,23 +114,6 @@ def test_core_comparison_groups():
     assert set(pooled["season"]) >= {"2020-2025 pooled"}
 
 
-def test_cutoff_is_nth_best_mark_across_all_rounds():
-    # A slow 8th-place final (25.00) must not set the cutoff; athletes count once at their best mark.
-    moc = pd.DataFrame({
-        "season": 2026, "gender": "boys", "event_code": "200", "is_relay": False, "school_name_raw": "S",
-        "athlete_name_raw": [f"A{i}" for i in range(8)] + [f"A{i}" for i in range(8)] + ["P1", "P2", "P3"],
-        "athlete_id": [str(i) for i in range(8)] * 2 + ["p1", "p2", "p3"],
-        "round": ["final"] * 8 + ["prelim"] * 11, "status": "OK",
-        "place": list(range(1, 9)) + [None] * 11,
-        "mark_raw": [f"{21 + i / 10:.2f}" for i in range(7)] + ["25.00"]
-                    + [f"{21.05 + i / 10:.2f}" for i in range(7)] + ["21.75"] + ["21.72", "21.90", "22.40"],
-        "mark_value": [21 + i / 10 for i in range(7)] + [25.0]
-                      + [21.05 + i / 10 for i in range(7)] + [21.75] + [21.72, 21.90, 22.40]})
-    cut = analysis.moc_cutoffs(moc).iloc[0]
-    # best marks: 21.0..21.6 (7 athletes), 21.72, 21.75, ... -> 8th best = 21.72
-    assert cut["moc_cutoff_mark"] == "21.72" and cut["moc_cutoff_source"] == "best_mark_all_rounds"
-
-
 def _core_q():
     rows = []
     for season in (2025, 2026):
@@ -165,7 +123,7 @@ def _core_q():
                                             ("tri-valley", 8, "next_best_mark", 1), ("redwood-empire", 7, "at_large_standard", 0),
                                             ("class-a", 3, "automatic", 0), ("class-a", 5, "next_best_mark", 1)):
                 rows.append(dict(season=season, gender="girls", event_code=ev, area=area, area_place=place,
-                                 qualifier_type=qtype, made_final=top, in_declared_field=1, competed=1,
+                                 qualifier_type=qtype, route=qtype, made_final=top, in_declared_field=1, competed=1,
                                  at_large_combined=int(qtype in analysis.AT_LARGE_TYPES),
                                  athlete_id=f"{area}{place}{ev}", school="S", moc_overall_place=float(place)))
     return pd.DataFrame(rows)
@@ -200,38 +158,10 @@ def test_core_place_curve_aggregates_and_suppresses():
     big = c[(c["season"].str.contains("pooled")) & (c["gender"] == "all") & (c["event_group"] == "all")
             & (c["area"] == "tri-valley") & (c["area_place"] == "5-6")].iloc[0]
     assert big["entries"] == 8 and big["made_final_count"] == 8          # TV 5th/6th, 2 events x 2 seasons x 2 places
-    assert set(c["area_place"]) == {str(p) for p in range(1, 13)} | {"5-6", "7-8"}
-
-
-def test_moc_field_ignores_a_small_stray_round():
-    # A 3-athlete "Prelims" block (a jump-off) must not stand in for a 23-athlete final.
-    moc = pd.DataFrame({"gender": "boys", "event_code": "HJ", "round": ["prelim"] * 3 + ["final"] * 26,
-                        "status": ["OK"] * 3 + ["OK"] * 23 + ["DNS"] * 3})
-    assert analysis.moc_fields(moc) == {("boys", "HJ"): 23}
-
-
-def test_spot_use_segments_sum_to_guaranteed_spots():
-    q = q_rows()
-    q.loc[1, "vacancy_refilled_by_area"] = None            # TV automatic no-show, not refilled
-    extra = q.iloc[[0, 0, 4]].copy()
-    extra["competed"] = 0
-    extra["in_declared_field"] = 0
-    extra["competed_other_moc_event"] = [1, 0, 1]           # auto: ran another event; auto: ran nothing
-    q = pd.concat([q, extra], ignore_index=True)
-    short = analysis.mark_unfilled(q, _moc(23))
-    full = analysis.mark_unfilled(q, _moc(24))
-    assert [x if isinstance(x, str) else None for x in short["spot_use"]] == ["competed", "unfilled", "refilled", None, "competed",
-                                          "unfilled", "unfilled", "chose_another_event"]
-    assert [x if isinstance(x, str) else None for x in full["spot_use"]] == ["competed", "did_not_enter", "refilled", None, "competed",
-                                         "chose_another_event", "did_not_enter", "chose_another_event"]
-    su = analysis.spot_utilization(full).set_index("area")
-    tv, bs = su.loc["tri-valley"], su.loc["bay-shore"]
-    segs = [tv[f"g_{k}"] for k in analysis.SPOT_USE]
-    assert segs == [1, 1, 0, 1, 2] and sum(segs) == tv["guaranteed_spots"] == 5
-    assert (tv["guaranteed_used"], tv["guaranteed_used_rate"]) == (2, 0.4)
-    assert (bs["at_large_spots"], bs["al_competed"], bs["al_chose_another_event"], bs["guaranteed_spots"]) == (2, 1, 1, 0)
-    roll = analysis.spot_utilization_by_area(su.reset_index()).set_index("area")
-    assert roll.loc["tri-valley", "guaranteed_used_rate"] == 0.4
+    assert set(c["area_place"]) == {str(p) for p in range(1, 13)} | {"5-6", "7-8", analysis.NOT_AUTO_BAND}
+    na = c[(c["season"].str.contains("pooled")) & (c["gender"] == "all") & (c["event_group"] == "all")
+           & (c["area"] == "tri-valley") & (c["area_place"] == analysis.NOT_AUTO_BAND)].iloc[0]
+    assert na["entries"] == 4 and pd.isna(na["made_final_count"])      # TV 8th next best mark: 4 entries
 
 
 def test_moc_performance_publishes_counts_from_five_entries():
@@ -240,3 +170,33 @@ def test_moc_performance_publishes_counts_from_five_entries():
     row = perf[(perf["event"] == "all") & (perf["gender"] == "all") & (perf["season"] == "2026")].iloc[0]
     assert (row["competed"], row["made_final"], row["made_final_rate"]) == (5, 5, 1.0)
     assert set(perf["season"]) == {"2026", "2026-2026 pooled"}
+
+
+def test_left_out_counts_beaten_automatics_from_other_areas():
+    routes = pd.DataFrame([
+        # 1600 m: Bay Shore automatics at 5:20 and 5:31; a Redwood Empire 10th at 5:17 who wasn't entered
+        dict(gender="girls", event_code="1600", meet_area="bay-shore", place=5, mark_value=320.0, mark_raw="5:20",
+             athlete_name="Ana Vell", school_name="S1", is_relay=False, route="auto", left_out=False),
+        dict(gender="girls", event_code="1600", meet_area="bay-shore", place=10, mark_value=331.0, mark_raw="5:31",
+             athlete_name="Bea Ord", school_name="S2", is_relay=False, route="auto", left_out=False),
+        dict(gender="girls", event_code="1600", meet_area="redwood-empire", place=6, mark_value=316.0, mark_raw="5:16",
+             athlete_name="Cy Rao", school_name="S3", is_relay=False, route="auto", left_out=False),
+        dict(gender="girls", event_code="1600", meet_area="redwood-empire", place=10, mark_value=317.0, mark_raw="5:17",
+             athlete_name="Di Sato", school_name="S4", is_relay=False, route=None, left_out=True),
+        dict(gender="girls", event_code="1600", meet_area="redwood-empire", place=11, mark_value=326.0, mark_raw="5:26",
+             athlete_name="Eve Tam", school_name="S5", is_relay=False, route=None, left_out=True),
+    ])
+    q = pd.DataFrame([dict(season=2025, gender="girls", event_code="1600", area="bay-shore", area_place=p, route="automatic",
+                           in_declared_field=1, competed=1, made_final=m, moc_overall_place=o, qualifier_type="automatic")
+                      for p, m, o in ((5, 1, 6.0), (10, 0, 20.0))])
+    lo, pairs = analysis.left_out(2025, routes, q)
+    got = lo.set_index("athlete_name")["beaten_other_area_autos"].to_dict()
+    assert got == {"Di Sato": 2, "Eve Tam": 1}            # own Area's 5:16 automatic doesn't count
+    assert set(pairs["beaten_area"]) == {"bay-shore"} and pairs["beaten_made_final"].sum() == 1
+    counts, beaten = analysis.left_out_summary(lo, pairs)
+    row = counts[(counts["area"] == "redwood-empire") & (counts["beaten_area"] == "bay-shore")].iloc[0]
+    assert (row["beat_any"], row["beaten_autos"]) == (2, 2)
+    tot = counts[(counts["area"] == "redwood-empire") & (counts["beaten_area"] == "any")].iloc[0]
+    assert (tot["left_out"], tot["beat_any"]) == (2, 2)
+    b = beaten[(beaten["season"] == "2025") & (beaten["area"] == "all") & (beaten["beaten_area"] == "all")].iloc[0]
+    assert b["beaten_autos"] == 2 and pd.isna(b["made_final"])           # 2 entries: MOC figures suppressed

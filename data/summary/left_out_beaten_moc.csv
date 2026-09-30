@@ -1,0 +1,151 @@
+season,area,beaten_area,beaten_autos,competed,made_final,median_moc_place
+2022,tri-valley,tri-valley,0,0,,
+2022,tri-valley,bay-shore,41,38,0,19.0
+2022,tri-valley,redwood-empire,31,29,0,20.0
+2022,tri-valley,class-a,37,37,1,20.0
+2022,tri-valley,all,103,98,1,20.0
+2022,bay-shore,tri-valley,0,0,,
+2022,bay-shore,bay-shore,0,0,,
+2022,bay-shore,redwood-empire,18,16,0,20.0
+2022,bay-shore,class-a,21,21,0,20.0
+2022,bay-shore,all,37,35,0,20.0
+2022,redwood-empire,tri-valley,0,0,,
+2022,redwood-empire,bay-shore,30,27,0,19.0
+2022,redwood-empire,redwood-empire,0,0,,
+2022,redwood-empire,class-a,20,19,0,21.0
+2022,redwood-empire,all,49,45,0,20.0
+2022,class-a,tri-valley,0,0,,
+2022,class-a,bay-shore,24,22,0,19.5
+2022,class-a,redwood-empire,1,1,,
+2022,class-a,class-a,0,0,,
+2022,class-a,all,25,23,0,20.0
+2022,all,tri-valley,0,0,,
+2022,all,bay-shore,47,44,0,19.0
+2022,all,redwood-empire,33,31,0,20.0
+2022,all,class-a,38,37,1,20.0
+2022,all,all,112,106,1,20.0
+2023,tri-valley,tri-valley,0,0,,
+2023,tri-valley,bay-shore,43,40,1,19.0
+2023,tri-valley,redwood-empire,32,31,2,18.0
+2023,tri-valley,class-a,28,28,1,21.0
+2023,tri-valley,all,95,92,3,20.0
+2023,bay-shore,tri-valley,2,2,,
+2023,bay-shore,bay-shore,0,0,,
+2023,bay-shore,redwood-empire,8,8,1,17.5
+2023,bay-shore,class-a,14,14,0,23.0
+2023,bay-shore,all,24,24,1,22.0
+2023,redwood-empire,tri-valley,2,2,,
+2023,redwood-empire,bay-shore,24,22,1,20.5
+2023,redwood-empire,redwood-empire,0,0,,
+2023,redwood-empire,class-a,19,19,0,20.0
+2023,redwood-empire,all,43,41,1,21.0
+2023,class-a,tri-valley,0,0,,
+2023,class-a,bay-shore,14,13,0,20.0
+2023,class-a,redwood-empire,1,1,,
+2023,class-a,class-a,0,0,,
+2023,class-a,all,15,14,0,20.5
+2023,all,tri-valley,2,2,,
+2023,all,bay-shore,44,41,1,19.5
+2023,all,redwood-empire,32,31,2,18.0
+2023,all,class-a,30,30,1,21.0
+2023,all,all,100,97,3,20.0
+2024,tri-valley,tri-valley,0,0,,
+2024,tri-valley,bay-shore,29,28,1,19.0
+2024,tri-valley,redwood-empire,39,38,0,20.0
+2024,tri-valley,class-a,25,24,1,21.0
+2024,tri-valley,all,86,83,2,20.0
+2024,bay-shore,tri-valley,0,0,,
+2024,bay-shore,bay-shore,0,0,,
+2024,bay-shore,redwood-empire,20,19,0,21.0
+2024,bay-shore,class-a,15,14,2,23.0
+2024,bay-shore,all,34,32,2,21.5
+2024,redwood-empire,tri-valley,0,0,,
+2024,redwood-empire,bay-shore,14,13,0,21.0
+2024,redwood-empire,redwood-empire,0,0,,
+2024,redwood-empire,class-a,17,16,0,21.5
+2024,redwood-empire,all,31,29,0,21.0
+2024,class-a,tri-valley,0,0,,
+2024,class-a,bay-shore,7,7,0,22.0
+2024,class-a,redwood-empire,19,19,0,22.0
+2024,class-a,class-a,0,0,,
+2024,class-a,all,26,26,0,22.0
+2024,all,tri-valley,0,0,,
+2024,all,bay-shore,31,30,1,19.5
+2024,all,redwood-empire,40,39,0,20.0
+2024,all,class-a,26,25,2,21.0
+2024,all,all,90,87,3,20.0
+2025,tri-valley,tri-valley,0,0,,
+2025,tri-valley,bay-shore,51,51,2,19.0
+2025,tri-valley,redwood-empire,36,35,0,19.5
+2025,tri-valley,class-a,34,32,2,21.0
+2025,tri-valley,all,117,115,4,20.0
+2025,bay-shore,tri-valley,0,0,,
+2025,bay-shore,bay-shore,0,0,,
+2025,bay-shore,redwood-empire,21,20,0,20.5
+2025,bay-shore,class-a,16,15,0,21.5
+2025,bay-shore,all,37,35,0,21.0
+2025,redwood-empire,tri-valley,0,0,,
+2025,redwood-empire,bay-shore,38,38,0,20.0
+2025,redwood-empire,redwood-empire,0,0,,
+2025,redwood-empire,class-a,21,21,1,22.0
+2025,redwood-empire,all,59,59,1,21.0
+2025,class-a,tri-valley,0,0,,
+2025,class-a,bay-shore,22,22,0,20.0
+2025,class-a,redwood-empire,17,17,0,20.0
+2025,class-a,class-a,0,0,,
+2025,class-a,all,38,38,0,20.0
+2025,all,tri-valley,0,0,,
+2025,all,bay-shore,51,51,2,19.0
+2025,all,redwood-empire,37,36,0,20.0
+2025,all,class-a,36,34,2,21.0
+2025,all,all,120,118,4,20.0
+2026,tri-valley,tri-valley,0,0,,
+2026,tri-valley,bay-shore,45,45,2,20.0
+2026,tri-valley,redwood-empire,39,37,1,19.0
+2026,tri-valley,class-a,33,31,0,20.0
+2026,tri-valley,all,113,109,3,20.0
+2026,bay-shore,tri-valley,1,1,,
+2026,bay-shore,bay-shore,0,0,,
+2026,bay-shore,redwood-empire,19,18,0,21.0
+2026,bay-shore,class-a,19,17,0,20.0
+2026,bay-shore,all,39,36,0,21.0
+2026,redwood-empire,tri-valley,1,1,,
+2026,redwood-empire,bay-shore,23,23,0,22.0
+2026,redwood-empire,redwood-empire,0,0,,
+2026,redwood-empire,class-a,22,21,0,19.5
+2026,redwood-empire,all,45,44,0,21.0
+2026,class-a,tri-valley,1,1,,
+2026,class-a,bay-shore,23,22,2,21.0
+2026,class-a,redwood-empire,21,20,1,21.0
+2026,class-a,class-a,0,0,,
+2026,class-a,all,45,43,3,21.0
+2026,all,tri-valley,1,1,,
+2026,all,bay-shore,47,46,2,20.0
+2026,all,redwood-empire,41,39,1,20.0
+2026,all,class-a,35,33,0,20.0
+2026,all,all,120,115,3,20.0
+2022-2026 pooled,tri-valley,tri-valley,0,0,,
+2022-2026 pooled,tri-valley,bay-shore,209,202,6,19.0
+2022-2026 pooled,tri-valley,redwood-empire,177,170,3,20.0
+2022-2026 pooled,tri-valley,class-a,157,152,5,20.5
+2022-2026 pooled,tri-valley,all,514,497,13,20.0
+2022-2026 pooled,bay-shore,tri-valley,3,3,,
+2022-2026 pooled,bay-shore,bay-shore,0,0,,
+2022-2026 pooled,bay-shore,redwood-empire,86,81,1,20.0
+2022-2026 pooled,bay-shore,class-a,85,81,2,21.0
+2022-2026 pooled,bay-shore,all,171,162,3,21.0
+2022-2026 pooled,redwood-empire,tri-valley,3,3,,
+2022-2026 pooled,redwood-empire,bay-shore,129,123,1,21.0
+2022-2026 pooled,redwood-empire,redwood-empire,0,0,,
+2022-2026 pooled,redwood-empire,class-a,99,96,1,21.0
+2022-2026 pooled,redwood-empire,all,227,218,2,21.0
+2022-2026 pooled,class-a,tri-valley,1,1,,
+2022-2026 pooled,class-a,bay-shore,90,86,2,20.0
+2022-2026 pooled,class-a,redwood-empire,59,58,1,21.0
+2022-2026 pooled,class-a,class-a,0,0,,
+2022-2026 pooled,class-a,all,149,144,3,21.0
+2022-2026 pooled,all,tri-valley,3,3,,
+2022-2026 pooled,all,bay-shore,220,212,6,19.0
+2022-2026 pooled,all,redwood-empire,183,176,3,20.0
+2022-2026 pooled,all,class-a,165,159,6,20.0
+2022-2026 pooled,all,all,542,523,14,20.0

@@ -175,17 +175,31 @@ def cmd_analysis(args) -> int:
     from . import analysis, replay
     perf = pd.read_csv(paths.PROCESSED / "performances.csv", dtype={"school_id": str, "athlete_id": str},
                        low_memory=False)
-    qs, los = [], []
+    qs, los, pairs, rates = [], [], [], []
     for season in args.season:
         results, entries, rules, label, kw, legs = replay_inputs(season)
-        q, lo, comp = analysis.build_season(season, results, entries, rules, kw, legs, perf)
+        q, lo, pr, comp, pd_comp = analysis.build_season(season, results, entries, rules, kw, legs, perf)
         qs.append(q)
         los.append(lo)
-        s = replay.score(comp)
-        print(f"{season}: {len(q)} athlete-event rows; RULES match {s['rules_match_rate']:.3f}, RAW {s['raw_match_rate']:.3f}")
+        pairs.append(pr)
+        old, new = replay.score(comp), replay.score(pd_comp)
+        rates.append({"season": season, "pre_declaration_rules_match": old["rules_match_rate"],
+                      "pre_declaration_raw_match": old["raw_match_rate"], "pass_down_rules_match": new["rules_match_rate"],
+                      "pass_down_raw_match": new["raw_match_rate"], "pass_down_matched": new["matched"],
+                      "pass_down_unexplained_entries": new["rules_mismatches"]})
+        print(f"{season}: {len(q)} athlete-event rows; RULES match pre-declaration {old['rules_match_rate']:.3f}, "
+              f"pass-down {new['rules_match_rate']:.3f}")
     q = pd.concat(qs, ignore_index=True)
+    lo = pd.concat(los, ignore_index=True)
+    pr = pd.concat(pairs, ignore_index=True)
     paths.OUTPUTS.mkdir(parents=True, exist_ok=True)
+    # athlete-level: local only
     q.to_csv(paths.OUTPUTS / "qualifiers.csv", index=False)
+    lo.to_csv(paths.OUTPUTS / "left_out.csv", index=False)
+    pr.to_csv(paths.OUTPUTS / "left_out_beaten.csv", index=False)
+    q[q["no_show"] == 1].sort_values(["season", "area", "gender", "event_code"]).to_csv(
+        paths.OUTPUTS / "no_shows.csv", index=False)
+    pd.DataFrame(rates).to_csv(paths.OUTPUTS / "match_rates_pass_down.csv", index=False)
     out = paths.SUMMARY
     out.mkdir(parents=True, exist_ok=True)
     analysis.field_makeup(q).to_csv(out / "field_makeup.csv", index=False)
@@ -194,16 +208,15 @@ def cmd_analysis(args) -> int:
     su = analysis.spot_utilization(q)
     su.to_csv(out / "spot_utilization.csv", index=False)
     analysis.spot_utilization_by_area(su).to_csv(out / "spot_utilization_by_area.csv", index=False)
-    analysis.spot_utilization_flags(su).to_csv(out / "spot_utilization_flags_unused.csv", index=False)
-    analysis.spot_utilization_flags(su, metric="unfilled_spots").to_csv(
-        out / "spot_utilization_flags_unfilled.csv", index=False)
-    analysis.no_shows_unfilled(su).to_csv(out / "no_shows_unfilled_by_area.csv", index=False)
     analysis.core_comparison(q).to_csv(out / "core_comparison.csv", index=False)
     analysis.core_tests(q).to_csv(out / "core_tests.csv", index=False)
     analysis.core_place_curve(q).to_csv(out / "core_place_curve.csv", index=False)
-    # athlete-level rows: local only (decision #29)
-    pd.concat(los, ignore_index=True).to_csv(paths.OUTPUTS / "left_out.csv", index=False)
-    print(f"wrote outputs/qualifiers.csv, outputs/left_out.csv (git-ignored) and {out.relative_to(paths.ROOT)}/*.csv")
+    counts, beaten = analysis.left_out_summary(lo, pr)
+    counts.to_csv(out / "left_out_counts.csv", index=False)
+    beaten.to_csv(out / "left_out_beaten_moc.csv", index=False)
+    pd.DataFrame(rates).round(4).to_csv(out / "match_rates.csv", index=False)
+    print("wrote outputs/{qualifiers,left_out,left_out_beaten,no_shows}.csv (git-ignored) and "
+          f"{out.relative_to(paths.ROOT)}/*.csv")
     return 0
 
 

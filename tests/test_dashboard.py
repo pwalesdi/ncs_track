@@ -56,9 +56,9 @@ def expected_headline():
     al = al[(al["field"] == "qualified") & (al["spot_type"] == "at_large_combined")]
     su = summary("spot_utilization_by_area.csv")
     return {"sixth": {a: pair(cell(a, p)) for a, p in last_auto.items()},
-            "depth": {"tv": pair(cell("tri-valley", "7-8")), "others": pair(cell("bay-shore+redwood-empire", "5-6"))},
+            "depth": {"tv": pair(cell("tri-valley", "7-8 not automatic")), "others": pair(cell("bay-shore+redwood-empire", "5-6"))},
             "tv_spots": (int(al.loc[al["area"] == "tri-valley", "count"].sum()), int(al["count"].sum())),
-            "unfilled": (int(su["unfilled_spots"].sum()), int(su["guaranteed_spots"].sum()))}
+            "noshow": (int(su["no_show"].sum()), int(su["entries"].sum()))}
 
 
 # The spot checks recorded in docs/dashboard_checks.md.
@@ -74,7 +74,7 @@ def test_2_makeup_actual_entries(tmp_path):
     m = js('makeup(D, {field:"declared", season:"2026", gender:"all", event:"all"})', tmp_path)
     fm = summary("field_makeup.csv")
     x = fm[(fm["season"] == 2026) & (fm["field"] == "declared") & (fm["area"] == "bay-shore") & (fm["qualifier_type"] == "automatic")]
-    assert m["bay-shore"]["automatic"] == x["count"].sum() == 187
+    assert m["bay-shore"]["automatic"] == x["count"].sum() == 192
 
 
 def test_3_next_best_mark_and_at_large_spots(tmp_path):
@@ -91,43 +91,41 @@ def test_4_performance_class_a_automatic(tmp_path):
     m = summary("moc_performance.csv", dtype={"season": str})
     x = m[(m["season"] == "2026") & (m["gender"] == "all") & (m["event"] == "all") & (m["area"] == "class-a")
           & (m["qualifier_type"] == "automatic")].iloc[0]
-    assert (p["class-a"]["automatic"]["final"], p["class-a"]["automatic"]["entries"]) == (x["made_final"], x["competed"]) == (7, 83)
+    assert (p["class-a"]["automatic"]["final"], p["class-a"]["automatic"]["entries"]) == (x["made_final"], x["competed"]) == (7, 91)
     # a suppressed cell comes through as null, never as a number
     small = js('performance(D, {season:"2022", gender:"all", event:"all"})', tmp_path)["class-a"]["nbm_std"]
-    assert small == {"entries": 1, "final": None}
+    assert small["entries"] < 5 and small["final"] is None
 
 
 def test_5_spot_use_every_area_every_season(tmp_path):
     r = summary("spot_utilization_by_area.csv").set_index(["season", "area"])
-    segs = ["competed", "refilled", "chose_another_event", "did_not_enter", "unfilled"]
+    segs = ["competed", "no_show", "not_used"]
     for season in (2022, 2023, 2024, 2025, 2026):
         u = js(f'spotUse(D, {{season:"{season}", gender:"all", event:"all"}})', tmp_path)
         for a in AREAS:
             row, x = r.loc[(season, a)], u[a]
             assert [x["g"][k] for k in segs] == [row[f"g_{k}"] for k in segs]
             assert sum(x["g"][k] for k in segs) == x["guaranteed_spots"] == row["guaranteed_spots"]
-            assert x["g"]["unfilled"] == row["unfilled_spots"]
-            assert x["used"] == row["guaranteed_used"]
-            assert sum(x["al"][k] for k in segs) == x["at_large_spots"] == row["at_large_spots"]
+            assert (x["passed_down"], x["no_show"], x["entries"]) == (row["passed_down"], row["no_show"], row["entries"])
+            assert x["al"]["competed"] + x["al"]["no_show"] == x["at_large_spots"] == row["at_large_spots"]
 
 
 def test_5b_captions(tmp_path):
-    x = {"guaranteed_spots": 6, "at_large_spots": 4,
-         "g": {"competed": 5, "refilled": 0, "chose_another_event": 1, "did_not_enter": 0, "unfilled": 0},
-         "al": {"competed": 2, "refilled": 0, "chose_another_event": 2, "did_not_enter": 0, "unfilled": 0}}
-    assert js(f"[useCaption({json.dumps(x)}), atLargeLine({json.dumps(x)})]", tmp_path) == [
-        "6 of 6 guaranteed spots: 5 competed · 1 chose another event",
-        "Plus 4 at-large standard qualifiers: 2 competed, 2 chose another event."]
+    x = {"guaranteed_spots": 7, "at_large_spots": 3, "passed_down": 4,
+         "g": {"competed": 6, "no_show": 1, "not_used": 0}, "al": {"competed": 3, "no_show": 0, "not_used": 0}}
+    assert js(f"[useCaption({json.dumps(x)}), passedLine({json.dumps(x)}), atLargeLine({json.dumps(x)})]", tmp_path) == [
+        "7 of 7 guaranteed spots: 6 competed · 1 no-show", "4 spots passed down from declines",
+        "Plus 3 at-large standard qualifiers: 3 competed."]
 
 
-def test_5c_unfilled_table(tmp_path):
-    t = js('unfilledTable(D, {gender:"all", event:"all"})', tmp_path)
+def test_5c_no_show_table(tmp_path):
+    t = js('noShowTable(D, {gender:"all", event:"all"})', tmp_path)
     su = summary("spot_utilization.csv")
-    assert t["total"] == su["unfilled_spots"].sum()
+    assert (t["total"], t["entries"]) == (su["no_show"].sum(), su["entries"].sum())
     for a in AREAS:
         x = su[su["area"] == a]
-        assert t["areas"][a]["total"] == x["unfilled_spots"].sum()
-        for season, n in x.groupby("season")["unfilled_spots"].sum().items():
+        assert t["areas"][a]["total"] == x["no_show"].sum()
+        for season, n in x.groupby("season")["no_show"].sum().items():
             assert t["areas"][a]["seasons"][str(season)] == n
         assert sum(e["total"] for e in t["areas"][a]["events"].values()) == t["areas"][a]["total"]
 
@@ -157,15 +155,13 @@ def test_8_headline_matches_summary(tmp_path):
     e = expected_headline()
     for a in AREAS:
         assert (h["sixth"][a]["cell"]["entries"], h["sixth"][a]["cell"]["median"]) == e["sixth"][a]
-    assert (h["depth"]["tv"]["entries"], h["depth"]["tv"]["median"]) == e["depth"]["tv"] == (253, 13)
-    assert (h["depth"]["others"]["entries"], h["depth"]["others"]["median"]) == e["depth"]["others"] == (561, 18)
+    assert (h["depth"]["tv"]["entries"], h["depth"]["tv"]["median"]) == e["depth"]["tv"] == (212, 13)
+    assert (h["depth"]["others"]["entries"], h["depth"]["others"]["median"]) == e["depth"]["others"] == (565, 18)
     assert (h["tv_spots"]["k"], h["tv_spots"]["n"]) == e["tv_spots"] == (464, 659)
-    assert (h["unfilled"]["k"], h["unfilled"]["n"]) == e["unfilled"]
+    assert (h["noshow"]["k"], h["noshow"]["n"]) == e["noshow"]
 
 
-def test_9_flags_and_filters(tmp_path):
-    fl = js('flags(D, {season:"side", gender:"all", event:"all"})', tmp_path)
-    assert len(fl) == len(summary("spot_utilization_flags_unfilled.csv"))
+def test_9_filters(tmp_path):
     u = js('spotUse(D, {season:"2026", gender:"boys", event:"group:throws"})', tmp_path)
     su = summary("spot_utilization.csv")
     y = su[(su["season"] == 2026) & (su["gender"] == "boys") & su["event_code"].isin(["SP", "DT"])]

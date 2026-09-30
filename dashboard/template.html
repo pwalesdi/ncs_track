@@ -10,9 +10,9 @@ __CHARTJS__</script>
   /* Light theme only: built for projecting in a committee room. */
   :root {
     --page: #f4f5f7; --card: #ffffff; --text: #111418; --muted: #4a5058; --line: #d9dce1; --soft: #eef0f3;
-    --tv: #0072B2; --bs: #009E73; --re: #D55E00; --ca: #B5528C; --other: #c9cdd3; --unfilled: #5b6068;
+    --tv: #0072B2; --bs: #009E73; --re: #D55E00; --ca: #B5528C; --other: #c9cdd3;
     /* Spot-use segments: the same five colors in every donut, so one legend fits all. */
-    --u-competed: #1d4e79; --u-refilled: #86b0d8; --u-chose: #d7dade; --u-none: #8e939a; --u-unfilled: #c9a227;
+    --u-competed: #1d4e79; --u-noshow: #c9a227; --u-notused: #d7dade;
     --link: #005b8f;
   }
   * { box-sizing: border-box; }
@@ -82,7 +82,7 @@ __CHARTJS__</script>
   /* Headline cards */
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; }
-  #card-unfilled { grid-column: 1 / -1; }
+  #card-noshow { grid-column: 1 / -1; }
   .card .big { font-size: 2.2rem; font-weight: 750; line-height: 1.1; }
   .card .cap { font-size: .98rem; margin: 6px 0 0; }
   .card .cnt { font-size: .85rem; color: var(--muted); margin: 4px 0 0; }
@@ -102,6 +102,7 @@ __CHARTJS__</script>
   .dgrid .chart { height: 110px; width: 110px; margin: 0 auto; }
   .dgrid td span { font-size: .72rem; color: var(--muted); }
   .donut p.al, .dgrid td span.al { font-style: italic; }
+  .donut p.pd, .dgrid td span.pd { margin-top: 2px; }
 
   /* Tables */
   details { margin-top: 10px; }
@@ -183,30 +184,26 @@ __CHARTJS__</script>
   </section>
 
   <section class="tabpanel" id="tab-use" role="tabpanel">
-    <h2>Spot use <span class="badge">Unfilled: provisional — under verification</span></h2>
-    <p class="how">What happened to each <b>guaranteed spot</b> (automatic + next best mark; 24 per event).
-      Each spot is counted once.</p>
+    <h2>Spot use</h2>
+    <p class="how">What happened to each Area's <b>guaranteed spots</b> in each event: its automatic spots (6; Class A
+      3) plus the next-best-mark spots it won. Spots are assigned after declarations: when a finisher declines, the
+      spot passes down to the next finisher from that Area. A decline before the deadline is not a no-show and is not
+      counted against the Area. Field size plays no part.</p>
     <ul class="how" id="use-defs">
       <li><b>Competed</b>: the qualifier ran the event at the MOC.</li>
-      <li><b>Refilled</b>: the qualifier withdrew before the deadline and the next finalist from that Area took the spot.</li>
-      <li><b>Chose another event</b>: the qualifier competed at the MOC, but in other events.</li>
-      <li><b>Didn't enter</b>: the qualifier was not at the MOC at all.</li>
-      <li><b>Unfilled</b>: nobody used the spot and the event field ended up short.</li>
+      <li><b>No-show</b>: the qualifier was in the MOC program for the event but didn't compete in it (did not start,
+        or absent from its results), even if they competed in other events that day.</li>
+      <li><b>Not used</b>: no entrant from that Area took the spot.</li>
     </ul>
-    <p class="how">Centre: <b>Guaranteed spots used</b> = (competed + refilled) ÷ guaranteed spots. At-large standard
-      qualifiers have no fixed number of spots, so they are listed on a separate line under each donut and are not
-      in the donut or the %.</p>
+    <p class="how">Centre: share of guaranteed spots whose qualifier competed. At-large standard qualifiers have no
+      fixed number of spots, so they are listed on a separate line under each donut and are not in the donut or the %.</p>
     <div class="legend" id="lg-use"></div>
     <div id="use-body"></div>
     <div class="panel">
-      <h3 style="margin:0 0 4px;font-size:1.05rem">Unfilled guaranteed spots, 2022–2026</h3>
-      <p class="note">Follows the gender and event filters; the season filter doesn't apply.</p>
-      <div id="unf-table"></div>
-    </div>
-    <div class="panel">
-      <h3 style="margin:0 0 4px;font-size:1.05rem">Unfilled spots in 3 or more of the 5 seasons</h3>
-      <p class="note">Area × event. Follows the gender and event filters; the season filter doesn't apply.</p>
-      <div class="tablewrap"><table class="num" id="t-flags"></table></div>
+      <h3 style="margin:0 0 4px;font-size:1.05rem">No-shows, 2022–2026</h3>
+      <p class="note">Every MOC entry (any route) that was in the program but didn't compete in the event, by the
+        Area it came from. Follows the gender and event filters; the season filter doesn't apply.</p>
+      <div id="ns-table"></div>
     </div>
   </section>
 
@@ -308,30 +305,32 @@ function performance(D, f, season) {
   return out;
 }
 // Spot-use segments, in drawing order: [key, label]. Guaranteed spots: g_<key>; at-large: al_<key>.
-var USE_SEGMENTS = [["competed", "competed"], ["refilled", "refilled"], ["chose_another_event", "chose another event"],
-                    ["did_not_enter", "didn't enter"], ["unfilled", "unfilled"]];
+var USE_SEGMENTS = [["competed", "competed"], ["no_show", "no-show"], ["not_used", "not used"]];
 function spotUse(D, f, season) {
   var rows = D.spot_utilization.filter(function (r) { return keep(r, f, season); });
   var out = {};
   AREAS.forEach(function (a) {
     var ra = rows.filter(function (r) { return r.area === a; });
     var o = {};
-    ["guaranteed_spots", "at_large_spots", "unfilled_spots", "declared", "no_show"].forEach(function (k) { o[k] = sum(ra, k); });
+    ["guaranteed_spots", "at_large_spots", "passed_down", "entries", "no_show"].forEach(function (k) { o[k] = sum(ra, k); });
     o.g = {}; o.al = {};
     USE_SEGMENTS.forEach(function (s) {
       o.g[s[0]] = sum(ra, "g_" + s[0]);
-      o.al[s[0]] = s[0] === "unfilled" ? 0 : sum(ra, "al_" + s[0]);
+      o.al[s[0]] = s[0] === "not_used" ? 0 : sum(ra, "al_" + s[0]);
     });
-    o.used = o.g.competed + o.g.refilled;
+    o.used = o.g.competed;
     out[a] = o;
   });
   return out;
 }
-// "6 of 6 guaranteed spots: 5 competed · 1 chose another event" (every non-zero segment; they sum to the total)
+// "7 of 7 guaranteed spots: 6 competed · 1 no-show" (every non-zero segment; they sum to the total)
 function useCaption(x) {
   if (!x.guaranteed_spots) return "No guaranteed spots";
   var parts = USE_SEGMENTS.filter(function (s) { return x.g[s[0]]; }).map(function (s) { return x.g[s[0]] + " " + s[1]; });
   return x.guaranteed_spots + " of " + x.guaranteed_spots + " guaranteed spots: " + parts.join(" · ");
+}
+function passedLine(x) {
+  return x.passed_down + (x.passed_down === 1 ? " spot" : " spots") + " passed down from declines";
 }
 function atLargeLine(x) {
   var n = x.at_large_spots;
@@ -339,20 +338,22 @@ function atLargeLine(x) {
   var parts = USE_SEGMENTS.filter(function (s) { return x.al[s[0]]; }).map(function (s) { return x.al[s[0]] + " " + s[1]; });
   return "Plus " + n + " at-large standard qualifier" + (n === 1 ? "" : "s") + ": " + parts.join(", ") + ".";
 }
-// Unfilled guaranteed spots per Area x season (+ total), and per Area x event x season.
-function unfilledTable(D, f) {
+// No-shows per Area x season (+ total), and per Area x event x season; entries alongside.
+function noShowTable(D, f) {
   var rows = D.spot_utilization.filter(function (r) { return keep(r, f, "all"); });
-  var out = {total: 0, seasons: {}, areas: {}};
+  var out = {total: 0, entries: 0, seasons: {}, areas: {}};
   D.seasons.forEach(function (s) { out.seasons[s] = 0; });
   AREAS.forEach(function (a) {
-    var o = {total: 0, seasons: {}, events: {}};
+    var o = {total: 0, entries: 0, seasons: {}, events: {}};
     D.seasons.forEach(function (s) { o.seasons[s] = 0; });
-    rows.filter(function (r) { return r.area === a && r.unfilled_spots; }).forEach(function (r) {
-      var e = String(r.event_code), k = r.gender + " " + e;
-      o.seasons[r.season] += r.unfilled_spots; o.total += r.unfilled_spots;
-      out.seasons[r.season] += r.unfilled_spots; out.total += r.unfilled_spots;
-      if (!o.events[k]) { o.events[k] = {gender: r.gender, event: e, total: 0, seasons: {}}; D.seasons.forEach(function (s) { o.events[k].seasons[s] = 0; }); }
-      o.events[k].seasons[r.season] += r.unfilled_spots; o.events[k].total += r.unfilled_spots;
+    rows.filter(function (r) { return r.area === a; }).forEach(function (r) {
+      o.entries += r.entries; out.entries += r.entries;
+      if (!r.no_show) return;
+      var k = r.gender + " " + r.event_code;
+      o.seasons[r.season] += r.no_show; o.total += r.no_show;
+      out.seasons[r.season] += r.no_show; out.total += r.no_show;
+      if (!o.events[k]) { o.events[k] = {gender: r.gender, event: String(r.event_code), total: 0, seasons: {}}; D.seasons.forEach(function (s) { o.events[k].seasons[s] = 0; }); }
+      o.events[k].seasons[r.season] += r.no_show; o.events[k].total += r.no_show;
     });
     out.areas[a] = o;
   });
@@ -373,8 +374,8 @@ function headline(D) {
   var c = curve(D, POOLED_KEY, "all", "all");
   var sh = spotShare(D, {field: "qualified", season: "all", gender: "all", event: "all"});
   var u = spotUse(D, {season: "all", gender: "all", event: "all"});
-  var unf = 0, gs = 0;
-  AREAS.forEach(function (a) { unf += u[a].g.unfilled; gs += u[a].guaranteed_spots; });
+  var ns = 0, en = 0;
+  AREAS.forEach(function (a) { ns += u[a].no_show; en += u[a].entries; });
   var cell = function (area, place) {
     var r = D.place_curve.filter(function (x) { return x.season === POOLED_KEY && x.gender === "all" && x.event_group === "all" &&
                                                    x.area === area && x.area_place === place; })[0];
@@ -385,15 +386,10 @@ function headline(D) {
     sixth: {"tri-valley": {place: "6", cell: c["tri-valley"]["6"]}, "bay-shore": {place: "6", cell: c["bay-shore"]["6"]},
             "redwood-empire": {place: "6", cell: c["redwood-empire"]["6"]}, "class-a": {place: "3", cell: c["class-a"]["3"]}},
     // (b) Tri-Valley 7th-8th (not automatic) vs Bay Shore + Redwood Empire 5th-6th (automatic)
-    depth: {tv: cell("tri-valley", "7-8"), others: cell(COMBINED_AREA, "5-6")},
+    depth: {tv: cell("tri-valley", "7-8 not automatic"), others: cell(COMBINED_AREA, "5-6")},
     tv_spots: {k: sh["tri-valley"].total, n: sh._total},
-    unfilled: {k: unf, n: gs}
+    noshow: {k: ns, n: en}
   };
-}
-function flags(D, f) {
-  var g = function (r) { return (f.gender === "all" || r.gender === f.gender) &&
-    (!eventSet(f.event) || eventSet(f.event).indexOf(String(r.event_code)) >= 0); };
-  return D.flags_unfilled.filter(g);
 }
 </script>
 
@@ -403,7 +399,7 @@ function flags(D, f) {
   var css = getComputedStyle(document.documentElement);
   var v = function (n) { return css.getPropertyValue(n).trim(); };
   var COLOR = {"tri-valley": v("--tv"), "bay-shore": v("--bs"), "redwood-empire": v("--re"), "class-a": v("--ca")};
-  var TEXT = v("--text"), MUTED = v("--muted"), LINE = v("--line"), OTHER = v("--other"), UNFILLED = v("--unfilled");
+  var TEXT = v("--text"), MUTED = v("--muted"), LINE = v("--line"), OTHER = v("--other");
   var NARROW = function () { return window.innerWidth < 560; };
   function tint(hex, a) { var n = parseInt(hex.replace("#", ""), 16);
     return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
@@ -557,10 +553,10 @@ function flags(D, f) {
       '<div class="card" id="card-tv" data-k="' + h.tv_spots.k + '" data-n="' + h.tv_spots.n + '"><div class="big">' + pctNum(h.tv_spots.k, h.tv_spots.n) +
       '%</div><p class="cap">of next-best-mark + at-large spots went to Tri-Valley athletes</p><p class="cnt">' + h.tv_spots.k + " of " + h.tv_spots.n +
       " next-best-mark + at-large spots (all qualifiers)</p></div>" +
-      '<div class="card" id="card-unfilled" data-k="' + h.unfilled.k + '" data-n="' + h.unfilled.n + '"><div class="big">' + h.unfilled.k +
-      '</div><p class="cap">guaranteed spots unfilled over five seasons <span class="badge">Provisional</span></p><p class="cnt">' + h.unfilled.k + " of " + h.unfilled.n +
-      " guaranteed spots (" + pctNum(h.unfilled.k, h.unfilled.n) + "%): the qualifier didn't compete, nobody replaced them, and the event field ended below 24.</p>" +
-      unfilledHtml(unfilledTable(D, {gender: "all", event: "all"}), false) + "</div>";
+      '<div class="card" id="card-noshow" data-k="' + h.noshow.k + '" data-n="' + h.noshow.n + '"><div class="big">' + h.noshow.k +
+      '</div><p class="cap">no-shows over five seasons</p><p class="cnt">' + h.noshow.k + " of " + h.noshow.n +
+      " entries (" + pctNum(h.noshow.k, h.noshow.n) + "%) were in the MOC program for an event but didn't compete in it. " +
+      "Declines before the deadline are not no-shows.</p>" + noShowHtml(noShowTable(D, {gender: "all", event: "all"}), false) + "</div>";
   }
 
   // ---------- Area place vs MOC finish ----------
@@ -725,10 +721,8 @@ function flags(D, f) {
   }
 
   // ---------- Spot use ----------
-  var USE_COLOR = {competed: v("--u-competed"), refilled: v("--u-refilled"), chose_another_event: v("--u-chose"),
-                   did_not_enter: v("--u-none"), unfilled: v("--u-unfilled")};
-  var USE_LABEL = {competed: "Competed", refilled: "Refilled", chose_another_event: "Chose another event",
-                   did_not_enter: "Didn't enter", unfilled: "Unfilled"};
+  var USE_COLOR = {competed: v("--u-competed"), no_show: v("--u-noshow"), not_used: v("--u-notused")};
+  var USE_LABEL = {competed: "Competed", no_show: "No-show", not_used: "Not used"};
   function donut(id, x, big) {
     charts[id] = new Chart(el(id), {
       type: "doughnut",
@@ -737,25 +731,30 @@ function flags(D, f) {
                          backgroundColor: USE_SEGMENTS.map(function (s) { return USE_COLOR[s[0]]; })}]},
       options: {responsive: true, maintainAspectRatio: false, animation: false, cutout: "62%",
                 plugins: {legend: {display: false},
-                          centerText: {big: x.guaranteed_spots ? pctNum(x.used, x.guaranteed_spots) + "%" : "–", small: big ? "guaranteed\nspots used" : "", size: big ? 22 : 14},
+                          centerText: {big: x.guaranteed_spots ? pctNum(x.used, x.guaranteed_spots) + "%" : "–", small: big ? "competed" : "", size: big ? 22 : 14},
                           tooltip: {callbacks: {label: function (c) { return c.label + ": " + c.raw + " of " + x.guaranteed_spots + " guaranteed spots"; }}}}}
     });
   }
-  function unfilledHtml(t, withEvents) {
+  function caption(x, tag) {
+    return "<" + tag + ' class="cap" data-total="' + x.guaranteed_spots + '" data-parts="' + USE_SEGMENTS.map(function (g) { return x.g[g[0]]; }).join(",") + '">' +
+      useCaption(x) + "</" + tag + "><" + tag + ' class="pd">' + passedLine(x) + "</" + tag + "><" + tag + ' class="al">' + atLargeLine(x) + "</" + tag + ">";
+  }
+  function noShowHtml(t, withEvents) {
     var cols = D.seasons.map(String);
     var head = ["Area"].concat(cols, ["2022–2026"]);
-    var rows = AREAS.map(function (a) { var o = t.areas[a]; return [AREA_NAME[a]].concat(cols.map(function (s) { return o.seasons[s]; }), [o.total + " spots"]); });
-    rows.push(["<b>All Areas</b>"].concat(cols.map(function (s) { return "<b>" + t.seasons[s] + "</b>"; }), ["<b>" + t.total + " spots</b>"]));
+    var rows = AREAS.map(function (a) { var o = t.areas[a]; return [AREA_NAME[a]].concat(cols.map(function (s) { return o.seasons[s]; }),
+      [spotsTxt(o.total, o.entries, "entries")]); });
+    rows.push(["<b>All Areas</b>"].concat(cols.map(function (s) { return "<b>" + t.seasons[s] + "</b>"; }), ["<b>" + spotsTxt(t.total, t.entries, "entries") + "</b>"]));
     var html = numTable(head, rows);
     if (withEvents) {
       var er = [];
       AREAS.forEach(function (a) {
         Object.keys(t.areas[a].events).sort().forEach(function (k) {
           var e = t.areas[a].events[k];
-          er.push([AREA_NAME[a] + " · " + e.gender + " " + e.event].concat(cols.map(function (s) { return e.seasons[s] || ""; }), [e.total + " spots"]));
+          er.push([AREA_NAME[a] + " · " + e.gender + " " + e.event].concat(cols.map(function (s) { return e.seasons[s] || ""; }), [e.total + " no-shows"]));
         });
       });
-      html += "<details><summary>Show by event</summary>" + (er.length ? numTable(["Area · event"].concat(cols, ["2022–2026"]), er) : '<p class="note">No unfilled spots.</p>') + "</details>";
+      html += "<details><summary>Show by event</summary>" + (er.length ? numTable(["Area · event"].concat(cols, ["2022–2026"]), er) : '<p class="note">No no-shows.</p>') + "</details>";
     }
     return html;
   }
@@ -767,27 +766,20 @@ function flags(D, f) {
       body.innerHTML = '<div class="panel"><div class="gridwrap"><table class="grid dgrid"><thead><tr><th></th>' + cols.map(function (s) { return "<th>" + s + "</th>"; }).join("") +
         "</tr></thead><tbody>" + AREAS.map(function (a) {
           return '<tr><th class="area" style="--c:' + COLOR[a] + '">' + AREA_NAME[a] + "</th>" + cols.map(function (s) {
-            var x = spotUse(D, state, s)[a];
-            return '<td><div class="chart"><canvas id="du-' + a + "-" + s + '"></canvas></div><span class="cap" data-total="' + x.guaranteed_spots + '" data-parts="' +
-              USE_SEGMENTS.map(function (g) { return x.g[g[0]]; }).join(",") + '">' + useCaption(x) + '</span><span class="al">' + atLargeLine(x) + "</span></td>";
+            return '<td><div class="chart"><canvas id="du-' + a + "-" + s + '"></canvas></div>' + caption(spotUse(D, state, s)[a], "span") + "</td>";
           }).join("") + "</tr>";
-        }).join("") + '</tbody></table></div><p class="note">Centre: guaranteed spots used, (competed + refilled) ÷ guaranteed spots.</p></div>';
+        }).join("") + '</tbody></table></div><p class="note">Centre: share of guaranteed spots whose qualifier competed.</p></div>';
       AREAS.forEach(function (a) { cols.forEach(function (s) { donut("du-" + a + "-" + s, spotUse(D, state, s)[a], false); }); });
     } else {
       var u = spotUse(D, state);
       body.innerHTML = '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="donuts">' + AREAS.map(function (a) {
-        var x = u[a];
-        return '<div class="donut"><h3>' + AREA_NAME[a] + '</h3><div class="chart"><canvas id="du-' + a + '"></canvas></div><p class="cap" data-total="' + x.guaranteed_spots +
-          '" data-parts="' + USE_SEGMENTS.map(function (g) { return x.g[g[0]]; }).join(",") + '">' + useCaption(x) + '</p><p class="al">' + atLargeLine(x) + "</p></div>";
-      }).join("") + "</div>" + details(numTable(["Area", "Guaranteed spots", "Competed", "Refilled", "Chose another event", "Didn't enter", "Unfilled", "Guaranteed spots used", "At-large standard qualifiers"],
-        AREAS.map(function (a) { var x = u[a]; return [AREA_NAME[a], x.guaranteed_spots + " spots", x.g.competed, x.g.refilled, x.g.chose_another_event, x.g.did_not_enter, x.g.unfilled,
-          spotsTxt(x.used, x.guaranteed_spots, "guaranteed spots"), x.at_large_spots ? x.al.competed + " of " + x.at_large_spots + " competed" : "none"]; }))) + "</div>";
+        return '<div class="donut"><h3>' + AREA_NAME[a] + '</h3><div class="chart"><canvas id="du-' + a + '"></canvas></div>' + caption(u[a], "p") + "</div>";
+      }).join("") + "</div>" + details(numTable(["Area", "Guaranteed spots", "Competed", "No-show", "Not used", "Passed down from declines", "At-large standard qualifiers"],
+        AREAS.map(function (a) { var x = u[a]; return [AREA_NAME[a], x.guaranteed_spots + " spots", x.g.competed, x.g.no_show, x.g.not_used, x.passed_down + " spots",
+          x.at_large_spots ? x.al.competed + " of " + x.at_large_spots + " competed" : "none"]; }))) + "</div>";
       AREAS.forEach(function (a) { donut("du-" + a, u[a], true); });
     }
-    el("unf-table").innerHTML = unfilledHtml(unfilledTable(D, state), true);
-    el("t-flags").innerHTML = "<thead><tr><th>Area</th><th>Gender</th><th>Event</th><th class=n>Seasons with unfilled spots</th><th class=n>Unfilled spots, 5 seasons</th></tr></thead><tbody>" +
-      flags(D, state).map(function (r) { return "<tr><td>" + AREA_NAME[r.area] + "</td><td>" + r.gender + "</td><td>" + r.event_code + "</td><td class=n>" + r.seasons_flagged +
-        " (" + r.seasons.split("|").join(", ") + ")</td><td class=n>" + r.total_all_seasons + " spots</td></tr>"; }).join("") + "</tbody>";
+    el("ns-table").innerHTML = noShowHtml(noShowTable(D, state), true);
   }
 
   // ---------- render ----------

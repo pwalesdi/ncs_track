@@ -280,7 +280,7 @@ season,gender,event_code,area,auto_spots,nbm_spots,guaranteed_spots,g_competed,g
 2024,boys,3200,redwood-empire,6,0,6,6,0,0,0,0,0,0,0,0,6,0,0,6,1.0,0.0
 2024,boys,3200,class-a,3,0,3,3,0,0,0,0,0,0,0,0,3,0,0,3,1.0,0.0
 2024,boys,400,tri-valley,6,3,9,9,0,0,0,0,0,1,1,0,10,0,0,9,1.0,0.0
-2024,boys,400,bay-shore,6,0,6,7,0,0,0,0,0,0,0,0,7,0,0,7,1.1667,0.0
+2024,boys,400,bay-shore,7,0,7,7,0,0,0,0,0,0,0,0,7,0,0,7,1.0,0.0
 2024,boys,400,redwood-empire,6,0,6,5,1,0,0,0,0,0,0,0,6,1,0,5,0.8333,0.1667
 2024,boys,400,class-a,3,0,3,3,0,0,0,0,0,0,0,0,3,0,0,3,1.0,0.0
 2024,boys,4x100,tri-valley,6,2,8,8,0,0,0,0,0,0,0,0,8,0,0,8,1.0,0.0
@@ -429,7 +429,7 @@ season,gender,event_code,area,auto_spots,nbm_spots,guaranteed_spots,g_competed,g
 2025,boys,DT,class-a,3,0,3,3,0,0,0,0,0,0,0,0,3,0,0,3,1.0,0.0
 2025,boys,HJ,tri-valley,6,7,13,13,0,0,0,0,0,0,0,0,13,0,0,13,1.0,0.0
 2025,boys,HJ,bay-shore,6,0,6,5,1,0,1,0,0,0,0,0,6,1,0,5,0.8333,0.1667
-2025,boys,HJ,redwood-empire,6,0,6,7,0,0,0,0,0,0,0,0,7,0,0,7,1.1667,0.0
+2025,boys,HJ,redwood-empire,7,0,7,7,0,0,0,0,0,0,0,0,7,0,0,7,1.0,0.0
 2025,boys,HJ,class-a,3,0,3,2,1,0,0,0,0,0,0,0,3,1,1,2,0.6667,0.3333
 2025,boys,LJ,tri-valley,6,3,9,9,0,0,0,0,0,0,0,0,9,0,0,9,1.0,0.0
 2025,boys,LJ,bay-shore,6,0,6,5,1,0,0,0,0,0,0,0,6,1,1,5,0.8333,0.1667
@@ -493,7 +493,7 @@ season,gender,event_code,area,auto_spots,nbm_spots,guaranteed_spots,g_competed,g
 2025,girls,DT,class-a,3,0,3,3,0,0,0,0,0,0,0,0,3,0,0,3,1.0,0.0
 2025,girls,HJ,tri-valley,6,3,9,9,0,0,0,0,0,0,0,0,9,0,0,9,1.0,0.0
 2025,girls,HJ,bay-shore,6,0,6,5,1,0,2,0,0,0,0,0,6,1,0,5,0.8333,0.1667
-2025,girls,HJ,redwood-empire,6,0,6,7,0,0,1,0,0,0,0,0,7,0,0,7,1.1667,0.0
+2025,girls,HJ,redwood-empire,7,0,7,7,0,0,1,0,0,0,0,0,7,0,0,7,1.0,0.0
 2025,girls,HJ,class-a,3,1,4,3,1,0,0,0,0,0,0,0,4,1,0,3,0.75,0.25
 2025,girls,LJ,tri-valley,6,2,8,6,2,0,2,0,0,0,0,0,8,2,1,6,0.75,0.25
 2025,girls,LJ,bay-shore,6,1,7,7,0,0,0,0,0,0,0,0,7,0,0,7,1.0,0.0
@@ -501,7 +501,7 @@ season,gender,event_code,area,auto_spots,nbm_spots,guaranteed_spots,g_competed,g
 2025,girls,LJ,class-a,3,0,3,2,1,0,1,0,0,0,0,0,3,1,1,2,0.6667,0.3333
 2025,girls,PV,tri-valley,6,1,7,7,0,0,0,1,0,0,0,0,7,0,0,7,1.0,0.0
 2025,girls,PV,bay-shore,6,0,6,6,0,0,0,0,0,0,0,0,6,0,0,6,1.0,0.0
-2025,girls,PV,redwood-empire,6,1,7,8,0,0,0,0,0,0,0,0,8,0,0,8,1.1429,0.0
+2025,girls,PV,redwood-empire,7,1,8,8,0,0,0,0,0,0,0,0,8,0,0,8,1.0,0.0
 2025,girls,PV,class-a,3,0,3,3,0,0,0,0,0,0,0,0,3,0,0,3,1.0,0.0
 2025,girls,SP,tri-valley,6,2,8,8,0,0,0,0,0,0,0,0,8,0,0,8,1.0,0.0
 2025,girls,SP,bay-shore,6,0,6,6,0,0,0,0,0,0,0,0,6,0,0,6,1.0,0.0

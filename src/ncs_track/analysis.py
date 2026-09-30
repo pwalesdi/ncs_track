@@ -279,7 +279,8 @@ def moc_performance(q: pd.DataFrame) -> pd.DataFrame:
 def spot_utilization(q: pd.DataFrame) -> pd.DataFrame:
     """Per season x gender x event x Area (decision #33). Field size plays no part.
 
-    guaranteed_spots  the Area's automatic spots (6; Class A 3) + next-best-mark spots it won
+    guaranteed_spots  the Area's automatic spots (6; Class A 3; one more per tie at the last
+                      automatic place) + next-best-mark spots it won
     g_competed        automatic / next-best-mark entrants who competed in the event
     g_no_show         ... who were in the program for it but didn't compete (DNS or absent)
     g_not_used        guaranteed spots no entrant from the Area took (too few declared finishers)
@@ -297,9 +298,10 @@ def spot_utilization(q: pd.DataFrame) -> pd.DataFrame:
         gtd = x[x["qualifier_type"].isin(GUARANTEED_TYPES)]
         al = x[x["qualifier_type"] == "at_large_standard"]
         nbm = int((x["qualifier_type"] == "next_best_mark").sum())
-        spots = AUTO_SPOTS[r.area] + nbm
+        autos = max(AUTO_SPOTS[r.area], int((x["qualifier_type"] == "automatic").sum()))   # a tie can add one
+        spots = autos + nbm
         rows.append({"season": r.season, "gender": r.gender, "event_code": r.event_code, "area": r.area,
-                     "auto_spots": AUTO_SPOTS[r.area], "nbm_spots": nbm, "guaranteed_spots": spots,
+                     "auto_spots": autos, "nbm_spots": nbm, "guaranteed_spots": spots,
                      "g_competed": int(gtd["competed"].sum()), "g_no_show": int((gtd["competed"] == 0).sum()),
                      "g_not_used": max(spots - len(gtd), 0),
                      "passed_down": int((allq["declined"] == "automatic").sum()),

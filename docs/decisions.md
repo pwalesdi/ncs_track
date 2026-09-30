@@ -317,3 +317,18 @@ Newest at the bottom.
       unexplained entrants: 6 (2023 Tri-Valley 100 m ×3 and 4x100, 2024 ×2). The pass-down
       rate is not an independent test: automatic and next-best-mark routes are defined from the
       program, so only extra entrants per Area can fail.
+33. **Spot use = no-shows; field size plays no part** (2026-09-30, Patrick). Replaces #23, #25,
+    #26 and #28 (the "unfilled" metric and its open questions are retired).
+    - **No-show:** in the MOC program for the event but didn't compete in it (DNS/SCR, or
+      absent from its results), including athletes who competed in other events that day and
+      pass-down entrants who didn't start. Declines before the deadline are not no-shows.
+    - **Guaranteed spots per Area and event:** its automatic spots (6; Class A 3; one more per
+      tie at the last automatic place) + the next-best-mark spots it won. Donut: Competed /
+      No-show / Not used (no entrant from that Area took it). Centre: competed ÷ guaranteed
+      spots. Below each donut: spots passed down from declines, and the at-large standard
+      entrants (competed / no-show), who are not in the donut.
+    - **Tables:** no-shows by Area × season with an event drill-down (every entrant, any
+      route); the named list is `outputs/no_shows.csv` (local only).
+    - **"Provisional" badge removed:** the 2025 girls 1600 audit passes (#32).
+    - Pooled 2022–2026: 114 no-shows in 3,950 entries (3%); guaranteed spots 3,759 competed,
+      111 no-show, 6 not used; 247 automatic spots passed down from declines.

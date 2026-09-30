@@ -78,14 +78,14 @@ STATE_JS = """() => {
 }"""
 
 CARDS_JS = """() => {
-  const out = {sixth: {}, depth: null, tv_spots: null, unfilled: null};
+  const out = {sixth: {}, depth: null, tv_spots: null, noshow: null};
   document.querySelectorAll('[data-head="sixth"]').forEach(el => {
     out.sixth[el.dataset.area] = [Number(el.dataset.entries), Number(el.dataset.median)]; });
   const d = document.getElementById('card-depth').dataset;
   out.depth = {tv: [Number(d.tvEntries), Number(d.tvMedian)], others: [Number(d.otEntries), Number(d.otMedian)]};
-  const tv = document.getElementById('card-tv'), un = document.getElementById('card-unfilled');
+  const tv = document.getElementById('card-tv'), un = document.getElementById('card-noshow');
   out.tv_spots = [Number(tv.dataset.k), Number(tv.dataset.n)];
-  out.unfilled = [Number(un.dataset.k), Number(un.dataset.n)];
+  out.noshow = [Number(un.dataset.k), Number(un.dataset.n)];
   return out;
 }"""
 
@@ -120,7 +120,7 @@ def check_headline(page, label: str) -> list[str]:
     for k, v in want["depth"].items():
         if tuple(got["depth"][k]) != tuple(v):
             problems.append(f"{label}: depth card {k} shows {got['depth'][k]}, tables give {v}")
-    for k in ("tv_spots", "unfilled"):
+    for k in ("tv_spots", "noshow"):
         if tuple(got[k]) != tuple(want[k]):
             problems.append(f"{label}: card {k} shows {got[k]}, tables give {want[k]}")
     return problems

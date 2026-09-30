@@ -26,17 +26,18 @@ EVENT_ORDER = ["100", "200", "400", "800", "1600", "3200", "100H", "110H", "300H
 
 # From docs/analysis_tables.md, in the dashboard's plain language.
 DEFINITIONS = [
-    ("Automatic", "Qualified by place at the Area meet: top 6 (Class A: top 3)."),
-    ("Next best mark", "One of the 3 fill spots per event: the next best marks from all four Area meets."),
-    ("At-large", "Met the posted at-large standard in the Area final, outside the automatic places. "
-                 "Only these athletes are called at-large."),
+    ("Automatic", "Each Area's automatic spots (6; Class A 3) go to its top finishers who entered, in order of Area "
+                  "place. If a finisher declines, the spot passes down to the next finisher, so e.g. a 10th-place "
+                  "finisher can be an automatic qualifier."),
+    ("Next best mark", "After declarations, the 3 spots per event go to the 3 best remaining Area-final marks across all "
+                       "four Area meets (not automatic, didn't decline)."),
+    ("At-large", "Anyone else remaining who met the posted at-large standard in the Area final. Only these athletes "
+                 "are called at-large."),
     ("Next best mark + at-large standard", "The two routes together."),
-    ("Guaranteed spots", "The fixed spots per event: 21 automatic (6 + 6 + 6 + 3) plus 3 next best mark = 24. "
-                         "At-large-standard spots come on top and have no fixed number."),
-    ("All qualifiers", "Everyone who earned a spot, whether or not they entered. A replay of each season's rules "
-                       "against the Area results (it matches 98–99% of real entries once athlete choices and "
-                       "replacements are counted)."),
-    ("Actual entries", "Athletes who entered the MOC (the meet program)."),
+    ("All qualifiers", "Who the rules made eligible before anyone declared: a replay of each season's rules against "
+                       "the Area results (top 6 / top 3, then next best marks, then the standard)."),
+    ("Actual entries", "Athletes in the MOC program, on the routes they actually took (after declines passed spots "
+                       "down). The replay reproduces 99.5–100% of real entries per season."),
     ("Entries", "Athlete-events: one athlete in two events counts twice."),
     ("Competed", "Has a row in the MOC results with any status other than DNS or scratch (DNF, DQ, no height and "
                  "fouls count)."),
@@ -45,16 +46,14 @@ DEFINITIONS = [
     ("Typical MOC finish (median place)", "The middle MOC place of the entries in a group. Finalists keep their "
                                           "final place; everyone else with a valid MOC mark is ranked after the "
                                           "finalists by their best mark. Groups under 5 entries are not shown."),
+    ("Guaranteed spots", "Per Area and event: its automatic spots (6; Class A 3) plus the next-best-mark spots it won."),
+    ("Declined", "Finished ahead of the Area's last automatic qualifier but not in the MOC program. The spot passes down "
+                 "to the next finisher. A decline is not a no-show and carries no penalty."),
     ("Spot use: Competed", "The qualifier ran the event at the MOC."),
-    ("Spot use: Refilled", "The qualifier withdrew before the deadline and the next finalist from that Area took the spot."),
-    ("Spot use: Chose another event", "The qualifier competed at the MOC, but in other events."),
-    ("Spot use: Didn't enter", "The qualifier was not at the MOC at all (competed in no MOC event; includes a few "
-                               "who were in the program but didn't start). Relay teams that didn't run count here."),
-    ("Spot use: Unfilled (provisional)", "Nobody used the spot and the event field ended up short: a guaranteed spot "
-                                         "whose qualifier didn't compete, nobody replaced them, and the event's MOC "
-                                         "field ended below 24. Under verification."),
-    ("Guaranteed spots used", "(Competed + refilled) ÷ guaranteed spots. At-large standard qualifiers are listed "
-                              "separately and are not part of this %."),
+    ("Spot use: No-show", "The qualifier was in the MOC program for the event but didn't compete in it (did not start, "
+                          "or absent from its results), including athletes who competed in other events that day and "
+                          "athletes who got the spot by pass-down."),
+    ("Spot use: Not used", "No entrant from that Area took the spot."),
     ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
                            "are computed from all five seasons' entries, not averaged."),
     ("Source", "Athletic.net Area and MOC results; MOC programs (Diablo Timing); rules per season. Pre-2026 "
@@ -69,11 +68,6 @@ CAVEATS = [
     "Rules before 2026 are partly assumed: allocations for 2022–2025 assumed from 2026; 2023 at-large standards "
     "assumed from 2026 (none printed).",
     "Unresolved school names (e.g. 'West County', 2022) appear as Unknown and are not compared.",
-    "Unfilled spots are provisional (under verification). Three open questions: (1) in 23 events more guaranteed "
-    "spots count as unfilled than the field was short of 24, because at-large qualifiers filled lanes (121 unfilled "
-    "spots vs. 86 empty places); (2) 11 unfilled spots were taken by a lower finalist from the same Area, who isn't "
-    "credited as a replacement because they weren't next in line; (3) 7 replacements didn't compete, and their "
-    "spots still count as refilled.",
     "Privacy: MOC-place figures are published only for groups of 5 or more entries; single events are not shown "
     "on the Area place vs. MOC finish tab.",
     "State results are pending; state qualification is not shown.",
@@ -101,16 +95,14 @@ def build() -> dict:
         "field_makeup": records(fm, ["season", "gender", "event_code", "field", "area", "qualifier_type", "count"]),
         "at_large_share": records(al, ["season", "gender", "event_code", "field", "spot_type", "area", "count"]),
         "moc_performance": records(mp, ["season", "gender", "event", "area", "qualifier_type", "competed", "made_final"]),
-        "spot_utilization": records(su, ["season", "gender", "event_code", "area", "guaranteed_spots", "at_large_spots",
-                                         "declared", "no_show", "unfilled_spots",
-                                         *[f"g_{k}" for k in SPOT_USE], *[f"al_{k}" for k in SPOT_USE if k != "unfilled"]]),
+        "spot_utilization": records(su, ["season", "gender", "event_code", "area", "guaranteed_spots", "passed_down",
+                                         "at_large_spots", "entries", "no_show",
+                                         *[f"g_{k}" for k in SPOT_USE], *[f"al_{k}" for k in SPOT_USE if k != "not_used"]]),
         "place_curve": records(pd.read_csv(S / "core_place_curve.csv", dtype={"season": str, "area_place": str,
                                                                                "made_final_count": "Int64"}),
                                ["season", "gender", "event_group", "area", "area_place", "entries", "made_final_count",
                                 "median_moc_place"]),
         "caveats": CAVEATS,
-        "flags_unfilled": records(pd.read_csv(S / "spot_utilization_flags_unfilled.csv"),
-                                  ["area", "gender", "event_code", "seasons_flagged", "seasons", "total_all_seasons"]),
     }
 
 

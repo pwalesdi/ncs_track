@@ -204,6 +204,23 @@ def cmd_analysis(args) -> int:
     return 0
 
 
+def cmd_allocate(args) -> int:
+    from . import allocate, replay
+    cfg = allocate.load_config(Path(args.config))
+    paths.OUTPUTS.mkdir(parents=True, exist_ok=True)
+    for season in args.season:
+        results, entries, rules, label, kw, legs = replay_inputs(season)
+        got = allocate.allocate(results, rules, cfg)
+        got.to_csv(paths.OUTPUTS / f"allocation_{cfg.name}_{season}.csv", index=False)
+        by = got[got["qualified_by"].notna()].groupby(["meet_area", "qualified_by"]).size().unstack(fill_value=0)
+        print(f"{season} ({label}), config {cfg.name}: {int(got['qualified_by'].notna().sum())} allocated")
+        print(by.to_string())
+        if args.compare:
+            s = replay.score(allocate.compare(got, entries, rules, cfg, legs=legs, **kw))
+            print(f"  vs MOC program: RAW {s['raw_match_rate']:.3f}, RULES {s['rules_match_rate']:.3f}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="ncs_track")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -228,6 +245,11 @@ def main(argv: list[str] | None = None) -> int:
     an = sub.add_parser("analysis", help="build outputs/qualifiers.csv and data/summary/ tables")
     an.add_argument("--season", type=int, nargs="+", required=True)
     an.set_defaults(func=cmd_analysis)
+    al = sub.add_parser("allocate", help="run the allocation engine with a config (configs/allocation/*.yaml)")
+    al.add_argument("--config", required=True)
+    al.add_argument("--season", type=int, nargs="+", required=True)
+    al.add_argument("--compare", action="store_true", help="also score against the real MOC program")
+    al.set_defaults(func=cmd_allocate)
     args = ap.parse_args(argv)
     return args.func(args)
 

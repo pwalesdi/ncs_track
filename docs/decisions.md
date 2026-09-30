@@ -115,3 +115,16 @@ Newest at the bottom.
 10. **The dashboard is tested through macOS's JavaScript engine** (`osascript`), because
     Node isn't installed. The page's own aggregation code runs against pandas; the
     rendering script is only syntax-checked.
+
+**Part 4, allocation engine**
+11. **The engine is its own code, not a wrapper around the replay.** It reuses only the
+    replay's small helpers (fill picking, event list). The equivalence test is therefore a
+    real check: it compares every allocation row and the match scores for all 5 seasons.
+12. **"Adjusted" standards are a percentage of the mark.** A positive `adjust_pct` makes
+    every standard harder: times get faster, field marks longer or higher. This is one
+    simple, symmetric choice; you may want per-event or absolute adjustments instead. No
+    adjusted config was created.
+13. **`replacement` is in the config but never changes who is allocated.** It is used only
+    when comparing with a real program.
+14. **`tests/` is now a Python package** (`tests/__init__.py`), so the engine test can
+    reuse the replay test's fixture.

@@ -1,0 +1,29 @@
+# The existing NCS Area -> MOC allocation, as validated by the replay (2022-2026:
+# RULES match 97.9-99.1%). Standards come from each season's rules file.
+# See docs/replay_2026.md, docs/replay_seasons.md and docs/decisions.md.
+name: current
+description: >-
+  Existing system: top 6 per Area (Class A top 3); 3 fill spots from the next best marks of
+  all four meets, assigned before at-large; ties at the last fill spot all in; at-large
+  standard as printed; Class A at-large from 4th place; wind-aided marks allowed;
+  vacancies refilled by the next finalist in line from the same Area.
+auto_spots:
+  tri-valley: 6
+  bay-shore: 6
+  redwood-empire: 6
+  class-a: 3
+fill:
+  count: 3
+  pool: [tri-valley, bay-shore, redwood-empire, class-a]
+  order: before_at_large
+  ties: include
+at_large:
+  mode: "on"
+  eligible_outside_top:
+    tri-valley: 6
+    bay-shore: 6
+    redwood-empire: 6
+    class-a: 3
+  wind_aided_allowed: true
+replacement: same_area
+qualifying_rounds: [final]

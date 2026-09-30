@@ -21,8 +21,13 @@ def test_loads_clean(rules):
 
 
 def test_fallback_label():
-    rules, label = load_rules_for(2019)
+    rules, label = load_rules_for(2021)                 # no 2021 file -> latest
     assert rules["season"] == 2026 and label == "2026 rules applied"
+
+
+def test_season_file_used_when_present():
+    rules, label = load_rules_for(2019)
+    assert rules["season"] == 2019 and "printed in 2019 results" in label
 
 
 def test_every_standard_present(rules):

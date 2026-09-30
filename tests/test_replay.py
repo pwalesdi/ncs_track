@@ -1,0 +1,198 @@
+"""Replay on hand-built fixtures. Every expected entrant below is worked out by hand.
+
+Girls 100 m, at-large standard 12.45 (2026 table). Non-auto marks, best first:
+
+  TV7 12.30  BS7 12.35  TV8 12.40  RE7 12.44  CA4 12.44  BS8 12.46  CA5 12.47  TV9 12.50 ...
+
+Auto: top 6 at Tri-Valley, Bay Shore and Redwood Empire, top 3 at Class A = 21.
+"""
+
+import pandas as pd
+import pytest
+
+from ncs_track import paths
+from ncs_track.replay import (DEFAULT_GRID, Interpretation, compare, evaluate, interpretation_grid,
+                              predict, score, sweep)
+from ncs_track.rules import load_rules
+
+AREA_CODE = {"TV": "tri-valley", "BS": "bay-shore", "RE": "redwood-empire", "CA": "class-a"}
+
+MARKS = {
+    "TV": [12.00, 12.05, 12.10, 12.15, 12.20, 12.25, 12.30, 12.40, 12.50, 12.60],
+    "BS": [12.02, 12.06, 12.11, 12.16, 12.21, 12.26, 12.35, 12.46],
+    "RE": [12.03, 12.07, 12.12, 12.17, 12.22, 12.27, 12.44, 12.70],
+    "CA": [12.20, 12.30, 12.40, 12.44, 12.47, 12.60, 12.61],
+}
+
+
+@pytest.fixture(scope="module")
+def rules():
+    return load_rules(paths.rules_path(2026))
+
+
+def perf(area, place, mark, *, event="100", gender="girls", status="OK", wind_aided=False,
+         relay=False, name=None, school=None):
+    return {
+        "performance_id": f"{area}{place}{event}", "meet_key": f"2026-area-{AREA_CODE[area]}",
+        "season": 2026, "level": "area", "meet_area": AREA_CODE[area], "gender": gender,
+        "event_code": event, "in_scope": True, "round": "final",
+        "place": place if status == "OK" else None, "status": status,
+        "mark_raw": f"{mark:.2f}" if mark else status, "mark_value": mark if status == "OK" else None,
+        "wind_aided": wind_aided, "is_relay": relay,
+        "athlete_name_raw": None if relay else (name or f"{area}{place}, Runner"),
+        "school_name_raw": school or f"{area} School {place}",
+    }
+
+
+def results(extra=()):
+    rows = [perf(a, i + 1, m) for a, ms in MARKS.items() for i, m in enumerate(ms)]
+    return pd.DataFrame(rows + list(extra))
+
+
+def who(df, how=None):
+    d = df if how is None else df[df["qualified_by"] == how]
+    return sorted(n.split(",")[0] for n in d["athlete_name_raw"])
+
+
+AUTO = sorted([f"{a}{i}" for a in ("TV", "BS", "RE") for i in range(1, 7)] + ["CA1", "CA2", "CA3"])
+
+
+def test_default_reading_class_a_from_4th_fill_first(rules):
+    p = predict(results(), rules, Interpretation())
+    assert who(p, "auto") == AUTO
+    assert who(p, "fill") == ["BS7", "TV7", "TV8"]
+    assert who(p, "at_large") == ["CA4", "RE7"]
+    assert len(p) == 26
+
+
+def test_class_a_from_7th_drops_class_a_4th(rules):
+    p = predict(results(), rules, Interpretation(class_a_at_large_outside_top=6))
+    assert who(p, "at_large") == ["RE7"]
+    assert "CA4" not in who(p)
+    assert len(p) == 25
+
+
+def test_at_large_before_fill_adds_three(rules):
+    p = predict(results(), rules, Interpretation(fill_before_at_large=False))
+    assert who(p, "at_large") == ["BS7", "CA4", "RE7", "TV7", "TV8"]
+    assert who(p, "fill") == ["BS8", "CA5", "TV9"]
+    assert len(p) == 29
+
+
+def test_both_switches(rules):
+    p = predict(results(), rules, Interpretation(class_a_at_large_outside_top=6, fill_before_at_large=False))
+    assert who(p, "at_large") == ["BS7", "RE7", "TV7", "TV8"]
+    assert who(p, "fill") == ["BS8", "CA4", "CA5"]      # CA4 still reaches MOC, as fill
+
+
+def test_nbl_flyer_fill_excludes_class_a(rules):
+    p = predict(results(), rules, Interpretation(fill_source="nbl_flyer"))
+    assert who(p, "fill") == ["BS7", "BS8", "RE7", "TV7", "TV8", "TV9"]
+    assert who(p, "at_large") == ["CA4"]
+
+
+def test_fill_ties(rules):
+    tie = [perf("BS", 9, 12.40, name="BSX, Tie")]           # ties TV8 for the 3rd fill spot
+    incl = predict(results(tie), rules, Interpretation())
+    assert who(incl, "fill") == ["BS7", "BSX", "TV7", "TV8"]
+    excl = predict(results(tie), rules, Interpretation(fill_ties_include=False))
+    assert who(excl, "fill") == ["BS7", "TV7"]
+    # Tied athletes left out of fill still meet the standard, so they come in at-large.
+    assert {"BSX", "TV8"} <= set(who(excl, "at_large"))
+
+
+def test_dq_and_wind(rules):
+    extra = [perf("TV", None, None, status="DQ", name="TVDQ, Runner")]
+    df = results(extra)
+    df.loc[df["athlete_name_raw"] == "RE7, Runner", "wind_aided"] = True
+    ev = evaluate(df, rules, Interpretation(wind_aided_at_large=False))
+    assert ev.loc[ev["athlete_name_raw"] == "TVDQ, Runner", "qualified_by"].isna().all()
+    assert who(ev[ev["qualified_by"] == "at_large"]) == ["CA4"]
+    assert "RE7" not in who(ev[ev["qualified_by"].notna()])
+
+
+def test_non_final_rounds_and_other_levels_ignored(rules):
+    df = results([{**perf("TV", 1, 11.00, name="Prelim, Only"), "round": "prelim"},
+                  {**perf("TV", 1, 11.00, name="League, Only"), "level": "league"}])
+    assert "Prelim" not in who(predict(df, rules)) and "League" not in who(predict(df, rules))
+
+
+def test_relays(rules):
+    rel = [perf("TV", i, 48.0 + i, event="4x100", relay=True, school=f"TV School {i}") for i in range(1, 9)]
+    p = predict(pd.DataFrame(rel), rules)
+    auto = p[p["qualified_by"] == "auto"]
+    assert sorted(auto["school_name_raw"]) == [f"TV School {i}" for i in range(1, 7)]
+    # TV7 (55.00) and TV8 (56.00) miss the 49.40 standard; as the only non-auto teams in
+    # the pool they take two of the three fill spots.
+    assert sorted(p.loc[p["qualified_by"] == "fill", "school_name_raw"]) == ["TV School 7", "TV School 8"]
+
+
+# ---------------------------------------------------------------------------
+# compare / sweep
+# ---------------------------------------------------------------------------
+def key(s):
+    return s.lower().replace(" ", "-") if s else None
+
+
+def area(s):
+    if not s:
+        return None
+    return {"TV": "tri-valley", "BS": "bay-shore", "RE": "redwood-empire", "CA": "class-a"}.get(s[:2])
+
+
+def entries_from(pred, drop=(), add=(), rename=None):
+    rows = []
+    for _, r in pred.iterrows():
+        name = r["athlete_name_raw"]
+        if name.split(",")[0] in drop:
+            continue
+        if rename and name.split(",")[0] in rename:
+            name = rename[name.split(",")[0]]
+        rows.append({"gender": r["gender"], "event_code": r["event_code"], "is_adaptive": False,
+                     "event_modifier": None, "is_relay": False, "athlete_name": name,
+                     "school_name": r["school_name_raw"], "seed_mark_raw": r["mark_raw"]})
+    for name, school, mark in add:
+        rows.append({"gender": "girls", "event_code": "100", "is_adaptive": False, "event_modifier": None,
+                     "is_relay": False, "athlete_name": name, "school_name": school, "seed_mark_raw": mark})
+    return pd.DataFrame(rows)
+
+
+def test_compare_outcomes(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    ent = entries_from(pred, drop={"TV8"}, rename={"BS7": "BS7, Runnerina"},
+                       add=[("TV9, Runner", "TV School 9", "12.50"),
+                            ("Nowhere, Kid", "Unknown High", "12.00")])
+    comp = compare(ev, ent, rules, school_key=key, school_area=area)
+    by = comp.rows.groupby("outcome")["athlete_name"].apply(sorted).to_dict()
+    assert by["predicted_not_entered"] == ["TV8, Runner"]
+    assert by["entered_not_predicted"] == ["TV9, Runner"]
+    assert by["match_last_name_school"] == ["BS7, Runner"]
+    tv9 = comp.rows[comp.rows["athlete_name"] == "TV9, Runner"].iloc[0]
+    assert "Area place 9" in tv9["diagnosis"] and "below standard" in tv9["diagnosis"]
+    s = score(comp)
+    assert s["match"] == 24 and s["not_comparable_area_unknown"] == 1
+    assert comp.notes == []                                   # all four Areas present
+
+
+def test_compare_skips_areas_without_results(rules):
+    only_tv = results()[lambda d: d["meet_area"] == "tri-valley"]
+    ev = evaluate(only_tv, rules)
+    full = evaluate(results(), rules)
+    ent = entries_from(full[full["qualified_by"].notna()])
+    comp = compare(ev, ent, rules, school_key=key, school_area=area)
+    s = score(comp)
+    assert s["not_comparable_area_missing"] == len(ent) - len(ent[ent["school_name"].str.startswith("TV")])
+    assert any("fill pool incomplete" in n for n in comp.notes)
+
+
+def test_sweep_ranks_the_reading_that_reproduces_entries(rules):
+    truth = predict(results(), rules, Interpretation(class_a_at_large_outside_top=6, fill_before_at_large=False))
+    ent = entries_from(truth)
+    grid = interpretation_grid(**DEFAULT_GRID)
+    assert len(grid) == 4
+    table = sweep(results(), rules, ent, grid, school_key=key, school_area=area)
+    best = table.iloc[0]
+    assert best["interpretation"] == "class_a_at_large_outside_top=6;fill_before_at_large=False"
+    assert best["mismatches"] == 0 and best["precision"] == 1.0 and best["recall"] == 1.0
+    assert (table["mismatches"].iloc[1:] > 0).all()

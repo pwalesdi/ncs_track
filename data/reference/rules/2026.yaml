@@ -6,9 +6,9 @@
 # resolved. `authoritative:` records which value the analysis uses by default, and only
 # where the source doc itself says so.
 #
-# Only 2026 rules are in hand. They are applied to every season; outputs must carry
-# the label in `applied_label`. Add rules/{season}.yaml for another season only when a
-# source document for that season exists.
+# Only 2026 rules documents are in hand. Earlier seasons have their own generated files
+# (2019/2022-2025.yaml, see src/ncs_track/season_rules.py): at-large standards printed in
+# that season's results, everything else assumed from this file.
 #
 # Marks are quoted strings exactly as written in the source (feet-inches for field
 # events); src/ncs_track/marks.py parses them. Area keys match meets.csv `area` slugs.
@@ -16,10 +16,9 @@
 schema_version: 1
 season: 2026
 applied_label: "2026 rules applied"
-applies_to_seasons: [2019, 2022, 2023, 2024, 2025, 2026]
+applies_to_seasons: [2026]
 applies_to_seasons_note: >-
-  2026 rules applied to all seasons by instruction; earlier-season rules are not in hand
-  and may differ (discrepancy D7).
+  Earlier seasons use generated rules files built from this one (discrepancy D7).
 
 sources:
   - id: moc_guide
@@ -364,7 +363,9 @@ discrepancies:
   D7:
     topic: Earlier seasons (2019, 2022-2025)
     values: {rules_in_hand: [2026]}
-    handling: apply 2026 rules, label outputs
+    handling: >-
+      per-season files: standards printed in that season's Tri-Valley results (2019, 2022,
+      2024, 2025) or assumed from 2026 (2023); allocations assumed from 2026
     status: open
   D8:
     topic: MOC at-large eligibility wording vs Class A auto spots

@@ -1,0 +1,242 @@
+raw,school_key,method,sources,meet_keys,seen_at_areas
+Acalanes,acalanes,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Acalanes (Nc),acalanes,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Alameda,alameda,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Alameda (Nc),alameda,exact,hytek,2023-moc,
+Albany,albany,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Albany (Nc),albany,exact,hytek,2022-moc|2023-moc,
+Alhambra,alhambra-martinez,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Alhambra (Nc),alhambra-martinez,base,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
+Amador Valle,amador-valley,prefix,hytek,2019-area-tri-valley|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Amador Valley,amador-valley,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Amador Valley (Nc),amador-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
+American,american,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+American (Nc),american,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+American Can,american-canyon,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc,
+American Canyon,american-canyon,exact,hytek|moc_program,2019-moc|2024-moc|2025-moc|2026-moc,
+American Canyon (Nc),american-canyon,exact,hytek,2024-moc|2025-moc|2026-moc,
+Analy,analy,exact,hytek|moc_program,2019-moc|2026-moc,
+Analy (Nc),analy,exact,hytek|moc_program,2023-moc|2024-moc|2025-moc,
+Antioch,antioch,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley|2026-moc,tri-valley
+Antioch (Nc),antioch,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2024-area-tri-valley|2024-moc,tri-valley
+Arcata,arcata,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Arcata (Nc),arcata,exact,hytek,2024-moc|2026-moc,
+Archie Willi,archie-williams,prefix,hytek|moc_program,2023-moc|2026-moc,
+Archie Williams,archie-williams,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Archie Williams (Nc),archie-williams,exact,hytek,2022-moc|2024-moc|2025-moc,
+Arroyo,arroyo-nc,base,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Arroyo (Nc),arroyo-nc,base,hytek,2023-moc|2024-area-bay-shore,bay-shore
+Athenian,athenian,exact,hytek|moc_program,2024-moc|2025-moc|2026-moc,
+Athenian (Nc),athenian,exact,hytek,2024-moc|2026-moc,
+Bay School of San Francisco,bay-school-of-san-francisco,exact,hytek,2023-moc|2024-moc|2026-moc,
+Benicia,benicia,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Benicia (Nc),benicia,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Berean Chris,berean-christian,prefix,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc,
+Berean Christian,berean-christian,exact,hytek|moc_program,2026-moc,
+Berkeley,berkeley,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Berkeley (Nc),berkeley,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Bishop O'Dow,bishop-odowd,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore,bay-shore
+Bishop O'Dowd,bishop-odowd,exact,hytek|moc_program,2019-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Bishop O'Dowd (Nc),bishop-odowd,exact,hytek,2024-moc|2025-moc|2026-moc,
+Bishop Odowd (Nc),bishop-odowd,exact,hytek,2022-moc|2023-moc,
+Branson,branson,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Branson (Nc),branson,exact,hytek,2024-moc|2025-moc|2026-moc,
+California,california-san-ramon,base+area,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+California (Nc),california-san-ramon,base+area,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Calistoga,calistoga,exact,hytek|moc_program,2019-moc|2026-moc,
+Campolindo,campolindo,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Campolindo (Nc),campolindo,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Cardinal New,cardinal-newman,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Cardinal Newman (Nc),cardinal-newman,exact,hytek,2023-moc|2024-moc|2025-moc,
+Carondelet,carondelet,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Carondelet (Nc),carondelet,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Casa Grande,casa-grande,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Casa Grande (Nc),casa-grande,exact,hytek,2023-moc|2025-moc,
+Castro Valle,castro-valley,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Castro Valley,castro-valley,exact,hytek,2019-moc|2024-area-bay-shore,bay-shore
+Castro Valley (Nc),castro-valley,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Clayton Vall,clayton-valley,prefix,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Clayton Valley,clayton-valley,exact,hytek,2019-area-tri-valley|2019-moc,tri-valley
+Clayton Valley (Nc),clayton-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
+Clear Lake,clear-lake,exact,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc,
+Cloverdale,cloverdale,exact,hytek|moc_program,2022-moc|2023-moc|2025-moc|2026-moc,
+Cloverdale (Nc),cloverdale,exact,hytek,2023-moc,
+College Park,college-park,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+College Park (Nc),college-park,exact,hytek,2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+College Prep,college-preparatory,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+College Prep (Nc),college-preparatory,exact,hytek,2023-moc|2024-moc|2025-moc|2026-moc,
+Concord,concord,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley|2026-moc,tri-valley
+Concord (Nc),concord,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Convent & Stuart Hall (Nc),convent-and-stuart-hall,exact,hytek,2024-moc|2025-moc|2026-moc,
+Convent and,convent-and-stuart-hall,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Convent and Stuart Hall,convent-and-stuart-hall,exact,hytek,2019-moc,
+Convent and Stuart Hall (Nc),convent-and-stuart-hall,exact,hytek,2022-moc|2023-moc,
+Credo,credo,exact,moc_program,2023-moc,
+De Anza,de-anza,exact,hytek|moc_program,2022-moc|2026-moc,
+De Anza (Nc),de-anza,exact,hytek,2026-moc,
+De La Salle,de-la-salle,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+De La Salle (Nc),de-la-salle,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+DeAnza,de-anza,nospace,hytek,2019-moc,
+DeLaSalle,de-la-salle,nospace,hytek,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Deer Valley,deer-valley,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Deer Valley (Nc),deer-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Del Norte,del-norte,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Del Norte (Nc),del-norte,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc,
+Dougherty Va,dougherty-valley,prefix,hytek,2019-area-tri-valley|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Dougherty Valley,dougherty-valley,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Dougherty Valley (Nc),dougherty-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Drew,drew,exact,hytek|moc_program,2022-moc|2023-moc,
+Dublin,dublin,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Dublin (Nc),dublin,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+El Cerrito,el-cerrito,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+El Cerrito (Nc),el-cerrito,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Emerald,emerald,exact,hytek|moc_program,2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
+Emerald (Nc),emerald,exact,hytek,2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Emery,emery,exact,hytek|moc_program,2023-moc|2024-moc|2025-moc,
+Emery (Nc),emery,exact,hytek,2024-moc,
+Encinal,encinal,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Encinal (Nc),encinal,exact,hytek,2022-moc|2024-moc|2025-moc|2026-moc,
+Eureka,eureka,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Eureka (Nc),eureka,exact,hytek,2023-moc|2024-moc|2025-moc,
+Ferndale,ferndale,exact,hytek|moc_program,2023-moc|2024-moc|2025-moc,
+Foothill,foothill-pleasanton,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc,tri-valley
+Foothill (Nc),foothill-pleasanton,base,hytek|moc_program,2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Foothill Pleasanton (Nc),foothill-pleasanton,exact,hytek,2022-area-tri-valley|2022-moc,tri-valley
+Fort Bragg,fort-bragg,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Fort Bragg (Nc),fort-bragg,exact,hytek,2026-moc,
+Fortuna,fortuna,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Fortuna (Nc),fortuna,exact,hytek,2026-moc,
+Freedom,freedom,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Freedom (Nc),freedom,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Granada,granada,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Granada (Nc),granada,exact,hytek,2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Hayward,hayward,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Hayward (Nc),hayward,exact,hytek,2025-moc|2026-moc,
+Head Royce,head-royce,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Head Royce (Nc),head-royce,exact,hytek,2023-moc|2025-moc|2026-moc,
+Healdsburg,healdsburg,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
+Healdsburg (Nc),healdsburg,exact,hytek,2026-moc,
+Hercules,hercules,exact,hytek,2024-area-bay-shore,bay-shore
+Heritage,heritage-brentwood,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Heritage (Nc),heritage-brentwood,base,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Hoopa Valley,hoopa-valley,exact,hytek|moc_program,2025-moc,
+Internationa,international,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+International (Nc),international,exact,hytek,2023-moc|2024-moc|2025-moc|2026-moc,
+Irvington,irvington,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Irvington (N,irvington,exact,hytek,2024-area-bay-shore,bay-shore
+Irvington (Nc),irvington,exact,hytek,2022-moc|2023-moc,
+James Logan,james-logan,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+James Logan (Nc),james-logan,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Jesse Bethel,jesse-bethel,exact,hytek|moc_program,2019-moc|2023-moc|2024-area-bay-shore|2025-moc|2026-moc,bay-shore
+Jesse Bethel (Nc),jesse-bethel,exact,hytek,2023-moc,
+John F. Kennedy (Richmond),john-f-kennedy-richmond,exact,hytek,2024-area-bay-shore,bay-shore
+Justin-Siena,justin-siena,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Justin-Siena (Nc),justin-siena,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Kelseyville,kelseyville,exact,hytek|moc_program,2023-moc|2024-moc,
+Las Lomas,las-lomas,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Las Lomas (Nc),las-lomas,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Liberty,liberty-brentwood,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Liberty (Nc),liberty-brentwood,base,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Lick-Wilmerd,lick-wilmerding,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Lick-Wilmerding (Nc),lick-wilmerding,exact,hytek,2022-moc|2023-moc|2025-moc|2026-moc,
+Livermore,livermore,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2024-moc,tri-valley
+Livermore (N,livermore,exact,hytek|moc_program,2023-area-tri-valley|2023-moc|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Livermore (Nc),livermore,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley|2026-moc,tri-valley
+Lower Lake,lower-lake,exact,hytek|moc_program,2024-moc|2026-moc,
+Maria Carrillo,maria-carrillo,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Maria Carrillo (Nc),maria-carrillo,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Marin Academ,marin-academy,prefix,hytek|moc_program,2019-moc|2025-moc|2026-moc,
+Marin Cathol,marin-catholic,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Marin Catholic,marin-catholic,exact,hytek,2019-moc,
+Marin Catholic (Nc),marin-catholic,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc,
+McKinleyvill,mckinleyville,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc,
+McKinleyville,mckinleyville,exact,hytek,2019-moc,
+Mendocino,mendocino,exact,hytek|moc_program,2023-moc,
+Middletown,middletown,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Middletown (Nc),middletown,exact,hytek,2026-moc,
+Miramonte,miramonte,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Miramonte (Nc),miramonte,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Mission San,mission-san-jose,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Mission San Jose,mission-san-jose,exact,hytek,2019-moc,
+Mission San Jose (Nc),mission-san-jose,exact,hytek,2023-moc|2024-area-bay-shore|2024-moc|2026-moc,bay-shore
+Monte Vista,monte-vista,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Monte Vista (Nc),monte-vista,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Montgomery,montgomery,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Montgomery (Nc),montgomery,exact,hytek,2022-moc|2023-moc|2025-moc|2026-moc,
+Moreau Catho,moreau-catholic,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Moreau Catholic (Nc),moreau-catholic,exact,hytek,2022-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Mt Eden,mt-eden,exact,hytek|moc_program,2022-moc,
+Napa,napa,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2026-moc,
+Newark Memor,newark-memorial,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Newark Memorial,newark-memorial,exact,hytek,2019-moc,
+Newark Memorial (Nc),newark-memorial,exact,hytek,2023-moc|2024-area-bay-shore|2024-moc,bay-shore
+Northgate,northgate,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Northgate (Nc),northgate,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Novato,novato,exact,hytek|moc_program,2019-moc|2024-moc|2025-moc,
+Oakland Mili,oakland-military-institute,prefix,hytek,2019-moc,
+Petaluma,petaluma,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Petaluma (Nc),petaluma,exact,hytek,2023-moc|2024-moc|2025-moc|2026-moc,
+Piedmont,piedmont,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Piedmont (Nc),piedmont,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Piner,piner,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Piner (Nc),piner,exact,hytek,2023-moc,
+Pinole Valle,pinole-valley,prefix,hytek,2024-area-bay-shore,bay-shore
+Pinole Valley,pinole-valley,exact,hytek,2024-area-bay-shore,bay-shore
+Pittsburg,pittsburg,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Pittsburg (Nc),pittsburg,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Rancho Cotat,rancho-cotate,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Rancho Cotate (Nc),rancho-cotate,exact,hytek,2022-moc|2023-moc|2024-moc,
+Redwood,redwood-larkspur,base,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Redwood (Nc),redwood-larkspur,base,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Redwood Chri,redwood-christian,prefix,hytek|moc_program,2025-moc|2026-moc,
+Saint Mary's College,st-mary-college,exact,hytek,2019-moc,
+Salesian,salesian-college-preparatory,generic,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc|2026-moc,
+Salesian (Nc),salesian-college-preparatory,generic,hytek,2022-moc|2024-moc,
+Salesian Col,salesian-college-preparatory,prefix,hytek,2024-area-bay-shore,bay-shore
+Salesian College Preparatory,salesian-college-preparatory,exact,hytek,2024-area-bay-shore,bay-shore
+San Domenico,san-domenico,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+San Francisc,san-francisco-university,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
+San Francisco University,san-francisco-university,exact,hytek,2019-moc|2025-moc|2026-moc,
+San Leandro,san-leandro,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+San Leandro (Nc),san-leandro,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+San Lorenzo,san-lorenzo,exact,hytek|moc_program,2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+San Marin,san-marin,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+San Marin (Nc),san-marin,exact,hytek,2026-moc,
+San Rafael,san-rafael,exact,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc|2026-moc,
+San Ramon Va,san-ramon-valley,prefix,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+San Ramon Valley,san-ramon-valley,exact,hytek,2019-area-tri-valley,tri-valley
+San Ramon Valley (Nc),san-ramon-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Santa Rosa,santa-rosa,exact,hytek,2019-moc,
+Santa Rosa (,santa-rosa,exact,hytek|moc_program,2022-moc|2024-moc|2025-moc|2026-moc,
+Santa Rosa (Nc),santa-rosa,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Sonoma Acade,sonoma-academy,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
+Sonoma Academy (Nc),sonoma-academy,exact,hytek,2025-moc,
+Sonoma Valle,sonoma-valley,prefix,hytek|moc_program,2019-moc|2022-moc|2026-moc,
+St Mary's Co,st-mary-college,prefix,hytek,2024-area-bay-shore,bay-shore
+St Mary's College,st-mary-college,exact,hytek,2024-area-bay-shore,bay-shore
+St. Bernard (Nc),st-bernard-academy,generic,hytek|moc_program,2025-moc|2026-moc,
+St. Helena,st-helena,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2026-moc,
+St. Helena (Nc),st-helena,exact,hytek,2022-moc,
+St. Joseph Notre Dame (Nc),st-joseph-notre-dame,exact,hytek,2022-moc,
+St. Mary's,st-mary-college,generic,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Summerfield,summerfield-waldorf-of-santa-rosa,prefix,hytek|moc_program,2025-moc|2026-moc,
+Tamalpais,tamalpais,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Tamalpais (Nc),tamalpais,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Technology,technology,exact,hytek,2019-moc,
+Technology (Nc),technology,exact,hytek|moc_program,2024-moc|2025-moc|2026-moc,
+Terra Linda,terra-linda,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Terra Linda (Nc),terra-linda,exact,hytek,2024-moc|2026-moc,
+Ukiah,ukiah,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Ukiah (Nc),ukiah,exact,hytek,2026-moc,
+Upper Lake,upper-lake,exact,hytek|moc_program,2024-moc|2025-moc|2026-moc,
+Vallejo,vallejo,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Vallejo (Nc),vallejo,exact,hytek,2025-moc|2026-moc,
+Vintage,vintage,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Vintage (Nc),vintage,exact,hytek,2024-moc|2025-moc|2026-moc,
+Washington,washington,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Washington (,washington,exact,hytek,2024-area-bay-shore,bay-shore
+Washington (Nc),washington,exact,hytek,2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2026-moc,bay-shore
+Willits,willits,exact,hytek|moc_program,2019-moc|2022-moc|2025-moc|2026-moc,
+Windsor,windsor,exact,hytek,2019-moc,
+Windsor (Nc),windsor,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Ygnacio Vall,ygnacio-valley,prefix,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley

@@ -13,8 +13,13 @@ venv/
 .coverage
 htmlcov/
 
-# Pipeline outputs (rebuildable from data/raw + data/reference)
+# Athlete-level data: minors' names, grades and IDs. Never commit. Rebuild locally
+# (README "Data"); data/raw/MANIFEST.csv holds the checksums to verify a rebuild.
+data/raw/athleticnet/
+data/raw/hytek/
+data/reference/entries/
 data/processed/
+data/review/
 outputs/
 
 # Scratch

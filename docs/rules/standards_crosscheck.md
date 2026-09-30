@@ -4,6 +4,8 @@ Generated from the "At-Large" lines (spelled `At-Large` or `At Large`) that Hy-T
 
 ## Findings
 
+> Update 2026-09-29: each season now has its own rules file, which uses the standards printed in that season's results (see `docs/decisions.md`). Finding 2 describes the situation before that change.
+
 1. **The 2026 transcription is confirmed.** The 2026 Tri-Valley results print NCS at-large standards that equal the YAML for 34 of 34 events. Formatting differences such as `5-0` vs `5-00.00` are ignored.
 2. **NCS at-large standards change every season.** Standards are printed for Tri-Valley in 2019, 2022, 2024, 2025 and 2026, and 2019–2025 differ from 2026. Applying 2026 standards to earlier seasons (as instructed) will not reproduce who actually got an at-large spot in those years.
 3. **State (CIF) at-large standards are a different, stricter table.** The 2019, 2022, 2024 and 2025 MOC results print "CIF At-Large" marks well above the NCS table (e.g. girls 100 m: CIF 11.84–11.94 vs NCS 12.45–12.55), and the CIF marks also change by season. The source doc's [inference] that one table serves both levels (discrepancy D9) does not hold.

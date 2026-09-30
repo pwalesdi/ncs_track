@@ -1,6 +1,7 @@
-"""Checksum manifest for data/raw/: proves raw files are untouched.
+"""Checksum manifest for source files: proves they are untouched.
 
-`build` recomputes sha256/bytes for every file under data/raw/ and keeps the
+Covers data/raw/ (results) and data/reference/entries/ (meet programs / entry lists).
+`build` recomputes sha256/bytes for every file in those directories and keeps the
 hand-entered provenance columns from the existing manifest. `check` fails if any
 file changed, disappeared, or is not listed.
 """
@@ -18,6 +19,7 @@ COLUMNS = ["path", "source", "meet_key", "bytes", "sha256", "original_name", "so
            "fetched_at", "verified", "notes"]
 PROVENANCE = ["original_name", "source_url", "fetched_at", "verified", "notes"]
 SKIP = {".gitkeep", ".DS_Store", "MANIFEST.csv"}
+DIRS = ("data/raw", "data/reference/entries")
 
 
 def sha256(path: Path) -> str:
@@ -28,8 +30,17 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def _raw_files(raw: Path) -> list[Path]:
-    return sorted(p for p in raw.rglob("*") if p.is_file() and p.name not in SKIP)
+def _files(root: Path, dirs: tuple[str, ...]) -> list[Path]:
+    out = []
+    for d in dirs:
+        base = root / d
+        if base.exists():
+            out += [p for p in base.rglob("*") if p.is_file() and p.name not in SKIP]
+    return sorted(out)
+
+
+def _source(rel: Path) -> str:
+    return "entries" if rel.parts[:3] == ("data", "reference", "entries") else rel.parent.name
 
 
 def _meet_key(p: Path) -> str:
@@ -43,34 +54,37 @@ def read(manifest: Path = paths.MANIFEST) -> pd.DataFrame:
     return pd.read_csv(manifest, dtype=str, keep_default_na=False)
 
 
-def build(raw: Path = paths.RAW, manifest: Path = paths.MANIFEST) -> pd.DataFrame:
-    old = read(manifest).set_index("path") if manifest.exists() else None
+def build(root: Path = paths.ROOT, manifest: Path = paths.MANIFEST,
+          dirs: tuple[str, ...] = DIRS) -> pd.DataFrame:
+    old = read(manifest).set_index("path")
     rows = []
-    for p in _raw_files(raw):
-        rel = p.relative_to(raw.parent.parent).as_posix()   # data/raw/...
-        row = {"path": rel, "source": p.parent.name, "meet_key": _meet_key(p),
+    for p in _files(root, dirs):
+        rel = p.relative_to(root)
+        key = rel.as_posix()
+        row = {"path": key, "source": _source(rel), "meet_key": _meet_key(p),
                "bytes": str(p.stat().st_size), "sha256": sha256(p)}
         for col in PROVENANCE:
-            row[col] = old.at[rel, col] if old is not None and rel in old.index else ""
+            row[col] = old.at[key, col] if key in old.index else ""
         rows.append(row)
     df = pd.DataFrame(rows, columns=COLUMNS)
     df.to_csv(manifest, index=False)
     return df
 
 
-def check(raw: Path = paths.RAW, manifest: Path = paths.MANIFEST) -> list[str]:
-    """Return a list of problems; empty means every raw file matches the manifest."""
+def check(root: Path = paths.ROOT, manifest: Path = paths.MANIFEST,
+          dirs: tuple[str, ...] = DIRS) -> list[str]:
+    """Return a list of problems; empty means every file matches the manifest."""
     listed = read(manifest).set_index("path")
     problems = []
     seen = set()
-    for p in _raw_files(raw):
-        rel = p.relative_to(raw.parent.parent).as_posix()
-        seen.add(rel)
-        if rel not in listed.index:
-            problems.append(f"not in manifest: {rel}")
-        elif sha256(p) != listed.at[rel, "sha256"]:
-            problems.append(f"CHANGED: {rel}")
-    for rel in listed.index:
-        if rel not in seen:
-            problems.append(f"missing from disk: {rel}")
+    for p in _files(root, dirs):
+        key = p.relative_to(root).as_posix()
+        seen.add(key)
+        if key not in listed.index:
+            problems.append(f"not in manifest: {key}")
+        elif sha256(p) != listed.at[key, "sha256"]:
+            problems.append(f"CHANGED: {key}")
+    for key in listed.index:
+        if key not in seen:
+            problems.append(f"missing from disk: {key}")
     return problems

@@ -1,5 +1,8 @@
 # NCS Track & Field Qualification Analysis — Repo Audit
 
+> Athlete names in this document are made-up stand-ins. The data patterns they
+> illustrate (spelling variants, nicknames, grade errors) are real.
+
 Audit date: 2026-09-29. Nothing in the repo was modified, moved, or deleted. The only
 new files are `docs/audit.md` (this file) and `data/reference/meets.csv`.
 

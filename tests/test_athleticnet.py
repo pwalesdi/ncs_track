@@ -59,10 +59,10 @@ def test_fixtures_have_no_errors(moc, tv, rules):
 
 def test_rounds_kept_separate(moc):
     perf = moc[0]
-    smith = perf[perf["athlete_id"] == "9000001"].set_index("round")
-    assert smith.loc["prelim", "mark_value"] == pytest.approx(11.99)
-    assert smith.loc["final", "mark_value"] == pytest.approx(12.05)
-    assert smith.loc["prelim", "mark_flags"] == "Q"
+    sprinter = perf[perf["athlete_id"] == "9000001"].set_index("round")
+    assert sprinter.loc["prelim", "mark_value"] == pytest.approx(11.99)
+    assert sprinter.loc["final", "mark_value"] == pytest.approx(12.05)
+    assert sprinter.loc["prelim", "mark_flags"] == "Q"
 
 
 def test_relays(moc):
@@ -228,7 +228,7 @@ def test_cli_end_to_end(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(paths, "REVIEW", tmp_path / "review")
     assert cli.main(["ingest-athleticnet", str(MOC), str(TV)]) == 0
     out = capsys.readouterr().out
-    assert "2026 rules applied" in out and "0 errors total" in out
+    assert "2024 rules (standards printed in 2024 results" in out and "0 errors total" in out
     perf = pd.read_csv(tmp_path / "processed" / "performances.csv", dtype=str)
     assert len(perf) == 29 and perf["performance_id"].is_unique
     assert (tmp_path / "review" / "validation_issues.csv").exists()

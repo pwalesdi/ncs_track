@@ -5,8 +5,10 @@ are **hand-built** in the agreed Athletic.net extraction layout. They are not re
 Athletic.net exports.
 
 - **Real, copied from the Hy-Tek results** (`data/raw/hytek/2024-moc.htm`,
-  `2024-area-tri-valley.htm`): athlete names, grades, schools, events, rounds, heats,
-  places, marks, wind, and DQ/DNF/FS/NH outcomes. Relay leg names are real too.
+  `2024-area-tri-valley.htm`): grades, schools, events, rounds, heats, places, marks, wind,
+  and DQ/DNF/FS/NH outcomes.
+- **Made up:** every athlete and relay-leg name. The repo is public and the athletes are
+  minors; `tests/test_no_athlete_names.py` fails if a real name comes back.
 - **Synthetic:** `athlete_id` (9000001+), `school_id` (99001+), `source_url`. Names are
   written "First Last" and schools unabbreviated, as Athletic.net displays them.
   `gender` uses `F`/`M`.

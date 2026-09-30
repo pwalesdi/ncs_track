@@ -77,16 +77,35 @@ def test_flags_need_three_seasons():
     assert analysis.spot_utilization_flags(su[su["season"] != 2024]).empty
 
 
-def test_empty_lanes_no_show_rate_double_qualifier():
+def test_unused_not_refilled_no_show_rate_double_qualifier():
     tv = analysis.spot_utilization(q_rows()).set_index("area").loc["tri-valley"]
-    # unused 2 (1 no-show + 1 not declared); the not-declared spot was refilled -> 1 empty lane
-    assert tv["empty_lanes"] == 1 and tv["no_show_rate"] == 0.5
+    # unused 2 (1 no-show + 1 not declared); the not-declared spot was refilled -> 1 unused, not refilled
+    assert tv["unused_not_refilled"] == 1 and tv["no_show_rate"] == 0.5
     assert tv["not_declared_individual"] == 1 and tv["double_qualifier_share"] == 1.0
     su = pd.concat([analysis.spot_utilization(q_rows().assign(season=s)) for s in (2022, 2023, 2024)])
-    lanes = analysis.spot_utilization_flags(su, metric="empty_lanes")
-    assert list(lanes["area"]) == ["tri-valley"] and lanes.iloc[0]["metric"] == "empty_lanes"
-    ns = analysis.no_shows_empty_lanes(su).set_index(["season", "area"])
-    assert ns.loc[(2022, "tri-valley"), "empty_lane_rate"] == round(1 / 3, 4)
+    flags = analysis.spot_utilization_flags(su, metric="unused_not_refilled")
+    assert list(flags["area"]) == ["tri-valley"] and flags.iloc[0]["metric"] == "unused_not_refilled"
+
+
+def _moc(field_size):
+    return pd.DataFrame({"gender": "girls", "event_code": "100", "round": "prelim",
+                         "status": ["OK"] * field_size})
+
+
+def test_unfilled_spots_need_a_short_field():
+    # TV: auto who competed; auto no-show; next-best-mark not declared but refilled; BS at-large-std who competed.
+    q = q_rows()
+    q.loc[1, "vacancy_refilled_by_area"] = None
+    short = analysis.mark_unfilled(q, _moc(23))
+    full = analysis.mark_unfilled(q, _moc(24))
+    # Only the TV automatic no-show counts, and only when the field ended below 24.
+    assert short["unfilled_spot"].tolist() == [False, True, False, False, False]
+    assert not full["unfilled_spot"].any()
+    tv = analysis.spot_utilization(short).set_index("area").loc["tri-valley"]
+    assert (tv["guaranteed_spots"], tv["unfilled_spots"], tv["unfilled_rate"]) == (3, 1, round(1 / 3, 4))
+    assert tv["competed"] + tv["vacancies_refilled"] + tv["unfilled_spots"] + tv["other_unused"] == tv["spots_earned"]
+    ns = analysis.no_shows_unfilled(analysis.spot_utilization(short)).set_index("area")
+    assert ns.loc["tri-valley", "unfilled_spots"] == 1
 
 
 def test_moc_overall_places():

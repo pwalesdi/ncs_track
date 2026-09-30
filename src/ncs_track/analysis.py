@@ -29,6 +29,8 @@ AT_LARGE_TYPES = ("next_best_mark", "at_large_standard")
 TOP9_EVENTS = {"LJ", "TJ", "SP", "DT"}                 # 9 finalists get extra attempts
 NO_PRELIM_EVENTS = {"3200", "HJ", "PV"}                # one final round at the MOC
 NOT_COMPETED = {"DNS", "SCR"}
+MOC_FIELD = 24                                         # 6 + 6 + 6 + 3 automatic + 3 next best mark
+GUARANTEED_TYPES = ("automatic", "next_best_mark")     # the fixed spots; at-large standard has no cap
 AREAS = replay.AREAS
 KEY = ["season", "gender", "event_code"]
 
@@ -239,6 +241,8 @@ def spot_utilization(q: pd.DataFrame) -> pd.DataFrame:
                      "not_declared_chose_other_events": int((nd["choice_tag"] == "chose_other_events").sum()),
                      "not_declared_did_not_declare": int((nd["choice_tag"] == "did_not_declare").sum()),
                      "vacancies_refilled": len(refilled),
+                     "guaranteed_spots": int(x["qualifier_type"].isin(GUARANTEED_TYPES).sum()),
+                     "unfilled_spots": int(x.get("unfilled_spot", pd.Series(False, index=x.index)).fillna(False).astype(bool).sum()),
                      "not_declared_individual": int(nd["competed_other_moc_event"].notna().sum()),
                      "not_declared_competed_other_event": int((nd["competed_other_moc_event"] == 1).sum()),
                      "refilled_by_area": "|".join(f"{k}:{v}" for k, v in refilled.value_counts().sort_index().items()),
@@ -251,7 +255,9 @@ def _derived(t: pd.DataFrame) -> pd.DataFrame:
     t = t.copy()
     t["unused_total"] = t["spots_earned"] - t["competed"]
     t["utilization_rate"] = (t["competed"] / t["spots_earned"]).round(4)
-    t["empty_lanes"] = (t["unused_total"] - t["vacancies_refilled"]).clip(lower=0)
+    t["unused_not_refilled"] = (t["unused_total"] - t["vacancies_refilled"]).clip(lower=0)
+    t["other_unused"] = (t["unused_total"] - t["vacancies_refilled"] - t["unfilled_spots"]).clip(lower=0)
+    t["unfilled_rate"] = (t["unfilled_spots"] / t["guaranteed_spots"]).where(t["guaranteed_spots"] > 0).round(4)
     t["no_show_rate"] = (t["no_show"] / t["declared"]).where(t["declared"] > 0).round(4)
     t["double_qualifier_share"] = (t["not_declared_competed_other_event"] / t["not_declared_individual"]).where(
         t["not_declared_individual"] > 0).round(4)
@@ -259,26 +265,26 @@ def _derived(t: pd.DataFrame) -> pd.DataFrame:
 
 
 ADDITIVE = ["spots_earned", "declared", "competed", "no_show", "not_declared", "not_declared_chose_other_events",
-            "not_declared_did_not_declare", "vacancies_refilled", "not_declared_individual",
-            "not_declared_competed_other_event", "replacements_from_this_area"]
+            "not_declared_did_not_declare", "vacancies_refilled", "guaranteed_spots", "unfilled_spots",
+            "not_declared_individual", "not_declared_competed_other_event", "replacements_from_this_area"]
 
 
 def spot_utilization_by_area(t: pd.DataFrame) -> pd.DataFrame:
-    """Roll-up per season x area. empty_lanes is summed from the event rows (each floored
-    at 0 per event), not recomputed from the totals."""
-    r = t.groupby(["season", "area"])[ADDITIVE + ["empty_lanes"]].sum().reset_index()
-    lanes = r.pop("empty_lanes")
-    r = _derived(r)
-    r["empty_lanes"] = lanes
+    """Roll-up per season x area. unused_not_refilled and other_unused are summed from the
+    event rows (each floored at 0 per event), not recomputed from the totals."""
+    keep = ["unused_not_refilled", "other_unused"]
+    r = t.groupby(["season", "area"])[ADDITIVE + keep].sum().reset_index()
+    saved = r[keep].copy()
+    r = _derived(r.drop(columns=keep))
+    r[keep] = saved
     return r
 
 
-def no_shows_empty_lanes(t: pd.DataFrame) -> pd.DataFrame:
-    """Per Area x season: the counts behind no-show and empty-lane rates."""
+def no_shows_unfilled(t: pd.DataFrame) -> pd.DataFrame:
+    """Per Area x season: the counts behind no-show and unfilled-spot rates."""
     r = spot_utilization_by_area(t)
-    r["empty_lane_rate"] = (r["empty_lanes"] / r["spots_earned"]).round(4)
-    return r[["season", "area", "spots_earned", "declared", "no_show", "no_show_rate", "not_declared",
-              "vacancies_refilled", "empty_lanes", "empty_lane_rate"]]
+    return r[["season", "area", "spots_earned", "guaranteed_spots", "declared", "no_show", "no_show_rate",
+              "not_declared", "vacancies_refilled", "unfilled_spots", "unfilled_rate", "unused_not_refilled"]]
 
 
 def spot_utilization_flags(t: pd.DataFrame, min_seasons: int = 3, metric: str = "unused_total") -> pd.DataFrame:
@@ -525,6 +531,27 @@ def left_out(season: int, evaluated: pd.DataFrame, q: pd.DataFrame, cutoffs: pd.
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------
+def moc_fields(moc: pd.DataFrame) -> dict:
+    """(gender, event) -> athletes/teams who competed in the event's first MOC round."""
+    out = {}
+    for (g, e), x in moc.groupby(["gender", "event_code"]):
+        first = x[x["round"] == ("prelim" if (x["round"] == "prelim").any() else "final")]
+        out[(g, str(e))] = int((~first["status"].isin(NOT_COMPETED)).sum())
+    return out
+
+
+def mark_unfilled(q: pd.DataFrame, moc: pd.DataFrame) -> pd.DataFrame:
+    """unfilled_spot: a guaranteed spot (automatic or next best mark) whose qualifier didn't
+    compete, whose spot wasn't refilled, in an event whose MOC field ended below 24."""
+    fields = moc_fields(moc)
+    q = q.copy()
+    q["moc_field"] = [fields.get((g, str(e))) for g, e in zip(q["gender"], q["event_code"])]
+    q["unfilled_spot"] = ((q["in_qualified_field"] == 1) & q["qualifier_type"].isin(GUARANTEED_TYPES)
+                          & (q["competed"] == 0) & q["vacancy_refilled_by_area"].isna()
+                          & (q["moc_field"].fillna(MOC_FIELD) < MOC_FIELD))
+    return q
+
+
 def build_season(season: int, results, entries, rules, kw, legs, moc_perf):
     ev = replay.evaluate(results, rules, BEST_READING)
     comp = replay.compare(ev, entries, rules, interp=BEST_READING, legs=legs, **kw)
@@ -536,6 +563,7 @@ def build_season(season: int, results, entries, rules, kw, legs, moc_perf):
     moc = moc_all[moc_all["in_scope"]]
     q = qualifiers(season, comp, ev, moc, unresolved, kw["school_key"], competed_events(moc_all, legs),
                    moc_overall_places(moc, kw["school_key"]))
+    q = mark_unfilled(q, moc)
     cut = moc_cutoffs(moc)
     lo = left_out(season, ev, q, cut, kw["school_key"])
     return q, lo, comp

@@ -194,10 +194,10 @@ def cmd_analysis(args) -> int:
     su = analysis.spot_utilization(q)
     su.to_csv(out / "spot_utilization.csv", index=False)
     analysis.spot_utilization_by_area(su).to_csv(out / "spot_utilization_by_area.csv", index=False)
-    analysis.spot_utilization_flags(su).to_csv(out / "spot_utilization_flags.csv", index=False)
-    analysis.spot_utilization_flags(su, metric="empty_lanes").to_csv(
-        out / "spot_utilization_flags_empty_lanes.csv", index=False)
-    analysis.no_shows_empty_lanes(su).to_csv(out / "no_shows_empty_lanes_by_area.csv", index=False)
+    analysis.spot_utilization_flags(su).to_csv(out / "spot_utilization_flags_unused.csv", index=False)
+    analysis.spot_utilization_flags(su, metric="unfilled_spots").to_csv(
+        out / "spot_utilization_flags_unfilled.csv", index=False)
+    analysis.no_shows_unfilled(su).to_csv(out / "no_shows_unfilled_by_area.csv", index=False)
     analysis.core_comparison(q).to_csv(out / "core_comparison.csv", index=False)
     analysis.core_tests(q).to_csv(out / "core_tests.csv", index=False)
     analysis.core_place_curve(q).to_csv(out / "core_place_curve.csv", index=False)

@@ -1,49 +1,59 @@
 # Dashboard checks
 
 `dashboard/index.html` is built by `.venv/bin/python scripts/build_dashboard.py`, from
-`dashboard/template.html` and the tables in `data/summary/` (embedded as JSON; no athlete
-names). Chart.js comes from cdnjs.
+`dashboard/template.html` and the tables in `data/summary/`. The tables are embedded as
+JSON with no athlete names, left-out figures as counts only, and MOC-place figures only for
+groups of 5 or more entries. Chart.js 4.4.1 is inlined from `dashboard/vendor/`, pinned by
+SHA-256, so the page works offline.
 
-## How the checks work
+## Numbers: the page's own code against the summary tables
 
-`tests/test_dashboard.py` takes the dashboard's own aggregation code (the `agg` script
-block) and its embedded data out of the built `index.html`, and runs them with macOS's
-JavaScript engine (`osascript -l JavaScript`). It then compares the numbers the page would
-show with pandas reading the summary tables directly. The rendering script is only
-syntax-checked, because there is no browser here. Checked 2026-09-30; all pass.
+`tests/test_dashboard.py` runs the page's aggregation code (the `agg` script block) on its
+embedded data with macOS's JavaScript engine (`osascript -l JavaScript`), then compares the
+results with pandas reading `data/summary/`. Checked 2026-09-30; all pass.
 
-| # | Panel and filter | Dashboard shows | Summary table | Match |
-|---|---|---|---|---|
-| 1 | Field makeup; qualified, 2026, all | Tri-Valley 294 of 818 | `field_makeup.csv`: 294, field 818 | ✓ |
-| 2 | Field makeup; declared, 2026, all | Bay Shore automatic 187 | `field_makeup.csv`: 187 | ✓ |
-| 3 | At-large share; qualified, 2026, all | Tri-Valley next best mark 72 of 146 | `at_large_share.csv`: 72; combined spots 146 | ✓ |
-| 4 | MOC performance; 2026, all | Class A automatic top finish 7 of 83 | `moc_performance.csv`: 7 of 83 | ✓ |
-| 5 | Spot utilization; 2026, all | Redwood Empire empty lanes 17 of 216; no-shows 3 of 193 | `spot_utilization_by_area.csv`: 17, 216, 3, 193 | ✓ |
-| 6 | Left out; 2026, all | Tri-Valley 0 of 96 (3 of 96 before the all-rounds cutoff, 2026-09-30) | `left_out.csv`: 0 of 96 | ✓ |
-| 7 | Makeup, girls 100, 2026; utilization, boys throws, 2026 | Per-Area totals | `field_makeup.csv`, `spot_utilization.csv` filtered | ✓ |
-| 9 | Core question, 2026, all | Class A lowest autos 1 of 28; every Area/group count and median (from `core_place_counts.csv`) | `core_comparison.csv` (2026, all events) | ✓ |
-| 10 | Headline cards (pooled 2022–2026) | Tri-Valley 464 of 659 at-large spots; every Area's lowest-auto and at-large top finishes; empty lanes | pandas on `at_large_share.csv`, `core_place_counts.csv` (cross-checked with `core_comparison.csv`), `spot_utilization_by_area.csv` | ✓ |
-| 8 | Utilization, all seasons pooled; flag list | Bay Shore empty lanes, 5 seasons; 22 flags | Sum of `spot_utilization_by_area.csv`; `spot_utilization_flags_empty_lanes.csv` | ✓ |
+| # | View | Checked | Summary table |
+|---|---|---|---|
+| 1 | Field makeup, all qualifiers, 2026 | Tri-Valley 294 of 818 MOC spots; 72 next best mark, 30 at-large | `field_makeup.csv` |
+| 2 | Field makeup, actual entries, 2026 | Bay Shore 187 automatic | `field_makeup.csv` |
+| 3 | Next best mark + at-large spots, 2026 | Tri-Valley 72 of 103 next-best-mark spots; 43 at-large; 146 together | `at_large_share.csv` |
+| 4 | MOC performance, 2026 | Class A automatic: 7 of 83 entries finished top 8 | `moc_performance.csv` |
+| 5 | Spot use, every Area × season | Competed, refilled, unfilled, other unused; segments sum to spots earned | `spot_utilization_by_area.csv` |
+| 6 | Left out, 2026 | Tri-Valley 0 of 96 | `left_out.csv` |
+| 7 | Area place vs. MOC finish, pooled + 2024 girls throws | Every Area × place: entries, top 8, median (blank below 5) | `core_place_curve.csv` |
+| 8 | Overview cards | Finish bands (TV 7th–8th, BS/RE 5th–6th, CA 3rd); 464 of 659 spots; unfilled total | `core_place_curve.csv`, `at_large_share.csv`, `spot_utilization_by_area.csv` |
+| 9 | Flag list; boys throws filter | Rows = `spot_utilization_flags_unfilled.csv`; spots earned by Area | `spot_utilization.csv` |
+| 10 | Units | "294 of 818 MOC spots (36%)", "19 of 59 entries finished top 8 (32%)", ordinals | – |
 
-## Browser check (redesign, 2026-09-30)
+## Browser: every tab at both widths
 
 `scripts/checks/dashboard_browser.py` (also run by `tests/test_dashboard_browser.py`) opens
-the page in headless Chromium through Playwright, with **every network request blocked**.
-At each width it checks:
-- the page as loaded, then with every "Show numbers" table open, then after switching to
-  the declared field, all seasons, girls and the throws group;
-- that the headline cards show the numbers pandas computes from `data/summary/`;
-- that the filter bar is still at the top of the screen after scrolling to the bottom.
+the page in headless Chromium through Playwright, with every network request blocked. At
+390 px and 1400 px it visits every tab in three views: all seasons side by side (the
+default), focused on 2026, and all seasons pooled. In each it checks:
+- no page-level horizontal scroll;
+- every chart in the visible tab drew;
+- no "undefined" or "NaN" in the page text, chart labels, tooltips or donut centres;
+- no console errors;
+- that the Overview cards match pandas;
+- that below 700 px the filters sit behind the "Filters" button.
 
-| Width | Page-level horizontal scroll | Charts drawn (4 bar + 4 donut) | Headline numbers | Sticky filters | Console / page errors | Network |
-|---|---|---|---|---|---|---|
-| 390 px | none (390 = 390) | 8 of 8 | match | yes | 0 | 0 requests |
-| 1400 px | none (1400 = 1400) | 8 of 8 | match | yes | 0 | 0 requests |
+Result 2026-09-30: all pass at both widths, with 0 network requests. Charts drawn per tab
+and view (the same at both widths):
 
-Screenshots: `outputs/dashboard_{390,1400}{,_tables_open,_filtered}.png` (git-ignored).
+| Tab | Side by side | Focus on 2026 | Pooled |
+|---|---|---|---|
+| Area place vs. MOC finish | 10 (5 seasons × median, top 8) | 2 | 2 |
+| Field makeup | grid | 1 | 1 |
+| Next best mark + at-large spots | grid | 1 | 1 |
+| MOC performance | 2 grids | 1 | 1 |
+| Spot use | 20 donuts (Area × season) | 4 | 4 |
+| Left out | grid | note + table | note + table |
+
+Screenshots: `outputs/tabs/{390,1400}_{tab}.png` for the default view, plus
+`_{2026,pooled}` versions (git-ignored).
 
 ## Not checked here
 
-- **Real phones.** The check uses headless Chromium, not iOS Safari or Android Chrome.
-- **Canvas text.** The automated checks confirm the charts drew; they can't read the canvas
-  text. A "stray label" bug was caught by viewing the screenshots and fixed.
+- **Real phones and projectors.** The check uses headless Chromium only.
+- **Canvas text.** Labels are checked through the chart objects, not by reading pixels.

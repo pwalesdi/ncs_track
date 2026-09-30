@@ -23,47 +23,57 @@ CHARTJS_SHA256 = "81ffafe13c37e1b25793b020d446f4d9739b949dadb7f9f79d709a0cad781c
 EVENT_ORDER = ["100", "200", "400", "800", "1600", "3200", "100H", "110H", "300H", "4x100", "4x400",
                "HJ", "PV", "LJ", "TJ", "SP", "DT"]
 
-# From docs/analysis_tables.md (Terms), shortened for the footer.
+# From docs/analysis_tables.md, in the dashboard's plain language.
 DEFINITIONS = [
     ("Automatic", "Qualified by place at the Area meet: top 6 (Class A: top 3)."),
     ("Next best mark", "One of the 3 fill spots per event: the next best marks from all four Area meets."),
-    ("At-large standard", "Met the posted at-large standard in the Area final, outside the automatic places."),
-    ("At-large (combined)", "Next best mark + at-large standard."),
-    ("Replacement", "In the MOC program though not predicted, filling a vacancy (next finalist in line, same Area)."),
-    ("Unexplained", "In the program, not predicted, no explanation (includes schools that could not be matched)."),
-    ("Everyone who qualified", "Who the current rules say earned a spot: a replay of each season's rules against the "
-                               "Area results (matches 98–99% of real entries once athlete choices and replacements are counted)."),
-    ("Who actually declared", "Everyone in the MOC program."),
-    ("Competed", "Has a row in the MOC results with any status other than DNS or scratch (DNF, DQ, no height, fouls count)."),
-    ("Top finish", "MOC final place 8th or better (9th or better in LJ, TJ, SP and DT). The 800/1600 finals seat 12 but "
-                   "top 8 is used; the 3200, HJ and PV have no prelims."),
-    ("Empty lane", "A spot that went to nobody: earned but not used and not refilled. Includes no-shows, which cannot be refilled."),
-    ("No-show", "Declared but did not compete."),
-    ("Utilization", "Spots used by the Area's own qualifiers ÷ spots earned."),
+    ("At-large", "Met the posted at-large standard in the Area final, outside the automatic places. "
+                 "Only these athletes are called at-large."),
+    ("Next best mark + at-large standard", "The two routes together."),
+    ("Guaranteed spots", "The fixed spots per event: 21 automatic (6 + 6 + 6 + 3) plus 3 next best mark = 24. "
+                         "At-large-standard spots come on top and have no fixed number."),
+    ("All qualifiers", "Everyone who earned a spot, whether or not they entered. A replay of each season's rules "
+                       "against the Area results (it matches 98–99% of real entries once athlete choices and "
+                       "replacements are counted)."),
+    ("Actual entries", "Athletes who entered the MOC (the meet program)."),
+    ("Entries", "Athlete-events: one athlete in two events counts twice."),
+    ("Competed", "Has a row in the MOC results with any status other than DNS or scratch (DNF, DQ, no height and "
+                 "fouls count)."),
+    ("Top 8", "MOC final place 8th or better (9th or better in LJ, TJ, SP and DT). The 800/1600 finals seat 12 but "
+              "top 8 is used; the 3200, HJ and PV have no prelims."),
+    ("Typical MOC finish (median place)", "The middle MOC place of the entries in a group. Finalists keep their "
+                                          "final place; everyone else with a valid MOC mark is ranked after the "
+                                          "finalists by their best mark. Groups under 5 entries are not shown."),
+    ("Refilled", "The Area's qualifier withdrew before the entry deadline, and the next finalist from that Area took "
+                 "the spot."),
+    ("Unfilled spot (provisional)", "A guaranteed spot nobody used: the qualifier didn't compete, nobody replaced "
+                                    "them, and the event's MOC field (athletes who competed in the first round) "
+                                    "ended below 24. Under verification."),
+    ("Other unused", "A qualifier didn't use the spot but no gap followed: the field still had 24, or the spot came "
+                     "from the at-large standard."),
     ("Left out", "The 3 best non-qualifiers per Area and event, by Area mark, compared with the 8th-best valid MOC "
-                 "mark (9th for LJ/TJ/SP/DT) across all MOC rounds, one mark per athlete. Marks from different meets: "
-                 "a comparison, not a prediction."),
-    ("Panel 4 columns", "Used = utilization (competed ÷ spots earned); Empty = empty lanes ÷ spots earned; "
-                        "No-shows = of declared; Not decl. = qualified but not in the program; Refilled = vacancies refilled."),
-    ("All seasons", "Counts summed over 2022–2026 (pooled); rates recomputed from the sums."),
-    ("Lowest automatic", "An Area's automatic qualifiers who placed 5th–6th at the Area meet (3rd for Class A)."),
-    ("Median MOC place", "Finalists keep their final place; everyone else with a valid MOC mark is ranked after the "
-                         "finalists by their best mark. Lower is better."),
-    ("Source", "Athletic.net Area and MOC results, MOC programs (Diablo Timing); rules per season. "
-               "Pre-2026 allocations assumed from 2026; 2023 standards assumed from 2026. State results pending."),
+                 "mark (9th for LJ/TJ/SP/DT) across all MOC rounds, one mark per athlete."),
+    ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
+                           "are computed from all five seasons' entries, not averaged."),
+    ("Source", "Athletic.net Area and MOC results; MOC programs (Diablo Timing); rules per season. Pre-2026 "
+               "allocations assumed from 2026; 2023 standards assumed from 2026. State results pending."),
 ]
 
 
 CAVEATS = [
-    "Small samples: many cells hold a handful of athletes (at-large qualifiers outside Tri-Valley, Class A, any "
-    "single event). A few athletes can move a rate by 10–30 points.",
+    "Small samples: many cells hold a handful of athletes (next-best-mark and at-large qualifiers outside "
+    "Tri-Valley, Class A, any single event). A few athletes can move a rate by 10–30 points.",
     "Different meets: Area and MOC marks come from different days, wind, weather and competition.",
     "Rules before 2026 are partly assumed: allocations for 2022–2025 assumed from 2026; 2023 at-large standards "
     "assumed from 2026 (none printed).",
     "Unresolved school names (e.g. 'West County', 2022) appear as Unknown and are not compared.",
+    "Unfilled spots are provisional (under verification): they depend on how the MOC field is counted (athletes "
+    "who competed in the first round).",
+    "Privacy: MOC-place figures are published only for groups of 5 or more entries; single events are not shown "
+    "on the Area place vs. MOC finish tab.",
     "State results are pending; state qualification is not shown.",
-    "The core-comparison tests (docs/findings_v1.md §4) support a consistent direction pooled over five seasons, "
-    "not a precise gap, and say nothing about causes.",
+    "Statistical tests of the lowest-automatic vs. next-best-mark + at-large comparison (docs/findings_v1.md §4) "
+    "support a consistent direction pooled over five seasons, not a precise gap, and say nothing about causes.",
 ]
 
 
@@ -80,8 +90,9 @@ def build() -> dict:
     mp = mp[~mp["rollup"]]
     su = pd.read_csv(S / "spot_utilization.csv")
     lo = pd.read_csv(S / "left_out.csv")
-    lo = lo.assign(has_cutoff=lo["moc_cutoff_mark"].notna(),
-                   hit=lo["area_mark_would_have_been_top_finish"].fillna(False).astype(bool))
+    lo = lo[lo["moc_cutoff_mark"].notna()].assign(hit=lo["area_mark_would_have_been_top_finish"].fillna(False).astype(bool))
+    # Only counts are embedded, never one row per athlete.
+    lo = lo.groupby(["season", "gender", "event_code", "area"]).agg(hits=("hit", "sum"), total=("hit", "size")).reset_index()
     seasons = sorted(int(s) for s in su["season"].unique())
     events = [e for e in EVENT_ORDER if e in set(su["event_code"].astype(str))]
     return {
@@ -90,17 +101,17 @@ def build() -> dict:
         "at_large_share": records(al, ["season", "gender", "event_code", "field", "spot_type", "area", "count"]),
         "moc_performance": records(mp, ["season", "gender", "event_code", "area", "qualifier_type", "competed",
                                         "top_finish", "scored"]),
-        "spot_utilization": records(su, ["season", "gender", "event_code", "area", "spots_earned", "declared",
-                                         "competed", "no_show", "not_declared", "vacancies_refilled", "empty_lanes"]),
-        "left_out": records(lo, ["season", "gender", "event_code", "area", "has_cutoff", "hit"]),
-        "core_place_counts": records(pd.read_csv(S / "core_place_counts.csv", dtype={"moc_overall_place": "Int64"}),
-                                     ["season", "gender", "event_code", "area", "route", "moc_overall_place",
-                                      "top_finish", "count"]),
+        "spot_utilization": records(su, ["season", "gender", "event_code", "area", "spots_earned", "guaranteed_spots",
+                                         "declared", "competed", "no_show", "vacancies_refilled", "unfilled_spots",
+                                         "other_unused"]),
+        "left_out": records(lo, ["season", "gender", "event_code", "area", "hits", "total"]),
+        "place_curve": records(pd.read_csv(S / "core_place_curve.csv", dtype={"season": str, "area_place": str,
+                                                                               "top8_count": "Int64"}),
+                               ["season", "gender", "event_group", "area", "area_place", "entries", "top8_count",
+                                "median_moc_place"]),
         "caveats": CAVEATS,
-        "flags_empty_lanes": records(pd.read_csv(S / "spot_utilization_flags_empty_lanes.csv"),
-                                     ["area", "gender", "event_code", "seasons_flagged", "seasons", "total_all_seasons"]),
-        "flags_unused": records(pd.read_csv(S / "spot_utilization_flags.csv"),
-                                ["area", "gender", "event_code", "seasons_flagged", "seasons", "total_all_seasons"]),
+        "flags_unfilled": records(pd.read_csv(S / "spot_utilization_flags_unfilled.csv"),
+                                  ["area", "gender", "event_code", "seasons_flagged", "seasons", "total_all_seasons"]),
     }
 
 

@@ -24,6 +24,12 @@ checks them.
 
 ## Terms
 
+**Wording.** "At-large" means only athletes who met the at-large standard. The 3 fill spots
+per event are "next best mark", and the two together are "next best mark + at-large
+standard" (the column name `at_large_combined` is kept for compatibility). "Entries" are
+athlete-events: one athlete in two events counts twice. "Guaranteed spots" are the 24 fixed
+spots per event: 21 automatic plus 3 next best mark.
+
 - **qualifier_type**
   - `automatic`: qualified by place at the Area meet (top 6; Class A top 3).
   - `next_best_mark`: one of the 3 fill spots (next best marks from all four meets).
@@ -33,14 +39,15 @@ checks them.
     replacement overlay (same Area: the next finalist in line).
   - `unexplained`: in the program, not predicted, no explanation. Also used for program
     entries whose school spelling has no area that season (area = `unknown`).
-- **at_large_combined** = `next_best_mark` + `at_large_standard`. In athlete rows it's a
+- **at_large_combined** = next best mark + at-large standard. In athlete rows it's a
   0/1 column. In summary tables it appears as extra rows with `rollup = True`; don't add
   them to the per-type rows.
 - **Fields**
-  - **qualified**: everyone the rules say qualified, i.e. the replay prediction (types
-    `automatic`, `next_best_mark`, `at_large_standard`).
-  - **declared**: everyone in the MOC program, including replacements and unexplained
-    entrants.
+  - **qualified** ("All qualifiers" on the dashboard): everyone who earned a spot, whether
+    or not they entered, i.e. the replay prediction (types `automatic`, `next_best_mark`,
+    `at_large_standard`).
+  - **declared** ("Actual entries"): athletes who entered the MOC (the program), including
+    replacements and unexplained entrants.
 - **competed** = 1 if the athlete has a row in the MOC results with any status other than
   DNS or SCR.
   - DNF, DQ, NH, FOUL and FS count as competed without a valid mark. The status is kept in
@@ -98,7 +105,7 @@ field_size`.
 
 ## data/summary/at_large_share.csv
 
-At-large spots only, per season × gender × event × field × `spot_type`
+Next-best-mark and at-large spots only, per season × gender × event × field × `spot_type`
 (`next_best_mark`, `at_large_standard`, `at_large_combined`) × area. Every Area is listed,
 including zeros. Columns: `count`, `spots` (all Areas' spots of that type in the event)
 and `area_share = count / spots` (blank when `spots` is 0).
@@ -126,7 +133,11 @@ Per season × gender × event × area, over the spots the rules gave that Area:
 | vacancies_refilled | This Area's not-declared spots paired with a replacement |
 | refilled_by_area | Which Areas the replacements came from, `area:count` |
 | replacements_from_this_area | This Area's athletes who entered as replacements, for any Area |
-| empty_lanes | Spots that went to nobody: `unused_total − vacancies_refilled`, never below 0. Computed per event; the roll-ups sum the event values. The "wasted spot" metric. |
+| guaranteed_spots | Of `spots_earned`, the automatic and next-best-mark spots (the fixed 24 per event) |
+| unfilled_spots | **Provisional, under verification.** A guaranteed spot nobody used: its qualifier didn't compete, the spot wasn't refilled, and the event's MOC field (athletes or teams who competed in the first round, i.e. not DNS/SCR) ended below 24 |
+| unfilled_rate | `unfilled_spots / guaranteed_spots` |
+| other_unused | Unused, not refilled, and not unfilled: the field still had 24, or the spot came from the at-large standard (no fixed number). `competed + vacancies_refilled + unfilled_spots + other_unused = spots_earned` |
+| unused_not_refilled | The first version of this metric ("empty lanes"): `unused_total − vacancies_refilled`, never below 0. Kept for comparison; it over-counts (see `docs/findings_v1.md` §6). |
 | no_show_rate | `no_show / declared` |
 | not_declared_individual | Not-declared spots held by individuals (relay teams excluded) |
 | not_declared_competed_other_event | Of those, athletes who competed in another MOC event that season |
@@ -148,27 +159,28 @@ with `utilization_rate` recomputed from the sums.
 **Flag lists.** Each lists every Area × gender × event with the metric above 0 in at least
 3 of the seasons analysed. Columns: the seasons, how many there were, and the metric summed
 over all seasons.
-- `spot_utilization_flags.csv`: `unused_total`
-- `spot_utilization_flags_empty_lanes.csv`: `empty_lanes`
+- `spot_utilization_flags_unfilled.csv`: `unfilled_spots`
+- `spot_utilization_flags_unused.csv`: `unused_total`
 
-**`no_shows_empty_lanes_by_area.csv`** gives per season × area the counts behind the rates:
-`spots_earned`, `declared`, `no_show`, `no_show_rate`, `not_declared`,
-`vacancies_refilled`, `empty_lanes` and `empty_lane_rate` (= `empty_lanes /
-spots_earned`).
+**`no_shows_unfilled_by_area.csv`** gives per season × area the counts behind the rates:
+`spots_earned`, `guaranteed_spots`, `declared`, `no_show`, `no_show_rate`,
+`not_declared`, `vacancies_refilled`, `unfilled_spots`, `unfilled_rate` and
+`unused_not_refilled`.
 
-**Empty lanes include no-shows.** A no-show declared, so the vacancy is invisible in the
-program and is never counted as refilled.
+**Unfilled spots include no-shows** when the field ended short. A declared athlete who
+doesn't compete can't be seen in the program, so that spot is never counted as refilled.
 
 ## data/summary/core_comparison.csv and core_tests.csv
 
 `core_comparison.csv` compares each Area's lowest automatic qualifiers (Area places 5–6;
-3rd for Class A) with at-large qualifiers from the other Areas. Only athletes who competed
+3rd for Class A) with next-best-mark + at-large qualifiers from the other Areas. Only entries that competed
 at the MOC count, with genders combined. Rows are per season (plus `2022-2026 pooled`) ×
 event group (plus `all`) × area × `comparison_group`. Columns: `competed`, `top_finish`,
-`top_finish_rate`, `with_moc_place` and `median_moc_place`.
+`top_finish_rate`, `with_moc_place` and `median_moc_place`. Cells with fewer than 5
+entries publish `competed` and `with_moc_place` only; the MOC-place figures are blank.
 
 `core_tests.csv` (pooled 2022–2026, all events) gives three p-values for the
-`gap = lowest-auto top-finish rate − other Areas' at-large rate`:
+`gap = lowest-automatic top-8 rate − other Areas' next-best-mark + at-large top-8 rate`:
 
 | Column | Test |
 |---|---|
@@ -176,11 +188,18 @@ event group (plus `all`) × area × `comparison_group`. Columns: `competed`, `to
 | clustered_p | Difference in rates with standard errors clustered by athlete (relay teams by school × season). Repeat athletes are handled; there are `clusters` athletes. |
 | permutation_p | Area labels shuffled within season × gender × event, 10,000 times (seed 20260930), keeping each athlete's route (lowest automatic / at-large) fixed. It asks whether this Area's gap is larger than random Area labels produce. `expected_gap_random_areas` is the mean gap under shuffling, and the p-value is two-sided around it. |
 
-`core_place_counts.csv` has the counts behind the dashboard's core-question panel. Columns:
-`season`, `gender`, `event_code`, `area` and `route` (`lowest_automatic` / `at_large`: the
-athlete's own route); `moc_overall_place` (blank = no valid MOC mark); `top_finish`; and
-`count`. For Area A, "other Areas' at-large" = the `at_large` rows of every other Area.
-Medians are weighted by `count`.
+## data/summary/core_place_curve.csv
+
+Where Area finishers end up at the MOC, aggregated for the public repo. It is the data
+behind the dashboard's "Area place vs. MOC finish" tab and the Overview cards.
+- **Rows:** season (each, plus `2022-2026 pooled`) × gender (`girls`, `boys`, `all`) ×
+  `event_group` (six groups, plus `all`) × area × `area_place` (`1`…`12`, plus the bands
+  `5-6` and `7-8`).
+- **Columns:** `entries` (athlete-events that competed at the MOC), `top8_count` and
+  `median_moc_place`.
+- **Small cells:** when `entries` < 5, `top8_count` and `median_moc_place` are blank, so no
+  row reveals one athlete's MOC place.
+- **No single events:** the table has no single-event rows.
 
 ## data/summary/left_out.csv
 

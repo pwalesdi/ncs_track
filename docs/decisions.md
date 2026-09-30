@@ -192,3 +192,32 @@ Newest at the bottom.
     `data/summary/core_place_counts.csv`. Backup taken first. Pushed with
     `--force-with-lease` through `pre_push.sh`. The dashboard is rebuilt and re-added in a
     new commit.
+23. **Unfilled spots replace the first "empty lane" metric** (2026-09-30).
+    - **What counts:** a guaranteed spot (automatic or next best mark) whose qualifier
+      didn't compete, which wasn't refilled, in an event whose MOC field ended below 24.
+      The field is athletes or teams who competed in the first MOC round (not DNS/SCR).
+    - **Refilled spots are excluded**, because the spot was used.
+    - **Totals:** 247 → 121 over five seasons.
+    - **The old metric is kept** as `unused_not_refilled`, for comparison.
+    - **Donut segments:** Competed / Refilled / Unfilled plus a fourth, **Other unused**.
+      Without it the donut wouldn't add up to the spots earned. Other unused covers
+      spots whose field was still full, and at-large spots.
+    - **Provisional:** marked "under verification" everywhere.
+24. **Dashboard layout** (2026-09-30):
+    - Tabs with a sticky filter bar above them. Below 700 px, the filters sit behind a
+      "Filters" button with a one-line summary.
+    - Seasons control: "All seasons side by side" (the default), "Focus on" each year,
+      or "All seasons pooled".
+    - **Side-by-side views, per tab:**
+      - Field makeup, Next best mark + at-large spots, MOC performance and Left out:
+        Area × season grids of shaded, labelled cells.
+      - Spot use: a grid of small donuts.
+      - Area place vs. MOC finish: small-multiple line charts, one per season.
+      - Focus and pooled views use full-size horizontal bars, donuts or line charts.
+    - **The Area place vs. MOC finish tab shows single events as their event group**,
+      because of the privacy rule. The Field toggle doesn't apply there: only athletes who
+      competed have an MOC place.
+    - **Overview:** plain-English cards computed from the embedded data. They show each
+      Area's typical MOC finish for a place band (Tri-Valley 7th–8th, Bay Shore and
+      Redwood Empire 5th–6th, Class A 3rd), Tri-Valley's next-best-mark + at-large spots,
+      and unfilled spots (provisional).

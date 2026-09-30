@@ -176,6 +176,12 @@ event group (plus `all`) × area × `comparison_group`. Columns: `competed`, `to
 | clustered_p | Difference in rates with standard errors clustered by athlete (relay teams by school × season). Repeat athletes are handled; there are `clusters` athletes. |
 | permutation_p | Area labels shuffled within season × gender × event, 10,000 times (seed 20260930), keeping each athlete's route (lowest automatic / at-large) fixed. It asks whether this Area's gap is larger than random Area labels produce. `expected_gap_random_areas` is the mean gap under shuffling, and the p-value is two-sided around it. |
 
+`core_place_counts.csv` has the counts behind the dashboard's core-question panel. Columns:
+`season`, `gender`, `event_code`, `area` and `route` (`lowest_automatic` / `at_large`: the
+athlete's own route); `moc_overall_place` (blank = no valid MOC mark); `top_finish`; and
+`count`. For Area A, "other Areas' at-large" = the `at_large` rows of every other Area.
+Medians are weighted by `count`.
+
 ## data/summary/left_out.csv
 
 Per season × gender × event × area: the 3 best non-qualifiers by Area mark (valid marks

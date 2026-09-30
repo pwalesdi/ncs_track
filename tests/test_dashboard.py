@@ -137,3 +137,34 @@ def test_9_panel6_matches_core_comparison(tmp_path):
             assert (cc[area][js_key]["competed"], cc[area][js_key]["top_finish"]) == (x["competed"], x["top_finish"])
             assert cc[area][js_key]["median_place"] == x["median_moc_place"]
     assert (cc["class-a"]["lowest_automatic"]["top_finish"], cc["class-a"]["lowest_automatic"]["competed"]) == (1, 28)
+
+
+def expected_headline():
+    """The headline cards' numbers computed with pandas from data/summary/ (pooled 2022-2026)."""
+    al = summary("at_large_share.csv")
+    al = al[(al["field"] == "qualified") & (al["spot_type"] == "at_large_combined")]
+    cc = summary("core_place_counts.csv")
+    cmp_ = pd.read_csv(S / "core_comparison.csv", dtype={"season": str})
+    pooled = cmp_[cmp_["season"].str.contains("pooled") & (cmp_["event_group"] == "all")]
+    su = summary("spot_utilization_by_area.csv")
+    out = {"tv_at_large": (int(al.loc[al["area"] == "tri-valley", "count"].sum()), int(al["count"].sum())),
+           "empty_lanes": (int(su["empty_lanes"].sum()), int(su["spots_earned"].sum())), "lowest_auto": {}, "at_large": {}}
+    for a in ("tri-valley", "bay-shore", "redwood-empire", "class-a"):
+        low = cc[(cc["area"] == a) & (cc["route"] == "lowest_automatic")]
+        own = cc[(cc["area"] == a) & (cc["route"] == "at_large")]
+        out["lowest_auto"][a] = (int(low.loc[low["top_finish"] == 1, "count"].sum()), int(low["count"].sum()))
+        out["at_large"][a] = (int(own.loc[own["top_finish"] == 1, "count"].sum()), int(own["count"].sum()))
+        p = pooled[(pooled["area"] == a) & (pooled["comparison_group"] == "lowest_automatic")].iloc[0]
+        assert out["lowest_auto"][a] == (p["top_finish"], p["competed"])     # counts table agrees with core_comparison
+    return out
+
+
+def test_10_headline_matches_summary(tmp_path):
+    h = js("headline(D)", tmp_path)
+    e = expected_headline()
+    assert (h["tv_at_large"]["k"], h["tv_at_large"]["n"]) == e["tv_at_large"] == (464, 659)
+    assert (h["empty_lanes"]["k"], h["empty_lanes"]["n"]) == e["empty_lanes"]
+    for a, (k, n) in e["lowest_auto"].items():
+        assert (h["lowest_auto"][a]["k"], h["lowest_auto"][a]["n"]) == (k, n)
+    for a, (k, n) in e["at_large"].items():
+        assert (h["at_large"][a]["k"], h["at_large"][a]["n"]) == (k, n)

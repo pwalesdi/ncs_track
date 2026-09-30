@@ -342,14 +342,17 @@ def _core_rows(q: pd.DataFrame) -> pd.DataFrame:
     return c
 
 
-def core_places(q: pd.DataFrame) -> pd.DataFrame:
-    """One row per athlete-event in either core-comparison group (no names or IDs), so the
-    dashboard can filter by gender and single event: season, gender, event, Area, route,
-    top_finish, moc_overall_place."""
+def core_place_counts(q: pd.DataFrame) -> pd.DataFrame:
+    """Counts of athletes at each MOC place, per season x gender x event x Area x route
+    (lowest_automatic / at_large), for the core comparison. No athlete-level rows: the
+    dashboard computes top-finish rates and medians from these counts, and single-event
+    filtering still works. moc_overall_place is blank for athletes with no valid MOC mark."""
     c = _core_rows(q)
     c["route"] = c["lowest_auto"].map({True: "lowest_automatic", False: "at_large"})
-    return c[["season", "gender", "event_code", "area", "route", "top_finish", "moc_overall_place"]].sort_values(
-        ["season", "gender", "event_code", "area", "route"]).reset_index(drop=True)
+    c["moc_overall_place"] = c["moc_overall_place"].astype("Int64")
+    keys = ["season", "gender", "event_code", "area", "route", "moc_overall_place", "top_finish"]
+    return (c.groupby(keys, dropna=False).size().rename("count").reset_index()
+            .sort_values(keys).reset_index(drop=True))
 
 
 def _naive_p(k1, n1, k2, n2) -> float:

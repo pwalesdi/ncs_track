@@ -54,6 +54,19 @@ DEFINITIONS = [
 ]
 
 
+CAVEATS = [
+    "Small samples: many cells hold a handful of athletes (at-large qualifiers outside Tri-Valley, Class A, any "
+    "single event). A few athletes can move a rate by 10–30 points.",
+    "Different meets: Area and MOC marks come from different days, wind, weather and competition.",
+    "Rules before 2026 are partly assumed: allocations for 2022–2025 assumed from 2026; 2023 at-large standards "
+    "assumed from 2026 (none printed).",
+    "Unresolved school names (e.g. 'West County', 2022) appear as Unknown and are not compared.",
+    "State results are pending; state qualification is not shown.",
+    "The core-comparison tests (docs/findings_v1.md §4) support a consistent direction pooled over five seasons, "
+    "not a precise gap, and say nothing about causes.",
+]
+
+
 def records(df: pd.DataFrame, cols: list[str]) -> list[dict]:
     return json.loads(df[cols].to_json(orient="records"))
 
@@ -80,8 +93,10 @@ def build() -> dict:
         "spot_utilization": records(su, ["season", "gender", "event_code", "area", "spots_earned", "declared",
                                          "competed", "no_show", "not_declared", "vacancies_refilled", "empty_lanes"]),
         "left_out": records(lo, ["season", "gender", "event_code", "area", "has_cutoff", "hit"]),
-        "core_places": records(pd.read_csv(S / "core_places.csv"),
-                               ["season", "gender", "event_code", "area", "route", "top_finish", "moc_overall_place"]),
+        "core_place_counts": records(pd.read_csv(S / "core_place_counts.csv", dtype={"moc_overall_place": "Int64"}),
+                                     ["season", "gender", "event_code", "area", "route", "moc_overall_place",
+                                      "top_finish", "count"]),
+        "caveats": CAVEATS,
         "flags_empty_lanes": records(pd.read_csv(S / "spot_utilization_flags_empty_lanes.csv"),
                                      ["area", "gender", "event_code", "seasons_flagged", "seasons", "total_all_seasons"]),
         "flags_unused": records(pd.read_csv(S / "spot_utilization_flags.csv"),

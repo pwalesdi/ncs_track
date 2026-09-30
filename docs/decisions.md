@@ -148,9 +148,31 @@ Newest at the bottom.
       pooled standard error, which is conservative when the two rates differ. Athletes
       rarely repeat (about 1.15 rows each), so clustering itself changes little.
 17. **Panel 6 data (`data/summary/core_places.csv`).** One row per athlete-event in
-    either comparison group: season, gender, event, Area, route, top finish, MOC place.
-    It has no names or IDs, but it is athlete-level. It is needed so medians follow the
-    gender and single-event filters; tell me if you'd rather ship only aggregated
-    medians.
-18. **Chart.js 4.4.1 is vendored** in `dashboard/vendor/` (MIT licence), pinned by
+    either comparison group. Superseded by #18.
+18. **`core_places.csv` replaced by `core_place_counts.csv`** (2026-09-30, Patrick). The
+    new table counts athletes at each MOC place per season × gender × event × Area ×
+    route. The dashboard computes top-finish rates and weighted medians from the counts,
+    and single-event filtering still works.
+    - **`core_places.csv` is removed from the repo and from all history** (git
+      filter-repo, this path only, backup taken first). Pushed with `--force-with-lease`
+      through `pre_push.sh`.
+    - **Limitation:** at single-event grain each MOC place holds at most one athlete, so
+      1,528 of the 1,540 count rows have count 1. The counts table therefore carries
+      almost the same information as the athlete-level rows (no names or IDs in either).
+    - **Not removed:** the same rows are also embedded as JSON inside
+      `dashboard/index.html` in commits c946a00 and 70d1d6a (before this rewrite). The
+      approval covered `core_places.csv` only, so those copies remain in history.
+19. **Chart.js 4.4.1 is vendored** in `dashboard/vendor/` (MIT licence), pinned by
     SHA-256 and inlined at build time.
+20. **Dashboard redesign** (2026-09-30):
+    - Light theme only.
+    - Palette (Okabe–Ito-based): Tri-Valley #0072B2, Bay Shore #009E73, Redwood Empire
+      #D55E00, Class A #B5528C (reddish purple darkened for contrast). All are at least
+      3:1 against white. The closest pair is about 17 ΔE apart under simulated
+      protanopia, deuteranopia and tritanopia.
+    - Headline cards are computed in the page from the embedded data, pooled 2022–2026,
+      and don't follow the filters.
+    - The "At-large qualifiers" card shows each Area's own at-large qualifiers.
+    - On phones (< 560 px) the bar-end labels drop the median, which stays in "Show
+      numbers", so the Area names are never cut off.
+

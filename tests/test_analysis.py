@@ -164,7 +164,9 @@ def test_clustered_se_equals_robust_when_every_row_is_its_own_cluster():
     assert abs(b1 - 0.4) < 1e-12 and abs(b2 - 0.4) < 1e-12 and p1 != p2
 
 
-def test_core_places_has_no_identifiers():
-    cp = analysis.core_places(_core_q())
-    assert list(cp.columns) == ["season", "gender", "event_code", "area", "route", "top_finish", "moc_overall_place"]
-    assert set(cp["route"]) == {"lowest_automatic", "at_large"}
+def test_core_place_counts_are_counts():
+    cc = analysis.core_place_counts(_core_q())
+    assert list(cc.columns) == ["season", "gender", "event_code", "area", "route", "moc_overall_place",
+                                "top_finish", "count"]
+    assert cc["count"].sum() == len(analysis._core_rows(_core_q()))
+    assert set(cc["route"]) == {"lowest_automatic", "at_large"}

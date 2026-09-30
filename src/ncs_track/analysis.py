@@ -560,12 +560,12 @@ def left_out_summary(lo: pd.DataFrame, pairs: pd.DataFrame) -> tuple[pd.DataFram
       pooled) x left-out Area x beaten Area: entries, made the final, median MOC place; the
       MOC figures blank below MIN_CELL entries."""
     k = ["season", "gender", "event_code"]
-    tot = lo.groupby(k + ["area"]).agg(left_out=("athlete_name", "size"),
+    tot = lo.groupby(k + ["area"]).agg(left_out=("area_place", "size"),
                                       beat_any=("beaten_other_area_autos", lambda s: int((s > 0).sum()))).reset_index()
     tot["beaten_area"] = "any"
     if len(pairs):
-        pairs = pairs.assign(ath=pairs["athlete_name"].astype(str) + "|" + pairs["school"].astype(str),
-                             beaten=pairs["beaten_name"].astype(str) + "|" + pairs["beaten_school"].astype(str))
+        key = lambda n, sch: pairs[n].fillna("relay").astype(str) + "|" + pairs[sch].fillna("").astype(str)
+        pairs = pairs.assign(ath=key("athlete_name", "school"), beaten=key("beaten_name", "beaten_school"))
         pc = pairs.groupby(k + ["area", "beaten_area"]).agg(beat_any=("ath", "nunique"),
                                                              beaten_autos=("beaten", "nunique")).reset_index()
     else:

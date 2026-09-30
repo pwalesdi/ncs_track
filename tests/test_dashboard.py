@@ -181,3 +181,14 @@ def test_render_script_compiles(tmp_path):
     f.write_text(f"new Function({json.dumps(main)}); 'ok';")
     out = subprocess.run(["osascript", "-l", "JavaScript", str(f)], capture_output=True, text=True)
     assert out.returncode == 0 and out.stdout.strip() == "ok", out.stderr
+
+
+def test_11_left_out(tmp_path):
+    lo = js('leftOut(D, {season:"2025", gender:"girls", event:"1600"})', tmp_path)
+    c = summary("left_out_counts.csv")
+    c = c[(c["season"] == 2025) & (c["gender"] == "girls") & (c["event_code"].astype(str) == "1600")]
+    anyr = c[c["beaten_area"] == "any"]
+    assert (lo["leftOut"], lo["beatAny"]) == (anyr["left_out"].sum(), anyr["beat_any"].sum()) == (53, 12)
+    assert lo["areas"]["redwood-empire"]["beat"]["bay-shore"] == 2 and lo["areas"]["tri-valley"]["beat"]["bay-shore"] == 7
+    pooled = js('leftOut(D, {season:"all", gender:"all", event:"all"})', tmp_path)
+    assert pooled["beatAny"] == summary("left_out_counts.csv").query("beaten_area == 'any'")["beat_any"].sum()

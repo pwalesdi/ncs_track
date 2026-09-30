@@ -332,3 +332,22 @@ Newest at the bottom.
     - **"Provisional" badge removed:** the 2025 girls 1600 audit passes (#32).
     - Pooled 2022–2026: 114 no-shows in 3,950 entries (3%); guaranteed spots 3,759 competed,
       111 no-show, 6 not used; 247 automatic spots passed down from declines.
+34. **"Left out" redefined on pass-down routes** (2026-09-30, Patrick). Replaces #30's tab
+    removal and the old best-three / MOC-cutoff comparison.
+    - **Left out:** finished in an Area final (valid mark and place) behind the Area's last
+      automatic qualifier, no route, not in the program. Relay teams included. Athletes who
+      were offered a spot and didn't enter (declined an automatic, next-best-mark or at-large
+      spot) are not left out: they had the choice.
+    - **Beaten qualifier:** an automatic qualifier (pass-down) from another Area whose
+      Area-final mark is strictly worse. Only automatic qualifiers are compared; checked: no
+      left-out athlete has a better mark than any next-best-mark qualifier in the same event.
+    - **Public tables:** `left_out_counts.csv` (per season × gender × event × left-out Area ×
+      beaten Area: left-out athletes who beat ≥ 1, distinct qualifiers beaten; "any" rows
+      carry the totals) are counts with no MOC places. `left_out_beaten_moc.csv` gives how
+      the beaten qualifiers did at the MOC per season (+ pooled) × Area pair, with made-the-
+      final counts and medians blank below 5 entries. Named lists: `outputs/left_out.csv`,
+      `outputs/left_out_beaten.csv`.
+    - **Check:** 2025 girls 1600 — Redwood Empire 10th (5:17.28) beat 5 Bay Shore automatic
+      qualifiers, 11th (5:26.07) beat 3, as hand-checked.
+    - Pooled 2022–2026: 1,582 of 8,597 left-out finishers beat at least one automatic
+      qualifier from another Area.

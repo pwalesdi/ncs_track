@@ -26,7 +26,7 @@ from ncs_track import paths
 HTML = paths.ROOT / "dashboard" / "index.html"
 SHOTS = paths.OUTPUTS / "tabs"
 WIDTHS = (390, 1400)
-TABS = ["overview", "curve", "makeup", "spots", "perf", "use", "defs"]
+TABS = ["overview", "curve", "makeup", "spots", "perf", "use", "left", "defs"]
 MODES = {"2026": "2026", "pooled": "all"}
 
 STATE_JS = """() => {
@@ -174,7 +174,7 @@ def run() -> dict:
                 page.screenshot(path=str(SHOTS / f"{width}_{tab}.png"), full_page=True)
             for mode, value in MODES.items():
                 set_season(page, width, value)
-                for tab in ("curve", "makeup", "spots", "perf", "use"):
+                for tab in ("curve", "makeup", "spots", "perf", "use", "left"):
                     goto_tab(page, tab)
                     pr, s = check(page, f"{width}px {tab} {mode}")
                     problems += pr

@@ -54,6 +54,13 @@ DEFINITIONS = [
                           "or absent from its results), including athletes who competed in other events that day and "
                           "athletes who got the spot by pass-down."),
     ("Spot use: Not used", "No entrant from that Area took the spot."),
+    ("Left out", "Finished in an Area final behind her Area's last automatic qualifier (so she was never offered a "
+                 "spot), and not in the MOC field by any route. Athletes who met the at-large standard or had a "
+                 "next-best mark and chose not to enter declined; they are not left out."),
+    ("Beaten automatic qualifier", "An automatic qualifier from another Area whose Area-final mark was slower (or "
+                                   "shorter) than the left-out athlete's. Only automatic qualifiers are compared: by "
+                                   "design, nobody left out has a better mark than a next-best-mark qualifier."),
+    ("Left out: caveat", "Marks come from different Area meets."),
     ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
                            "are computed from all five seasons' entries, not averaged."),
     ("Source", "Athletic.net Area and MOC results; MOC programs (Diablo Timing); rules per season. Pre-2026 "
@@ -102,6 +109,12 @@ def build() -> dict:
                                                                                "made_final_count": "Int64"}),
                                ["season", "gender", "event_group", "area", "area_place", "entries", "made_final_count",
                                 "median_moc_place"]),
+        "left_out_counts": records(pd.read_csv(S / "left_out_counts.csv").fillna(0),
+                                   ["season", "gender", "event_code", "area", "beaten_area", "left_out", "beat_any",
+                                    "beaten_autos"]),
+        "left_out_beaten_moc": records(pd.read_csv(S / "left_out_beaten_moc.csv", dtype={"season": str, "made_final": "Int64"}),
+                                       ["season", "area", "beaten_area", "beaten_autos", "competed", "made_final",
+                                        "median_moc_place"]),
         "caveats": CAVEATS,
     }
 

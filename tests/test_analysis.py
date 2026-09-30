@@ -189,7 +189,16 @@ def test_left_out_counts_beaten_automatics_from_other_areas():
     q = pd.DataFrame([dict(season=2025, gender="girls", event_code="1600", area="bay-shore", area_place=p, route="automatic",
                            in_declared_field=1, competed=1, made_final=m, moc_overall_place=o, qualifier_type="automatic")
                       for p, m, o in ((5, 1, 6.0), (10, 0, 20.0))])
+    routes = pd.concat([routes, pd.DataFrame([      # a relay team (no athlete name) left out, beating both
+        dict(gender="girls", event_code="1600", meet_area="class-a", place=4, mark_value=318.0, mark_raw="5:18",
+             athlete_name=None, school_name="S6", is_relay=True, route=None, left_out=True)])], ignore_index=True)
     lo, pairs = analysis.left_out(2025, routes, q)
+    lo = lo[~lo["is_relay"]]
+    relay_pairs = pairs[pairs["is_relay"]]
+    assert len(relay_pairs) == 2
+    c_all, _ = analysis.left_out_summary(analysis.left_out(2025, routes, q)[0], pairs)
+    assert c_all[(c_all["area"] == "class-a") & (c_all["beaten_area"] == "bay-shore")]["beat_any"].iloc[0] == 1
+    pairs = pairs[~pairs["is_relay"]]
     got = lo.set_index("athlete_name")["beaten_other_area_autos"].to_dict()
     assert got == {"Di Sato": 2, "Eve Tam": 1}            # own Area's 5:16 automatic doesn't count
     assert set(pairs["beaten_area"]) == {"bay-shore"} and pairs["beaten_made_final"].sum() == 1

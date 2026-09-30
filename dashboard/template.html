@@ -208,6 +208,15 @@ __CHARTJS__</script>
   </section>
 
 
+  <section class="tabpanel" id="tab-left" role="tabpanel">
+    <h2>Left out</h2>
+    <p class="how"><b>Left out</b> = finished in an Area final behind her Area's last automatic qualifier (so she was
+      never offered a spot), and is not in the MOC field by any route. For each, we count the automatic qualifiers
+      from <b>other</b> Areas whose Area-final marks were slower. Only automatic qualifiers are compared: by design,
+      nobody left out has a better mark than a next-best-mark qualifier.</p>
+    <div id="left-body"></div>
+  </section>
+
   <section class="tabpanel" id="tab-defs" role="tabpanel">
     <h2>Definitions</h2>
     <dl class="defs" id="defs"></dl>
@@ -370,6 +379,26 @@ function curve(D, seasonKey, gender, group) {
   });
   return out;
 }
+// Left out: counts per left-out Area x beaten Area ("any" rows carry the left-out totals).
+function leftOut(D, f, season) {
+  var rows = D.left_out_counts.filter(function (r) { return keep(r, f, season); });
+  var out = {leftOut: 0, beatAny: 0, areas: {}};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    var tot = ra.filter(function (r) { return r.beaten_area === "any"; });
+    var o = {leftOut: sum(tot, "left_out"), beatAny: sum(tot, "beat_any"), beat: {}, beatenAutos: {}};
+    AREAS.forEach(function (b) {
+      var x = ra.filter(function (r) { return r.beaten_area === b; });
+      o.beat[b] = sum(x, "beat_any"); o.beatenAutos[b] = sum(x, "beaten_autos");
+    });
+    out.areas[a] = o; out.leftOut += o.leftOut; out.beatAny += o.beatAny;
+  });
+  return out;
+}
+function beatenMoc(D, season, area, beaten) {
+  var key = season === "all" || season === "side" ? POOLED_KEY : String(season);
+  return D.left_out_beaten_moc.filter(function (r) { return r.season === key && r.area === area && r.beaten_area === beaten; })[0] || null;
+}
 function headline(D) {
   var c = curve(D, POOLED_KEY, "all", "all");
   var sh = spotShare(D, {field: "qualified", season: "all", gender: "all", event: "all"});
@@ -453,7 +482,7 @@ function headline(D) {
   // ---------- state, controls, tabs ----------
   var TABS = [["overview", "Overview"], ["curve", "Area place vs. MOC finish"], ["makeup", "Field makeup"],
               ["spots", "Next best mark + at-large spots"], ["perf", "MOC performance"], ["use", "Spot use"],
-              ["defs", "Definitions"]];
+              ["left", "Left out"], ["defs", "Definitions"]];
   var state = {tab: "overview", field: "qualified", season: "side", gender: "all", event: "all"};
   var seasonSel = document.getElementById("season");
   seasonSel.add(new Option("All seasons side by side", "side"));
@@ -782,9 +811,45 @@ function headline(D) {
     el("ns-table").innerHTML = noShowHtml(noShowTable(D, state), true);
   }
 
+  // ---------- Left out ----------
+  function mocLine(r) {
+    if (!r || !r.beaten_autos) return "none";
+    if (r.made_final === null || r.made_final === undefined) return r.competed + " competed (fewer than 5: MOC places not shown)";
+    return finalTxt(r.made_final, r.competed) + (r.median_moc_place !== null ? "; median MOC place " + ordinal(r.median_moc_place) : "");
+  }
+  function renderLeft() {
+    var body = el("left-body");
+    var mocTable = function (season) {
+      return '<div class="panel"><h3 style="margin:0 0 4px;font-size:1.05rem">How the beaten automatic qualifiers did at the MOC</h3>' +
+        '<p class="note">' + (season === "all" || season === "side" ? "2022–2026 pooled" : season) +
+        ", all events, girls + boys (the gender and event filters don't apply here). Each beaten qualifier counts once per event.</p>" +
+        numTable(["Beaten qualifiers from", "Beaten automatic qualifiers", "At the MOC"],
+          AREAS.concat(["all"]).map(function (b) { var r = beatenMoc(D, season, "all", b);
+            return [b === "all" ? "<b>All Areas</b>" : AREA_NAME[b], r ? r.beaten_autos + " qualifiers" : "0", mocLine(r)]; })) + "</div>";
+    };
+    if (state.season === "side") {
+      body.innerHTML = '<div class="panel">' + grid(function (a, s) {
+        var x = leftOut(D, state, s).areas[a];
+        return {share: x.leftOut ? 3 * x.beatAny / x.leftOut : 0, html: "<b>" + x.beatAny + "</b><span>of " + x.leftOut +
+          " left-out finishers beat an automatic qualifier from another Area</span>"};
+      }) + '<p class="note">Rows: the left-out athlete\'s Area.</p></div>' + mocTable("side");
+      return;
+    }
+    var lo = leftOut(D, state);
+    var head = ["Left-out athletes from"].concat(AREAS.map(function (b) { return "beat a " + AREA_NAME[b] + " automatic"; }), ["beat any"]);
+    body.innerHTML = '<div class="panel" id="left-head" data-beat="' + lo.beatAny + '" data-total="' + lo.leftOut + '"><p style="font-size:1.1rem;margin:0"><b>' +
+      lo.beatAny + " of " + lo.leftOut + "</b> left-out finishers beat at least one automatic qualifier from another Area (" +
+      seasonLabel(state.season) + ").</p>" +
+      '<p class="note">Each cell: left-out athletes (rows: their Area) whose Area-final mark beat at least one automatic qualifier from the column\'s Area. ' +
+      "An athlete can beat qualifiers from several Areas, so a row's cells can add up to more than “beat any”.</p>" +
+      numTable(head, AREAS.map(function (a) { var o = lo.areas[a];
+        return [AREA_NAME[a]].concat(AREAS.map(function (b) { return a === b ? "–" : o.beat[b] + (o.beat[b] ? " (" + o.beatenAutos[b] + " qualifiers beaten)" : ""); }),
+          [o.beatAny + " of " + o.leftOut]); })) + "</div>" + mocTable(state.season);
+  }
+
   // ---------- render ----------
   var RENDER = {overview: renderOverview, curve: renderCurve, makeup: renderMakeup, spots: renderSpots,
-                perf: renderPerf, use: renderUse, defs: function () {}};
+                perf: renderPerf, use: renderUse, left: renderLeft, defs: function () {}};
   function render() {
     destroyAll();
     document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.toggle("active", p.id === "tab-" + state.tab); });

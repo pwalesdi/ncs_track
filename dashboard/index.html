@@ -402,6 +402,7 @@ function beatenMoc(D, season, area, beaten) {
 function headline(D) {
   var c = curve(D, POOLED_KEY, "all", "all");
   var sh = spotShare(D, {field: "qualified", season: "all", gender: "all", event: "all"});
+  var she = spotShare(D, {field: "declared", season: "all", gender: "all", event: "all"});
   var u = spotUse(D, {season: "all", gender: "all", event: "all"});
   var ns = 0, en = 0;
   AREAS.forEach(function (a) { ns += u[a].no_show; en += u[a].entries; });
@@ -417,6 +418,7 @@ function headline(D) {
     // (b) Tri-Valley 7th-8th (not automatic) vs Bay Shore + Redwood Empire 5th-6th (automatic)
     depth: {tv: cell("tri-valley", "7-8 not automatic"), others: cell(COMBINED_AREA, "5-6")},
     tv_spots: {k: sh["tri-valley"].total, n: sh._total},
+    tv_entries: {k: she["tri-valley"].total, n: she._total},
     noshow: {k: ns, n: en}
   };
 }
@@ -575,13 +577,14 @@ function headline(D) {
       '" data-ot-median="' + ot.median + '"><p class="cap" style="margin:0"><b>The depth point</b></p>' +
       '<p class="cap">Tri-Valley\'s 7th–8th place finishers, who don\'t get automatic spots, typically finished <b>' + ordinal(tv.median) +
       "</b> at the MOC, ahead of other Areas' 5th–6th place finishers (<b>" + ordinal(ot.median) + "</b>), who do.</p>" +
-      '<p class="cnt">Tri-Valley 7th–8th: ' + tv.entries + " entries, " + tv.final + " made the final (" + pctNum(tv.final, tv.entries) + "%). " +
+      '<p class="cnt">Tri-Valley 7th–8th on a next-best-mark or at-large route: ' + tv.entries + " entries, " + tv.final + " made the final (" + pctNum(tv.final, tv.entries) + "%). " +
       "Bay Shore and Redwood Empire 5th–6th: " + ot.entries + " entries, " + ot.final + " made the final (" + pctNum(ot.final, ot.entries) + "%). " +
       "Class A is left out of the second group because its 5th–6th don't get automatic spots. Median MOC place, 2022–2026 pooled; " +
       "entries are athlete-events.</p></div>" +
       '<div class="card" id="card-tv" data-k="' + h.tv_spots.k + '" data-n="' + h.tv_spots.n + '"><div class="big">' + pctNum(h.tv_spots.k, h.tv_spots.n) +
       '%</div><p class="cap">of next-best-mark + at-large spots went to Tri-Valley athletes</p><p class="cnt">' + h.tv_spots.k + " of " + h.tv_spots.n +
-      " next-best-mark + at-large spots (all qualifiers)</p></div>" +
+      " next-best-mark + at-large spots among all qualifiers (before declarations); " + h.tv_entries.k + " of " + h.tv_entries.n +
+      " (" + pctNum(h.tv_entries.k, h.tv_entries.n) + "%) among actual entries.</p></div>" +
       '<div class="card" id="card-noshow" data-k="' + h.noshow.k + '" data-n="' + h.noshow.n + '"><div class="big">' + h.noshow.k +
       '</div><p class="cap">no-shows over five seasons</p><p class="cnt">' + h.noshow.k + " of " + h.noshow.n +
       " entries (" + pctNum(h.noshow.k, h.noshow.n) + "%) were in the MOC program for an event but didn't compete in it. " +

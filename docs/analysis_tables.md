@@ -12,13 +12,14 @@ events only: no Unified, Ambulatory, 4x800, relay splits or exhibition rows.
 - MOC-guide fill (3 spots from all four meets)
 - fill ties included
 - wind-aided marks allowed
-- same-Area replacement
 - no entry limit
+- routes of actual entries by pass-down (decision #32, `replay.pass_down`)
 
 Each season uses its own rules file. See `docs/replay_2026.md` and
 `docs/replay_seasons.md`.
 
-**What is tracked.** `outputs/qualifiers.csv` names athletes and is git-ignored. The
+**What is tracked.** `outputs/qualifiers.csv`, `outputs/no_shows.csv`, `outputs/left_out.csv`
+and `outputs/left_out_beaten.csv` name athletes and are git-ignored. The
 `data/summary/` tables contain no names and are tracked; `tests/test_no_athlete_names.py`
 checks them.
 
@@ -27,27 +28,33 @@ checks them.
 **Wording.** "At-large" means only athletes who met the at-large standard. The 3 fill spots
 per event are "next best mark", and the two together are "next best mark + at-large
 standard" (the column name `at_large_combined` is kept for compatibility). "Entries" are
-athlete-events: one athlete in two events counts twice. "Guaranteed spots" are the 24 fixed
-spots per event: 21 automatic plus 3 next best mark.
+athlete-events: one athlete in two events counts twice. "Guaranteed spots" per Area and event
+are its automatic spots (6; Class A 3) plus the next-best-mark spots it won.
 
-- **qualifier_type**
-  - `automatic`: qualified by place at the Area meet (top 6; Class A top 3).
+- **qualifier_type** — the pre-declaration route ("All qualifiers": who the rules made
+  eligible before anyone declared; `replay.evaluate`)
+  - `automatic`: top 6 at the Area meet (Class A top 3).
   - `next_best_mark`: one of the 3 fill spots (next best marks from all four meets).
   - `at_large_standard`: met the posted at-large standard in the Area final, outside the
     automatic places.
-  - `replacement`: in the program though not predicted, and paired with a vacancy by the
-    replacement overlay (same Area: the next finalist in line).
-  - `unexplained`: in the program, not predicted, no explanation. Also used for program
-    entries whose school spelling has no area that season (area = `unknown`).
+- **route** — the pass-down route of a program entrant ("Actual entries"; decision #32)
+  - `automatic`: one of the Area's first 6 (Class A 3) entrants in Area-place order; ties at
+    the last place all count.
+  - `next_best_mark`: after declarations, one of the 3 best remaining marks, all four meets.
+  - `at_large_standard`: remaining and met the standard.
+  - `unexplained`: in the program with no route; also program entries whose school has no
+    area that season and couldn't be linked by name (area = `unknown`).
+- **declined** — `automatic` (finished ahead of the Area's last automatic qualifier, not in
+  the program), `next_best_mark` (a better remaining mark than a next-best-mark taker, not in
+  the program) or `at_large_standard` (remaining, met the standard, not in the program).
 - **at_large_combined** = next best mark + at-large standard. In athlete rows it's a
   0/1 column. In summary tables it appears as extra rows with `rollup = True`; don't add
   them to the per-type rows.
 - **Fields**
-  - **qualified** ("All qualifiers" on the dashboard): everyone who earned a spot, whether
-    or not they entered, i.e. the replay prediction (types `automatic`, `next_best_mark`,
-    `at_large_standard`).
-  - **declared** ("Actual entries"): athletes who entered the MOC (the program), including
-    replacements and unexplained entrants.
+  - **qualified** ("All qualifiers" on the dashboard): the pre-declaration replay; summary
+    tables use `qualifier_type`.
+  - **declared** ("Actual entries"): athletes in the MOC program; summary tables use `route`
+    (as their `qualifier_type` column).
 - **competed** = 1 if the athlete has a row in the MOC results with any status other than
   DNS or SCR.
   - DNF, DQ, NH, FOUL and FS count as competed without a valid mark. The status is kept in
@@ -75,11 +82,10 @@ fields together.
 | made_final | 1 if `moc_final_place` ≤ 9 for LJ, TJ, SP and DT, ≤ 8 for every other event. The dashboard's "made the final" metric. |
 | reached_final_round | 1 if the athlete appears in the MOC finals round (see note) |
 | scored | 1 if `moc_final_place` ≤ 6 |
-| choice_tag | For a qualified athlete not in the program: `chose_other_events` (listed elsewhere in the program, incl. the 4x800 and relay rosters) or `did_not_declare` |
-| replacement_for_area, vacancy_refilled_by_area | The Area whose vacancy a replacement filled / the Area of the athlete who refilled a vacancy |
+| route, declined | See terms |
+| no_show | 1 if in the program for the event but didn't compete in it |
+| choice_tag | For a pre-declaration qualifier not in the program: `chose_other_events` (listed elsewhere in the program, incl. the 4x800 and relay rosters) or `did_not_declare` |
 | competed_other_moc_event | For every qualified individual who didn't compete in this event (in the program or not): 1 if they competed in any other MOC event that season (individual, relay leg or 4x800; any status but DNS/SCR), else 0. Blank for relays, competitors and rows without an Athletic.net ID |
-| moc_field, unfilled_spot | The event's MOC field (largest competed count over its rounds, decision #25) and whether this spot is unfilled |
-| spot_use | For qualified spots: `competed`, `refilled`, `unfilled`, `chose_another_event` or `did_not_enter` (decision #26; first match wins in that order) |
 | moc_overall_place | Overall MOC place in the event (see note) |
 | state_qualified | `pending` until the CIF State meet data arrives |
 
@@ -123,60 +129,23 @@ groups with at least one entry have a row. Columns: `competed` (count); `made_fi
 
 ## data/summary/spot_utilization.csv
 
-Per season × gender × event × area, over the spots the rules gave that Area:
+Per season × gender × event × Area (every Area, zeros included; decision #33). Field size
+plays no part.
 
 | Column | Meaning |
 |---|---|
-| spots_earned | Qualified by the rules (the replay prediction) |
-| declared | Of those, in the program |
-| competed | Of those, competed (see terms) |
-| no_show | Declared but did not compete |
-| not_declared | Qualified but not in the program. `= spots_earned − declared`. |
-| not_declared_chose_other_events / not_declared_did_not_declare | Split of `not_declared` by athlete choice |
-| unused_total | `spots_earned − competed` (= `no_show + not_declared`) |
-| utilization_rate | `competed / spots_earned` |
-| vacancies_refilled | This Area's not-declared spots paired with a replacement |
-| refilled_by_area | Which Areas the replacements came from, `area:count` |
-| replacements_from_this_area | This Area's athletes who entered as replacements, for any Area |
-| guaranteed_spots | Of `spots_earned`, the automatic and next-best-mark spots (the fixed 24 per event) |
-| unfilled_spots | **Provisional, under verification.** A guaranteed spot nobody used: its qualifier didn't compete, the spot wasn't refilled, and the event's MOC field (athletes or teams who competed; the largest count over the event's rounds, i.e. not DNS/SCR) ended below 24 |
-| unfilled_rate | `unfilled_spots / guaranteed_spots` |
-| other_unused | Old donut segment, kept for comparison: unused, not refilled, and not unfilled (full-field guaranteed spots plus at-large spots). |
-| g_competed, g_refilled, g_chose_another_event, g_did_not_enter, g_unfilled | Guaranteed spots by `spot_use`. They sum to `guaranteed_spots`; `g_unfilled = unfilled_spots`. |
-| guaranteed_used, guaranteed_used_rate | `g_competed + g_refilled`, and that ÷ `guaranteed_spots` ("Guaranteed spots used" on the dashboard) |
-| at_large_spots, al_competed, al_refilled, al_chose_another_event, al_did_not_enter | At-large standard spots by `spot_use`, reported apart from guaranteed spots |
-| unused_not_refilled | The first version of this metric ("empty lanes"): `unused_total − vacancies_refilled`, never below 0. Kept for comparison; it over-counts (see `docs/findings_v1.md` §6). |
-| no_show_rate | `no_show / declared` |
-| not_declared_individual | Not-declared spots held by individuals (relay teams excluded) |
-| not_declared_competed_other_event | Of those, athletes who competed in another MOC event that season |
-| double_qualifier_share | `not_declared_competed_other_event / not_declared_individual` |
+| auto_spots, nbm_spots | The Area's automatic spots (6; Class A 3; +1 per tie at the last automatic place) and the next-best-mark spots it won |
+| guaranteed_spots | `auto_spots + nbm_spots` |
+| g_competed, g_no_show, g_not_used | Guaranteed spots whose entrant competed / was in the program but didn't compete / that no entrant from the Area took. They sum to `guaranteed_spots`. |
+| passed_down | Automatic spots passed down because a finisher ahead declined |
+| declined_nbm, declined_at_large | Next-best-mark and at-large spots declined |
+| at_large_spots, al_competed, al_no_show | At-large standard entrants, reported apart from guaranteed spots |
+| entries, no_show | Every program entrant from the Area (any route, incl. unexplained), and those who didn't compete |
+| no_show_competed_other_event | No-shows who competed in another MOC event that season |
+| guaranteed_used, guaranteed_used_rate | `g_competed`, and ÷ `guaranteed_spots` |
+| no_show_rate | `no_show / entries` |
 
-**How to read it**
-- **No-shows are never refilled.** A vacancy can only be seen when a qualified athlete is
-  missing from the program.
-- **Replacements count only in `replacements_from_this_area`.** A replacement never counts
-  toward the `competed` of the Area whose spot it filled. So utilization measures how many
-  of an Area's earned spots its own qualifiers used.
-- **`refilled_by_area` is always the same Area in these tables.** With same-Area
-  replacement, a vacancy is always refilled from its own Area. It would only differ under
-  fill-line replacement.
-
-**`spot_utilization_by_area.csv`** is the roll-up per season × area over all events,
-with `utilization_rate` recomputed from the sums.
-
-**Flag lists.** Each lists every Area × gender × event with the metric above 0 in at least
-3 of the seasons analysed. Columns: the seasons, how many there were, and the metric summed
-over all seasons.
-- `spot_utilization_flags_unfilled.csv`: `unfilled_spots`
-- `spot_utilization_flags_unused.csv`: `unused_total`
-
-**`no_shows_unfilled_by_area.csv`** gives per season × area the counts behind the rates:
-`spots_earned`, `guaranteed_spots`, `declared`, `no_show`, `no_show_rate`,
-`not_declared`, `vacancies_refilled`, `unfilled_spots`, `unfilled_rate` and
-`unused_not_refilled`.
-
-**Unfilled spots include no-shows** when the field ended short. A declared athlete who
-doesn't compete can't be seen in the program, so that spot is never counted as refilled.
+**`spot_utilization_by_area.csv`** is the roll-up per season × area over all events.
 
 ## data/summary/core_comparison.csv and core_tests.csv
 
@@ -201,34 +170,41 @@ entries publish `competed` and `with_moc_place` only; the MOC-place figures are 
 Where Area finishers end up at the MOC, aggregated for the public repo. It is the data
 behind the dashboard's "Area place vs. MOC finish" tab and the Overview cards.
 - **Rows:** season (each, plus `2022-2026 pooled`) × gender (`girls`, `boys`, `all`) ×
-  `event_group` (six groups, plus `all`) × area × `area_place` (`1`…`12`, plus the bands
-  `5-6` and `7-8`).
+  `event_group` (six groups, plus `all`) × area (plus `bay-shore+redwood-empire`) ×
+  `area_place` (`1`…`12`, the bands `5-6` and `7-8`, and `7-8 not automatic`: 7th–8th-place
+  entrants on a next-best-mark or at-large route).
+- **Guards:** a combined-Area cell is shown only when each Area's own cell is; the
+  `7-8 not automatic` cell only when the automatic 7th–8th cell is 0 or ≥ 5 entries.
 - **Columns:** `entries` (athlete-events that competed at the MOC), `made_final_count` and
   `median_moc_place`.
 - **Small cells:** when `entries` < 5, `made_final_count` and `median_moc_place` are blank, so no
   row reveals one athlete's MOC place.
 - **No single events:** the table has no single-event rows.
 
-## outputs/left_out.csv (local only, git-ignored)
+## Left out (decision #34)
 
-Per season × gender × event × area: the 3 best non-qualifiers by Area mark (valid marks
-only; ties broken by Area place). No names, but one row per athlete, so it is kept out of
-the public repo (decision #29); `docs/findings_v1.md` §5 summarises it in one paragraph.
+**Left out** = finished in an Area final behind the Area's last automatic qualifier, no
+route and not in the program. Compared with other Areas' automatic qualifiers (pass-down);
+"beaten" = the qualifier's Area-final mark is strictly worse. Marks come from different Area
+meets.
 
-| Column | Meaning |
-|---|---|
-| rank_among_non_qualifiers | 1–3 |
-| area_place, area_mark, area_mark_value | Area final result (value in seconds or metres) |
-| is_relay | |
-| declared_anyway | In the MOC program anyway, e.g. as a replacement (blank for relays) |
-| moc_cutoff_place, moc_cutoff_mark | The 8th-best valid MOC mark (9th for LJ/TJ/SP/DT) that season, across all rounds combined (prelims + finals). Each athlete or team counts once, at their best valid mark. |
-| moc_cutoff_source | `best_mark_all_rounds` |
-| area_mark_would_have_made_final | The Area mark equals or beats the cutoff |
-| caveat | See below |
+- **`outputs/left_out.csv`** (local, names): one row per left-out athlete, with
+  `beaten_other_area_autos` and `beaten_<area>` counts.
+- **`outputs/left_out_beaten.csv`** (local, names): one row per left-out athlete × beaten
+  qualifier, with the qualifier's MOC outcome.
+- **`data/summary/left_out_counts.csv`:** per season × gender × event × `area` (left-out
+  athlete's) × `beaten_area`: `beat_any` (left-out athletes who beat ≥ 1 automatic qualifier
+  from `beaten_area`) and `beaten_autos` (distinct qualifiers beaten). Rows with
+  `beaten_area = any` carry `left_out` (all left-out finishers) and `beat_any` (beat ≥ 1
+  from any other Area).
+- **`data/summary/left_out_beaten_moc.csv`:** how the beaten qualifiers did at the MOC, per
+  season (+ pooled) × `area` × `beaten_area` (each also `all`): `beaten_autos`, `competed`,
+  `made_final`, `median_moc_place`; the last two blank below 5 entries.
 
-**Caveat:** the Area mark and the MOC marks come from different meets, with different
-wind, weather, competition and (field events) attempts. The comparison doesn't predict how
-the athlete would have placed at the MOC.
+## data/summary/match_rates.csv
+
+Per season: RULES and RAW match rates of the pre-declaration replay and of pass-down
+against the real MOC programs, pass-down matched entries and unexplained entries.
 
 ## Known limits
 
@@ -236,7 +212,8 @@ the athlete would have placed at the MOC.
   when there is no ID. 1,292 of 1,297 MOC finalists (top 8, top 9 in LJ/TJ/SP/DT), 2022–2026, link to a
   qualifiers row.
   - The rest: one 2024 program spelling differs from Athletic.net, and "West County" (2022)
-    is an unconfirmed rename kept in review. Athletic.net lists those athletes under Analy.
+    is an unconfirmed rename kept in review. Athletic.net lists those athletes under Analy;
+    pass-down links most of them by name (decision #32).
 - **Unknown area.** Program entries whose school spelling is unresolved have `area =
   unknown`: 15 in 2022 and 5 in 2023.
 - **Assumed allocations.** Allocation numbers before 2026 are assumed from 2026; standards

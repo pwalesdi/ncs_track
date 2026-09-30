@@ -137,24 +137,22 @@ def use() -> str:
     r = pd.read_csv(S / "spot_utilization_by_area.csv")
     rows = []
     for x in r.itertuples():
-        al = (f"{x.at_large_spots} qualifiers: {x.al_competed} competed, {x.al_chose_another_event} chose another event, "
-              f"{x.al_did_not_enter} didn't enter" if x.at_large_spots else "none")
-        rows.append([x.season, AREA_NAME[x.area], f"{x.guaranteed_spots} spots", x.g_competed, x.g_refilled,
-                     x.g_chose_another_event, x.g_did_not_enter, x.g_unfilled,
-                     rate(x.guaranteed_used, x.guaranteed_spots, "guaranteed spots used"), al,
-                     rate(x.no_show, x.declared, "entries")])
-    main = table(rows, ["Season", "Area", "Guaranteed spots", "Competed", "Refilled", "Chose another event",
-                        "Didn't enter", "Unfilled (provisional)", "Guaranteed spots used", "At-large standard (separate)",
-                        "No-shows"])
-    fl = []
-    for name, f, unit in (("unfilled spots", "spot_utilization_flags_unfilled.csv", "unfilled spots"),
-                          ("any unused spot", "spot_utilization_flags_unused.csv", "unused spots")):
-        t = pd.read_csv(S / f)
-        fl.append(f"**Area × event with {name} in 3 or more of the 5 seasons: {len(t)} combinations**\n\n" + table(
-            [[AREA_NAME[x.area], x.gender, x.event_code, f"{x.seasons_flagged} seasons", x.seasons.replace("|", ", "),
-              f"{x.total_all_seasons} {unit}"] for x in t.itertuples()],
-            ["Area", "Gender", "Event", "Seasons", "Which", "Total over 5 seasons"]))
-    return main + "\n\n" + "\n\n".join(fl)
+        al = f"{x.at_large_spots} entrants: {x.al_competed} competed, {x.al_no_show} no-show" if x.at_large_spots else "none"
+        rows.append([x.season, AREA_NAME[x.area], f"{x.guaranteed_spots} spots", x.g_competed, x.g_no_show, x.g_not_used,
+                     f"{x.passed_down} spots", al, rate(x.no_show, x.entries, "entries")])
+    return table(rows, ["Season", "Area", "Guaranteed spots", "Competed", "No-show", "Not used",
+                        "Passed down from declines", "At-large standard (separate)", "No-shows, all entries"])
+
+
+def leftout() -> str:
+    c = pd.read_csv(S / "left_out_counts.csv")
+    tot = c[c["beaten_area"] == "any"].groupby("area")[["left_out", "beat_any"]].sum()
+    pair = c[c["beaten_area"] != "any"].groupby(["area", "beaten_area"])["beat_any"].sum()
+    rows = [[AREA_NAME[a]] + ["–" if a == b else f"{int(pair.get((a, b), 0))} athletes" for b in AREAS]
+            + [rate(int(tot.loc[a, "beat_any"]), int(tot.loc[a, "left_out"]), "left out")] for a in AREAS]
+    return ("**Left-out athletes (rows: their Area) who beat at least one automatic qualifier from each other Area, "
+            "2022–2026 pooled**\n\n" + table(rows, ["Left out from"] + [f"Beat a {AREA_NAME[b]} automatic" for b in AREAS]
+                                              + ["Beat any"]))
 
 
 def pooled() -> str:
@@ -177,15 +175,14 @@ def pooled() -> str:
                      rate(auto["made_final"].sum(), auto["competed"].sum(), TOP8),
                      rate(comb["made_final"].sum(), comb["competed"].sum(), TOP8),
                      rate(t.lowest_auto_top, t.lowest_auto_n, TOP8) + " vs " + rate(t.other_at_large_top, t.other_at_large_n, TOP8),
-                     rate(su.loc[a, "unfilled_spots"], su.loc[a, "guaranteed_spots"], "guaranteed spots unfilled"),
-                     rate(su.loc[a, "no_show"], su.loc[a, "declared"], "entries were no-shows")])
+                     rate(su.loc[a, "no_show"], su.loc[a, "entries"], "entries were no-shows")])
     return table(rows, ["Area", "Share of all qualifiers", "Next-best-mark + at-large spots held", "Automatic: made the final",
                         "Next best mark + at-large: made the final", "Lowest automatics vs other Areas' next best mark + at-large: made the final",
-                        "Unfilled spots (provisional)", "No-shows"])
+                        "No-shows"])
 
 
 SECTIONS = {"makeup": makeup, "spots": spots, "results": results, "core": core,
-            "corepooled": lambda: core(True), "tests": tests, "use": use, "pooled": pooled}
+            "corepooled": lambda: core(True), "tests": tests, "leftout": leftout, "use": use, "pooled": pooled}
 
 if __name__ == "__main__":
     for w in sys.argv[1:] or list(SECTIONS):

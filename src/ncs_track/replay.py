@@ -536,7 +536,8 @@ def switch_effects(table: pd.DataFrame, axes: dict, metric: str = "raw_mismatche
 # ---------------------------------------------------------------------------
 PASS_DOWN_COLUMNS = ["gender", "event_code", "meet_area", "area", "place", "status", "mark_raw", "mark_value",
                      "athlete_id", "athlete_name", "school_name", "is_relay", "identity", "performance_id",
-                     "meets_standard", "declared", "program_name", "route", "declined", "left_out"]
+                     "meets_standard", "declared", "program_name", "route", "declined", "left_out",
+                     "wind_aided", "remaining", "passed_unused"]
 
 
 def _program_matches(perf_ids: list[str], entry_ids: list[str]) -> dict[str, str]:
@@ -577,6 +578,72 @@ def _match_unresolved(x: pd.DataFrame, en: pd.DataFrame, match: dict) -> None:
         if len(hits) == 1:
             match[hits["identity"].iloc[0]] = r.identity
             used.add(r.identity)
+
+
+def assign_routes(x: pd.DataFrame, auto_n: dict, fill_n: int, measure: str, ties_include: bool = True,
+                  wind_aided_allowed: bool = True) -> pd.DataFrame:
+    """The pass-down walk for one event (see `pass_down`), given who accepts (`declared`).
+
+    Needs place, status, mark_value, meet_area, fill_candidate, meets_standard, wind_aided and
+    declared. Adds route (auto / fill / at_large), declined (auto / fill / at_large),
+    remaining (behind the Area's last automatic qualifier), left_out, and passed_unused:
+    walked past while a spot stayed unused (an Area with fewer entrants than automatic spots,
+    or a next-best-mark spot nobody took), i.e. offered implicitly and didn't take it.
+    Used by `pass_down` (declared = in the program) and by the scenario engine."""
+    x = x.copy()
+    x["route"], x["declined"], x["left_out"], x["passed_unused"] = None, None, False, False
+    ok = (x["status"] == "OK") & x["mark_value"].notna() & x["place"].notna()
+    remaining = pd.Series(False, index=x.index)
+    for area, xa in x[ok].sort_values("place", kind="stable").groupby("meet_area"):
+        n, taken, skipped, last_place = auto_n.get(area, 0), 0, [], None
+        for i, r in xa.iterrows():
+            tied = taken >= n and last_place is not None and r["place"] == last_place   # tie at the last spot
+            if (taken < n or tied) and r["declared"]:
+                x.at[i, "route"] = "auto"
+                taken += 1
+                last_place = r["place"]
+                for j in skipped:                   # ahead of an automatic qualifier: declined
+                    x.at[j, "declined"] = "auto"
+                skipped = []
+            elif tied:                              # tied with the last automatic qualifier, not entered
+                x.at[i, "declined"] = "auto"
+            elif taken < n:
+                skipped.append(i)
+            else:
+                remaining[i] = True
+        for j in skipped:                           # behind the last automatic qualifier (spots unused)
+            remaining[j] = True
+            x.at[j, "passed_unused"] = True
+    # next best mark: walk remaining marks in the fill pool, best first
+    pool = x[remaining & x["fill_candidate"].astype(bool)]
+    keyed = pool["mark_value"].map(lambda v: sort_key(v, measure)).sort_values(kind="stable")
+    got, cut, skipped = 0, None, []
+    for i, k in keyed.items():
+        if got >= fill_n and not (ties_include and cut is not None and abs(k - cut) < EPS):
+            break
+        if x.at[i, "declared"]:
+            x.at[i, "route"] = "fill"
+            got += 1
+            cut = k
+            for j in skipped:                       # a better mark not in the program: declined
+                x.at[j, "declined"] = "fill"
+            skipped = []
+        elif got >= fill_n:                         # tied with the last next-best-mark taker, not entered
+            x.at[i, "declined"] = "fill"
+        else:
+            skipped.append(i)
+    if got < fill_n:
+        for j in skipped:                           # walked past while a spot stayed unused
+            x.at[j, "passed_unused"] = True
+    # at-large standard: everyone else remaining who met it
+    wind_ok = True if wind_aided_allowed else ~x["wind_aided"].fillna(False).astype(bool)
+    rest = remaining & x["route"].isna() & x["declined"].isna()
+    al = rest & x["meets_standard"].astype(bool) & wind_ok
+    x.loc[al & x["declared"], "route"] = "at_large"
+    x.loc[al & ~x["declared"], "declined"] = "at_large"
+    x["left_out"] = rest & ~al & ~x["declared"]
+    x["remaining"] = remaining
+    return x
 
 
 def pass_down(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
@@ -621,49 +688,7 @@ def pass_down(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
         prog_name = dict(zip(en["identity"], en["athlete_name"]))
         x["declared"] = x["identity"].isin(match)
         x["program_name"] = x["identity"].map(lambda i: prog_name.get(match.get(i)))
-        x["route"], x["declined"], x["left_out"] = None, None, False
-        ok = (x["status"] == "OK") & x["mark_value"].notna() & x["place"].notna()
-        remaining = pd.Series(False, index=x.index)
-        for area, xa in x[ok].sort_values("place", kind="stable").groupby("meet_area"):
-            n, taken, skipped, last_place = auto_n.get(area, 0), 0, [], None
-            for i, r in xa.iterrows():
-                tied = taken >= n and last_place is not None and r["place"] == last_place   # tie at the last spot
-                if (taken < n or tied) and r["declared"]:
-                    x.at[i, "route"] = "auto"
-                    taken += 1
-                    last_place = r["place"]
-                    for j in skipped:                   # ahead of an automatic qualifier: declined
-                        x.at[j, "declined"] = "auto"
-                    skipped = []
-                elif taken < n:
-                    skipped.append(i)
-                else:
-                    remaining[i] = True
-            for j in skipped:                           # behind the last automatic qualifier (spots unused)
-                remaining[j] = True
-        # next best mark: walk remaining marks in the fill pool, best first
-        pool = x[remaining & x["fill_candidate"]]
-        keyed = pool["mark_value"].map(lambda v: sort_key(v, measure)).sort_values(kind="stable")
-        got, cut, skipped = 0, None, []
-        for i, k in keyed.items():
-            if got >= fill_n and not (interp.fill_ties_include and cut is not None and abs(k - cut) < EPS):
-                break
-            if x.at[i, "declared"]:
-                x.at[i, "route"] = "fill"
-                got += 1
-                cut = k
-                for j in skipped:                       # a better mark not in the program: declined
-                    x.at[j, "declined"] = "fill"
-                skipped = []
-            else:
-                skipped.append(i)
-        # at-large standard: everyone else remaining who met it
-        wind_ok = (~x["wind_aided"].fillna(False).astype(bool)) if not interp.wind_aided_at_large else True
-        rest = remaining & x["route"].isna() & x["declined"].isna()
-        al = rest & x["meets_standard"] & wind_ok
-        x.loc[al & x["declared"], "route"] = "at_large"
-        x.loc[al & ~x["declared"], "declined"] = "at_large"
-        x["left_out"] = rest & ~al & ~x["declared"]
+        x = assign_routes(x, auto_n, fill_n, measure, interp.fill_ties_include, interp.wind_aided_at_large)
         x["athlete_name"], x["school_name"], x["area"] = x["athlete_name_raw"], x["school_name_raw"], x["meet_area"]
         frames.append(x)
 

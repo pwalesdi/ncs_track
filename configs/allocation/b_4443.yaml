@@ -1,0 +1,28 @@
+# Scenario b_4443 (decision #35): Tri-Valley, Bay Shore and Redwood Empire 4 automatic spots each,
+# Class A 3; the base field stays 24, so every removed automatic spot becomes a next-best-mark
+# spot (9). Routes by pass-down; real declines kept; at-large standard unchanged per season.
+# A simulation for comparison, not a proposal.
+name: b_4443
+description: >-
+  4/4/4/3 automatic + 9 next best mark (all four meets, after declarations); at-large
+  standard as printed, on top; ties at the last spot all in; wind-aided marks allowed.
+auto_spots:
+  tri-valley: 4
+  bay-shore: 4
+  redwood-empire: 4
+  class-a: 3
+fill:
+  count: 9
+  pool: [tri-valley, bay-shore, redwood-empire, class-a]
+  order: before_at_large
+  ties: include
+at_large:
+  mode: "on"
+  eligible_outside_top:
+    tri-valley: 4
+    bay-shore: 4
+    redwood-empire: 4
+    class-a: 3
+  wind_aided_allowed: true
+replacement: "off"
+qualifying_rounds: [final]

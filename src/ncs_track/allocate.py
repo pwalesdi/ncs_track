@@ -13,8 +13,9 @@ predict?"; this engine answers the same question for any allocation described in
 
 Standards always come from the season's rules file; the config says how to use them.
 configs/allocation/current.yaml describes the existing system, and a test checks that the
-engine with it reproduces the validated replay exactly for every season. This module does
-not contain or evaluate any alternative allocation.
+engine with it reproduces the validated replay exactly for every season. The pass-down
+scenarios (configs/allocation/a_5553, b_4443, c_3333) are run by ncs_track.scenarios, which
+uses only auto_spots, fill and at_large from these configs.
 """
 
 from __future__ import annotations

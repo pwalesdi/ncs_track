@@ -351,3 +351,31 @@ Newest at the bottom.
       qualifiers, 11th (5:26.07) beat 3, as hand-checked.
     - Pooled 2022–2026: 1,582 of 8,597 left-out finishers beat at least one automatic
       qualifier from another Area.
+
+## Unattended decisions to review (unattended run, 2026-09-30; the user was away)
+
+35. **Scenario engine** (`src/ncs_track/scenarios.py`, `python -m ncs_track scenarios`). Each
+    scenario reruns the validated pass-down walk (`replay.assign_routes`, factored out of
+    `pass_down` with no change in output) with its own automatic spots and next-best-mark
+    count: current 6/6/6/3 + 3, a_5553 5/5/5/3 + 6, b_4443 4/4/4/3 + 9, c_3333 3/3/3/3 + 12.
+    At-large standard as printed per season, on top; ties all in; wind-aided allowed.
+    - **Declines:** anyone with a real decline (the `declined` column), or who was walked past
+      while a spot stayed unused in reality, declines every spot again. Everyone else accepts:
+      real entrants and finishers never offered a spot.
+    - **Fill pool:** every valid mark from all four Areas; `evaluate`'s fill flag (which
+      assumes places 1–6 are automatic) is not used, or a 6th-place finisher could never take a
+      next-best-mark spot in 5-5-5-3.
+    - **Outside every scenario:** program entrants the pass-down couldn't place (6 unexplained,
+      8 unlinked schools). They stay in the field and are never added, removed or left out.
+    - **Left out in a scenario** = the validated definition (#34) applied to the scenario's
+      routes: behind the Area's last automatic qualifier, no route, no real decline. Real
+      entrants who lose their spot in a scenario can be left out there.
+    - **Checks:** current reproduces the validated routes and left-out set exactly (test);
+      no left-out athlete beats a next-best-mark mark in any scenario (test).
+36. **A tie is an offer.** A finisher tied with the last automatic qualifier (same Area place),
+    or with the last next-best-mark mark, who didn't enter now counts as a decline; before,
+    she counted as left out. Without this, current would "add" 10 tied athletes. This changes
+    the validated pass-down figures slightly: automatic spots passed down 247 → 250,
+    next-best-mark declines 46 → 53, left out 8,597 → 8,587, left out who beat an automatic
+    qualifier from another Area 1,582 → 1,575. Routes, fields, no-shows and the audit are
+    unchanged.

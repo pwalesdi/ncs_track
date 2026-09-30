@@ -1,9 +1,9 @@
 season,area,beaten_area,beaten_autos,competed,made_final,median_moc_place
 2022,tri-valley,tri-valley,0,0,,
-2022,tri-valley,bay-shore,44,41,0,19.0
-2022,tri-valley,redwood-empire,34,32,0,20.0
+2022,tri-valley,bay-shore,43,40,0,19.0
+2022,tri-valley,redwood-empire,33,31,0,20.0
 2022,tri-valley,class-a,42,42,1,20.0
-2022,tri-valley,all,120,115,1,20.0
+2022,tri-valley,all,118,113,1,20.0
 2022,bay-shore,tri-valley,0,0,,
 2022,bay-shore,bay-shore,0,0,,
 2022,bay-shore,redwood-empire,19,17,0,20.0
@@ -20,15 +20,15 @@ season,area,beaten_area,beaten_autos,competed,made_final,median_moc_place
 2022,class-a,class-a,0,0,,
 2022,class-a,all,25,23,0,20.0
 2022,all,tri-valley,0,0,,
-2022,all,bay-shore,50,47,0,19.0
-2022,all,redwood-empire,36,34,0,20.0
+2022,all,bay-shore,49,46,0,19.0
+2022,all,redwood-empire,35,33,0,20.0
 2022,all,class-a,43,42,1,20.0
-2022,all,all,129,123,1,20.0
+2022,all,all,127,121,1,20.0
 2023,tri-valley,tri-valley,0,0,,
-2023,tri-valley,bay-shore,51,48,1,19.0
+2023,tri-valley,bay-shore,50,47,1,19.0
 2023,tri-valley,redwood-empire,45,44,2,17.0
 2023,tri-valley,class-a,34,34,1,21.0
-2023,tri-valley,all,130,126,4,19.0
+2023,tri-valley,all,129,125,4,19.0
 2023,bay-shore,tri-valley,2,2,,
 2023,bay-shore,bay-shore,0,0,,
 2023,bay-shore,redwood-empire,8,8,1,17.5
@@ -45,10 +45,10 @@ season,area,beaten_area,beaten_autos,competed,made_final,median_moc_place
 2023,class-a,class-a,0,0,,
 2023,class-a,all,15,14,0,20.5
 2023,all,tri-valley,2,2,,
-2023,all,bay-shore,52,49,1,19.5
+2023,all,bay-shore,51,48,1,19.5
 2023,all,redwood-empire,45,44,2,17.0
 2023,all,class-a,36,36,1,21.0
-2023,all,all,135,131,4,19.0
+2023,all,all,134,130,4,19.0
 2024,tri-valley,tri-valley,0,0,,
 2024,tri-valley,bay-shore,34,33,1,20.0
 2024,tri-valley,redwood-empire,44,43,0,20.0
@@ -125,10 +125,10 @@ season,area,beaten_area,beaten_autos,competed,made_final,median_moc_place
 2026,all,class-a,41,39,0,20.0
 2026,all,all,136,131,3,20.0
 2022-2026 pooled,tri-valley,tri-valley,0,0,,
-2022-2026 pooled,tri-valley,bay-shore,237,229,6,19.0
-2022-2026 pooled,tri-valley,redwood-empire,206,199,3,19.0
+2022-2026 pooled,tri-valley,bay-shore,235,227,6,19.0
+2022-2026 pooled,tri-valley,redwood-empire,205,198,3,19.0
 2022-2026 pooled,tri-valley,class-a,182,177,6,21.0
-2022-2026 pooled,tri-valley,all,625,605,15,20.0
+2022-2026 pooled,tri-valley,all,622,602,15,20.0
 2022-2026 pooled,bay-shore,tri-valley,3,3,,
 2022-2026 pooled,bay-shore,bay-shore,0,0,,
 2022-2026 pooled,bay-shore,redwood-empire,88,83,1,20.5
@@ -145,7 +145,7 @@ season,area,beaten_area,beaten_autos,competed,made_final,median_moc_place
 2022-2026 pooled,class-a,class-a,0,0,,
 2022-2026 pooled,class-a,all,154,149,3,21.0
 2022-2026 pooled,all,tri-valley,3,3,,
-2022-2026 pooled,all,bay-shore,248,240,6,19.0
-2022-2026 pooled,all,redwood-empire,212,205,3,19.0
+2022-2026 pooled,all,bay-shore,246,238,6,19.0
+2022-2026 pooled,all,redwood-empire,211,204,3,19.0
 2022-2026 pooled,all,class-a,190,184,6,21.0
-2022-2026 pooled,all,all,653,632,15,20.0
+2022-2026 pooled,all,all,650,629,15,20.0

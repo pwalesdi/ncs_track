@@ -609,4 +609,4 @@ def build_season(season: int, results, entries, rules, kw, legs, moc_perf):
     q = qualifiers(season, comp, routes, moc, unresolved, kw["school_key"], competed_events(moc_all, legs),
                    moc_overall_places(moc, kw["school_key"]))
     lo, pairs = left_out(season, routes, q)
-    return q, lo, pairs, comp, pd_comp
+    return q, lo, pairs, comp, pd_comp, routes.assign(season=season)

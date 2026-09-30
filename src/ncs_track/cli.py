@@ -175,10 +175,11 @@ def cmd_analysis(args) -> int:
     from . import analysis, replay
     perf = pd.read_csv(paths.PROCESSED / "performances.csv", dtype={"school_id": str, "athlete_id": str},
                        low_memory=False)
-    qs, los, pairs, rates = [], [], [], []
+    qs, los, pairs, rates, routes_all = [], [], [], [], []
     for season in args.season:
         results, entries, rules, label, kw, legs = replay_inputs(season)
-        q, lo, pr, comp, pd_comp = analysis.build_season(season, results, entries, rules, kw, legs, perf)
+        q, lo, pr, comp, pd_comp, rt = analysis.build_season(season, results, entries, rules, kw, legs, perf)
+        routes_all.append(rt)
         qs.append(q)
         los.append(lo)
         pairs.append(pr)
@@ -197,6 +198,7 @@ def cmd_analysis(args) -> int:
     q.to_csv(paths.OUTPUTS / "qualifiers.csv", index=False)
     lo.to_csv(paths.OUTPUTS / "left_out.csv", index=False)
     pr.to_csv(paths.OUTPUTS / "left_out_beaten.csv", index=False)
+    pd.concat(routes_all, ignore_index=True).to_csv(paths.OUTPUTS / "routes.csv", index=False)   # scenario input
     q[q["no_show"] == 1].sort_values(["season", "area", "gender", "event_code"]).to_csv(
         paths.OUTPUTS / "no_shows.csv", index=False)
     pd.DataFrame(rates).to_csv(paths.OUTPUTS / "match_rates_pass_down.csv", index=False)
@@ -217,6 +219,16 @@ def cmd_analysis(args) -> int:
     pd.DataFrame(rates).round(4).to_csv(out / "match_rates.csv", index=False)
     print("wrote outputs/{qualifiers,left_out,left_out_beaten,no_shows}.csv (git-ignored) and "
           f"{out.relative_to(paths.ROOT)}/*.csv")
+    return 0
+
+
+def cmd_scenarios(args) -> int:
+    from . import scenarios
+    t = scenarios.build(args.season)
+    ch = t["scenario_changes"]
+    x = ch[ch["season"].str.contains("pooled") & (ch["gender"] == "all") & (ch["event"] == "all")]
+    print(x.groupby("scenario", sort=False)[["added", "removed"]].sum().to_string())
+    print("wrote outputs/scenario_*.csv (git-ignored) and data/summary/scenario_*.csv")
     return 0
 
 
@@ -261,6 +273,9 @@ def main(argv: list[str] | None = None) -> int:
     an = sub.add_parser("analysis", help="build outputs/qualifiers.csv and data/summary/ tables")
     an.add_argument("--season", type=int, nargs="+", required=True)
     an.set_defaults(func=cmd_analysis)
+    sc = sub.add_parser("scenarios", help="simulate the allocation scenarios in configs/allocation/ (needs analysis first)")
+    sc.add_argument("--season", type=int, nargs="*")
+    sc.set_defaults(func=cmd_scenarios)
     al = sub.add_parser("allocate", help="run the allocation engine with a config (configs/allocation/*.yaml)")
     al.add_argument("--config", required=True)
     al.add_argument("--season", type=int, nargs="+", required=True)

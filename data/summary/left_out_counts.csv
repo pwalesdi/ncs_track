@@ -129,9 +129,7 @@ season,gender,event_code,area,beaten_area,left_out,beat_any,beaten_autos
 2022,girls,100H,bay-shore,any,18.0,0,
 2022,girls,100H,class-a,any,10.0,0,
 2022,girls,100H,redwood-empire,any,15.0,0,
-2022,girls,100H,tri-valley,any,13.0,1,
-2022,girls,100H,tri-valley,bay-shore,,1,1.0
-2022,girls,100H,tri-valley,redwood-empire,,1,1.0
+2022,girls,100H,tri-valley,any,12.0,0,
 2022,girls,1600,bay-shore,any,14.0,0,
 2022,girls,1600,class-a,any,9.0,4,
 2022,girls,1600,class-a,bay-shore,,4,2.0
@@ -429,12 +427,12 @@ season,gender,event_code,area,beaten_area,left_out,beat_any,beaten_autos
 2023,girls,DT,tri-valley,bay-shore,,8,6.0
 2023,girls,DT,tri-valley,class-a,,5,1.0
 2023,girls,DT,tri-valley,redwood-empire,,5,4.0
-2023,girls,HJ,bay-shore,any,9.0,0,
+2023,girls,HJ,bay-shore,any,8.0,0,
 2023,girls,HJ,class-a,any,10.0,0,
 2023,girls,HJ,redwood-empire,any,9.0,3,
 2023,girls,HJ,redwood-empire,bay-shore,,3,2.0
-2023,girls,HJ,tri-valley,any,14.0,8,
-2023,girls,HJ,tri-valley,bay-shore,,8,3.0
+2023,girls,HJ,tri-valley,any,9.0,3,
+2023,girls,HJ,tri-valley,bay-shore,,3,2.0
 2023,girls,LJ,bay-shore,any,13.0,0,
 2023,girls,LJ,class-a,any,13.0,0,
 2023,girls,LJ,redwood-empire,any,15.0,0,
@@ -514,9 +512,9 @@ season,gender,event_code,area,beaten_area,left_out,beat_any,beaten_autos
 2024,boys,4x100,class-a,any,9.0,0,
 2024,boys,4x100,redwood-empire,any,13.0,4,
 2024,boys,4x100,redwood-empire,class-a,,4,2.0
-2024,boys,4x100,tri-valley,any,12.0,9,
-2024,boys,4x100,tri-valley,class-a,,9,2.0
-2024,boys,4x100,tri-valley,redwood-empire,,3,1.0
+2024,boys,4x100,tri-valley,any,11.0,8,
+2024,boys,4x100,tri-valley,class-a,,8,2.0
+2024,boys,4x100,tri-valley,redwood-empire,,2,1.0
 2024,boys,4x400,bay-shore,any,7.0,0,
 2024,boys,4x400,class-a,any,10.0,0,
 2024,boys,4x400,redwood-empire,any,15.0,0,
@@ -652,7 +650,7 @@ season,gender,event_code,area,beaten_area,left_out,beat_any,beaten_autos
 2024,girls,DT,tri-valley,bay-shore,,1,2.0
 2024,girls,DT,tri-valley,redwood-empire,,1,1.0
 2024,girls,HJ,bay-shore,any,14.0,0,
-2024,girls,HJ,class-a,any,11.0,0,
+2024,girls,HJ,class-a,any,10.0,0,
 2024,girls,HJ,redwood-empire,any,3.0,0,
 2024,girls,HJ,tri-valley,any,10.0,0,
 2024,girls,LJ,bay-shore,any,13.0,11,
@@ -891,7 +889,7 @@ season,gender,event_code,area,beaten_area,left_out,beat_any,beaten_autos
 2025,girls,HJ,bay-shore,redwood-empire,,3,2.0
 2025,girls,HJ,class-a,any,14.0,3,
 2025,girls,HJ,class-a,redwood-empire,,3,2.0
-2025,girls,HJ,redwood-empire,any,4.0,0,
+2025,girls,HJ,redwood-empire,any,3.0,0,
 2025,girls,HJ,tri-valley,any,13.0,3,
 2025,girls,HJ,tri-valley,redwood-empire,,3,2.0
 2025,girls,LJ,bay-shore,any,14.0,2,

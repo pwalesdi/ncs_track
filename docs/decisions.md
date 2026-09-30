@@ -259,3 +259,33 @@ Newest at the bottom.
       refilled.
     None of these is changed here: changing the refill pairing would change the replay's
     RULES match rate, and capping unfilled at the shortfall is a definition choice.
+29. **Privacy: left_out.csv leaves the repo; moc_performance.csv gets the small-cell rule**
+    (2026-09-30, approved by Patrick).
+    - **`left_out.csv`** (one row per athlete) is now written to `outputs/left_out.csv`
+      (git-ignored) and removed from every commit (git filter-repo, this path only).
+      `.gitignore` also lists the old path. Findings §5 is one paragraph.
+    - **`moc_performance.csv`** is pre-aggregated to the dashboard's filter grain (season +
+      pooled × girls / boys / all × event, event group, all × Area × route) and blanks
+      made-the-final, scored and reached-final counts and rates below 5 entries. Every older
+      version (per-event rows, many with 1 entry) is removed from every commit; the new
+      version is re-added in a new commit.
+    - **Safeguards:** `git bundle` backup of all refs first; push with
+      `--force-with-lease=main:<old sha>` through `pre_push.sh`; the history scanner now
+      fails on the old headers of both files and on `left_out.csv` anywhere in history.
+    - **Residual risks, not covered by the approval:** older `dashboard/index.html`
+      versions (commits "Dashboard overhaul…" and "Spot use rebuilt…", both pushed this
+      round and before) embed the per-event MOC performance rows as JSON. And, as with the
+      place curve (#21), a suppressed cell can sometimes be recovered by subtracting two
+      published cells (e.g. girls + boys minus girls).
+30. **"Top finish" / "top 8" is renamed "Made the final"** everywhere (dashboard, docs,
+    columns: `made_final`, `made_final_rate`, `made_final_count`). Same definition: top 9 in
+    LJ/TJ/SP/DT, top 8 in every other event, relays included; the 800 and 1600 finals seat
+    12 but top 8 is counted. The "Left out" dashboard tab is removed.
+31. **Overview cards** (2026-09-30).
+    - **Apples to apples:** each Area's 6th-place finishers' median MOC place (Class A:
+      3rd, its last automatic place), pooled 2022–2026, all events.
+    - **The depth point:** Tri-Valley 7th–8th vs. Bay Shore + Redwood Empire 5th–6th
+      combined. Class A is excluded because its 5th–6th aren't automatic. The combined
+      group is a new pseudo-Area (`bay-shore+redwood-empire`) in `core_place_curve.csv`;
+      a combined cell is published only when each Area's own cell has ≥ 5 entries, so no
+      suppressed cell can be recovered by subtraction.

@@ -82,6 +82,7 @@ __CHARTJS__</script>
   /* Headline cards */
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+  #card-unfilled { grid-column: 1 / -1; }
   .card .big { font-size: 2.2rem; font-weight: 750; line-height: 1.1; }
   .card .cap { font-size: .98rem; margin: 6px 0 0; }
   .card .cnt { font-size: .85rem; color: var(--muted); margin: 4px 0 0; }
@@ -175,8 +176,9 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-perf" role="tabpanel">
     <h2>MOC performance</h2>
-    <p class="how">Of entries that competed at the MOC, how many finished in the top 8 (top 9 in LJ/TJ/SP/DT), by
-      Area and route. Entries are athlete-events: one athlete in two events counts twice.</p>
+    <p class="how"><b>Made the final</b> = finished top 9 in the long jump, triple jump, shot put or discus, or top 8 in every other event, relays included. (The 800 and 1600 finals seat 12; we count top 8.)</p>
+    <p class="how">Of entries that competed at the MOC, how many made the final, by Area and route. Entries are
+      athlete-events: one athlete in two events counts twice.</p>
     <div id="perf-body"></div>
   </section>
 
@@ -208,13 +210,6 @@ __CHARTJS__</script>
     </div>
   </section>
 
-  <section class="tabpanel" id="tab-left" role="tabpanel">
-    <h2>Left out</h2>
-    <p class="how">For each Area and event, the 3 best non-qualifiers by Area mark, compared with the 8th-best
-      valid MOC mark (9th in LJ/TJ/SP/DT) across all MOC rounds. The marks come from different meets (wind,
-      weather, competition), so this is a comparison, not a prediction.</p>
-    <div id="left-body"></div>
-  </section>
 
   <section class="tabpanel" id="tab-defs" role="tabpanel">
     <h2>Definitions</h2>
@@ -235,6 +230,7 @@ var EVENT_GROUPS = {"sprints_hurdles": ["100", "200", "100H", "110H", "300H"], "
                     "distance": ["1600", "3200"], "jumps": ["HJ", "PV", "LJ", "TJ"], "throws": ["SP", "DT"],
                     "relays": ["4x100", "4x400"]};
 var POOLED_KEY = "2022-2026 pooled";
+var COMBINED_AREA = "bay-shore+redwood-empire";   // pooled group in place_curve
 
 function eventSet(ev) {
   if (ev === "all") return null;
@@ -264,7 +260,11 @@ function ordinal(n) {
 }
 // Units always stated.
 function spotsTxt(k, n, what) { return n ? k + " of " + n + " " + (what || "MOC spots") + " (" + pctNum(k, n) + "%)" : "no " + (what || "MOC spots"); }
-function top8Txt(k, n) { return n ? k + " of " + n + " entries finished top 8 (" + pctNum(k, n) + "%)" : "no entries"; }
+function finalTxt(k, n) {
+  if (!n) return "no entries";
+  if (k === null || k === undefined) return n + (n === 1 ? " entry" : " entries") + " (fewer than 5: not shown)";
+  return k + " of " + n + " entries made the final (" + pctNum(k, n) + "%)";
+}
 
 function makeup(D, f, season) {
   var rows = D.field_makeup.filter(function (r) { return r.field === f.field && keep(r, f, season); });
@@ -291,16 +291,19 @@ function spotShare(D, f, season) {
   });
   return out;
 }
+// moc_performance is pre-aggregated to the filter grain (season + pooled, gender + all, event / group / all)
+// with made_final blank (null) below 5 entries; look the cell up rather than summing.
 function performance(D, f, season) {
-  var rows = D.moc_performance.filter(function (r) { return keep(r, f, season); });
+  var s = season === undefined ? f.season : season;
+  var key = s === "all" ? POOLED_KEY : String(s);
+  var rows = D.moc_performance.filter(function (r) { return r.season === key && r.gender === f.gender && r.event === f.event; });
   var out = {};
   AREAS.forEach(function (a) {
-    var ra = rows.filter(function (r) { return r.area === a; });
-    var g = function (types) {
-      var x = ra.filter(function (r) { return types.indexOf(r.qualifier_type) >= 0; });
-      return {entries: sum(x, "competed"), top8: sum(x, "top_finish")};
+    var g = function (t) {
+      var r = rows.filter(function (x) { return x.area === a && x.qualifier_type === t; })[0];
+      return r ? {entries: r.competed, final: r.made_final} : {entries: 0, final: 0};
     };
-    out[a] = {automatic: g(["automatic"]), nbm_std: g(["next_best_mark", "at_large_standard"])};
+    out[a] = {automatic: g("automatic"), nbm_std: g("at_large_combined")};
   });
   return out;
 }
@@ -355,23 +358,13 @@ function unfilledTable(D, f) {
   });
   return out;
 }
-function leftOut(D, f, season) {
-  var rows = D.left_out.filter(function (r) { return keep(r, f, season); });
-  var out = {_hits: 0, _total: 0};
-  AREAS.forEach(function (a) {
-    var ra = rows.filter(function (r) { return r.area === a; });
-    out[a] = {hits: sum(ra, "hits"), total: sum(ra, "total")};
-    out._hits += out[a].hits; out._total += out[a].total;
-  });
-  return out;
-}
 function curve(D, seasonKey, gender, group) {
   var rows = D.place_curve.filter(function (r) { return r.season === seasonKey && r.gender === gender && r.event_group === group; });
   var out = {};
   AREAS.forEach(function (a) {
     out[a] = {};
     rows.filter(function (r) { return r.area === a; }).forEach(function (r) {
-      out[a][r.area_place] = {entries: r.entries, top8: r.top8_count, median: r.median_moc_place};
+      out[a][r.area_place] = {entries: r.entries, final: r.made_final_count, median: r.median_moc_place};
     });
   });
   return out;
@@ -382,9 +375,17 @@ function headline(D) {
   var u = spotUse(D, {season: "all", gender: "all", event: "all"});
   var unf = 0, gs = 0;
   AREAS.forEach(function (a) { unf += u[a].g.unfilled; gs += u[a].guaranteed_spots; });
+  var cell = function (area, place) {
+    var r = D.place_curve.filter(function (x) { return x.season === POOLED_KEY && x.gender === "all" && x.event_group === "all" &&
+                                                   x.area === area && x.area_place === place; })[0];
+    return {entries: r.entries, final: r.made_final_count, median: r.median_moc_place};
+  };
   return {
-    finish: {"tri-valley": {band: "7-8", cell: c["tri-valley"]["7-8"]}, "bay-shore": {band: "5-6", cell: c["bay-shore"]["5-6"]},
-             "redwood-empire": {band: "5-6", cell: c["redwood-empire"]["5-6"]}, "class-a": {band: "3", cell: c["class-a"]["3"]}},
+    // (a) the last automatic place: 6th (Class A: 3rd)
+    sixth: {"tri-valley": {place: "6", cell: c["tri-valley"]["6"]}, "bay-shore": {place: "6", cell: c["bay-shore"]["6"]},
+            "redwood-empire": {place: "6", cell: c["redwood-empire"]["6"]}, "class-a": {place: "3", cell: c["class-a"]["3"]}},
+    // (b) Tri-Valley 7th-8th (not automatic) vs Bay Shore + Redwood Empire 5th-6th (automatic)
+    depth: {tv: cell("tri-valley", "7-8"), others: cell(COMBINED_AREA, "5-6")},
     tv_spots: {k: sh["tri-valley"].total, n: sh._total},
     unfilled: {k: unf, n: gs}
   };
@@ -456,7 +457,7 @@ function flags(D, f) {
   // ---------- state, controls, tabs ----------
   var TABS = [["overview", "Overview"], ["curve", "Area place vs. MOC finish"], ["makeup", "Field makeup"],
               ["spots", "Next best mark + at-large spots"], ["perf", "MOC performance"], ["use", "Spot use"],
-              ["left", "Left out"], ["defs", "Definitions"]];
+              ["defs", "Definitions"]];
   var state = {tab: "overview", field: "qualified", season: "side", gender: "all", event: "all"};
   var seasonSel = document.getElementById("season");
   seasonSel.add(new Option("All seasons side by side", "side"));
@@ -527,23 +528,32 @@ function flags(D, f) {
                  y: {stacked: !!opts.stacked, grid: {display: false}, ticks: {color: TEXT, font: {size: NARROW() ? 12 : 14, weight: "600"}, autoSkip: false, minRotation: 0, maxRotation: 0}}}}
     });
   }
-  function short(txt) { return NARROW() ? txt.replace(/ \(\d+%\)$/, "").replace(" MOC spots", "").replace(" entries finished top 8", " top 8") : txt; }
+  function short(txt) { return NARROW() ? txt.replace(/ \(\d+%\)$/, "").replace(" MOC spots", "").replace(" entries made the final", " made final") : txt; }
 
   // ---------- Overview ----------
   function renderOverview() {
     var h = headline(D);
     var li = function (a) {
-      var x = h.finish[a], c = x.cell, band = x.band === "3" ? "3rd" : x.band.replace("-", "th–") + "th";
-      return '<li style="--c:' + COLOR[a] + '" data-head="finish" data-area="' + a + '" data-entries="' + c.entries + '" data-median="' + c.median +
-        '"><b>' + ordinal(c.median) + "</b> " + AREA_NAME[a] + "'s " + band + "-place finishers" +
-        "<small>" + c.entries + " entries, " + c.top8 + " finished top 8 (" + pctNum(c.top8, c.entries) + "%)</small></li>";
+      var x = h.sixth[a], c = x.cell;
+      return '<li style="--c:' + COLOR[a] + '" data-head="sixth" data-area="' + a + '" data-entries="' + c.entries + '" data-median="' + c.median +
+        '"><b>' + ordinal(c.median) + "</b> " + AREA_NAME[a] + (a === "class-a" ? " (3rd place: Class A's last automatic spot)" : "") +
+        "<small>" + c.entries + " entries, " + c.final + " made the final (" + pctNum(c.final, c.entries) + "%)</small></li>";
     };
+    var tv = h.depth.tv, ot = h.depth.others;
     el("cards").innerHTML =
-      '<div class="card"><p class="cap" style="margin:0"><b>Typical MOC finish (median place)</b></p>' +
-      '<p class="cnt">Tri-Valley\'s 7th–8th place finishers typically finish ' + ordinal(h.finish["tri-valley"].cell.median) +
-      " at the MOC; Bay Shore's 5th–6th finish " + ordinal(h.finish["bay-shore"].cell.median) + ".</p>" +
+      '<div class="card"><p class="cap" style="margin:0"><b>Apples to apples: the last automatic place</b></p>' +
+      '<p class="cnt">Athletes who placed 6th at their Area meet typically finished this high at the MOC (median place). ' +
+      "Class A's automatic spots go to the top 3, so its row uses 3rd place.</p>" +
       '<ul class="finish">' + AREAS.map(li).join("") + "</ul>" +
       '<p class="cnt">Entries are athlete-events: one athlete in two events counts twice.</p></div>' +
+      '<div class="card" id="card-depth" data-tv-entries="' + tv.entries + '" data-tv-median="' + tv.median + '" data-ot-entries="' + ot.entries +
+      '" data-ot-median="' + ot.median + '"><p class="cap" style="margin:0"><b>The depth point</b></p>' +
+      '<p class="cap">Tri-Valley\'s 7th–8th place finishers, who don\'t get automatic spots, typically finished <b>' + ordinal(tv.median) +
+      "</b> at the MOC, ahead of other Areas' 5th–6th place finishers (<b>" + ordinal(ot.median) + "</b>), who do.</p>" +
+      '<p class="cnt">Tri-Valley 7th–8th: ' + tv.entries + " entries, " + tv.final + " made the final (" + pctNum(tv.final, tv.entries) + "%). " +
+      "Bay Shore and Redwood Empire 5th–6th: " + ot.entries + " entries, " + ot.final + " made the final (" + pctNum(ot.final, ot.entries) + "%). " +
+      "Class A is left out of the second group because its 5th–6th don't get automatic spots. Median MOC place, 2022–2026 pooled; " +
+      "entries are athlete-events.</p></div>" +
       '<div class="card" id="card-tv" data-k="' + h.tv_spots.k + '" data-n="' + h.tv_spots.n + '"><div class="big">' + pctNum(h.tv_spots.k, h.tv_spots.n) +
       '%</div><p class="cap">of next-best-mark + at-large spots went to Tri-Valley athletes</p><p class="cnt">' + h.tv_spots.k + " of " + h.tv_spots.n +
       " next-best-mark + at-large spots (all qualifiers)</p></div>" +
@@ -560,7 +570,7 @@ function flags(D, f) {
       for (var p = 1; p <= 12; p++) {
         var cell = c[a][String(p)] || {entries: 0};
         var ok = cell.entries >= 5 && cell.median !== null && cell.median !== undefined;
-        var y = !ok ? null : (metric === "median" ? cell.median : 100 * cell.top8 / cell.entries);
+        var y = !ok ? null : (metric === "median" ? cell.median : 100 * cell.final / cell.entries);
         pts.push({x: p, y: y, cell: cell});
       }
       return {label: AREA_NAME[a], data: pts, borderColor: COLOR[a], backgroundColor: COLOR[a], pointRadius: 4,
@@ -570,7 +580,7 @@ function flags(D, f) {
   function curveChart(id, c, metric, small) {
     var tip = function (ctx) {
       var cell = ctx.raw.cell, place = ordinal(ctx.raw.x);
-      return ctx.dataset.label + " " + place + " place: " + cell.entries + " entries, " + cell.top8 + " finished top 8, median MOC place " + ordinal(cell.median);
+      return ctx.dataset.label + " " + place + " place: " + cell.entries + " entries, " + cell.final + " made the final, median MOC place " + ordinal(cell.median);
     };
     charts[id] = new Chart(el(id), {
       type: "line", data: {datasets: curveDatasets(c, metric)},
@@ -585,7 +595,7 @@ function flags(D, f) {
             ? {reverse: true, min: 1, suggestedMax: 30, ticks: {color: MUTED, maxRotation: 0, callback: function (v) { return ordinal(v); }},
                title: {display: !small, text: "Typical MOC finish (median place)", color: MUTED}, grid: {color: LINE}}
             : {min: 0, max: 100, ticks: {color: MUTED, callback: function (v) { return v + "%"; }},
-               title: {display: !small, text: "% of entries that finished top 8", color: MUTED}, grid: {color: LINE}}}}
+               title: {display: !small, text: "% of entries that made the final", color: MUTED}, grid: {color: LINE}}}}
     });
   }
   function renderCurve() {
@@ -600,12 +610,12 @@ function flags(D, f) {
     if (state.season === "side") {
       body.innerHTML = '<div class="panel"><p class="note">Typical MOC finish (median place, higher on the chart is better), by season. Shared scale.</p><div class="multiples">' +
         D.seasons.map(function (s) { return '<div class="m"><h3>' + s + '</h3><div class="chart"><canvas id="cv-' + s + '"></canvas></div></div>'; }).join("") +
-        '</div></div><div class="panel"><p class="note">% of entries that finished top 8, by season. Shared scale.</p><div class="multiples">' +
+        '</div></div><div class="panel"><p class="note">% of entries that made the final, by season. Shared scale.</p><div class="multiples">' +
         D.seasons.map(function (s) { return '<div class="m"><h3>' + s + '</h3><div class="chart"><canvas id="ct-' + s + '"></canvas></div></div>'; }).join("") + "</div></div>";
       D.seasons.forEach(function (s) {
         var c = curve(D, String(s), gender, g);
         curveChart("cv-" + s, c, "median", true);
-        curveChart("ct-" + s, c, "top8", true);
+        curveChart("ct-" + s, c, "final", true);
       });
     } else {
       var key = state.season === "all" ? POOLED_KEY : state.season;
@@ -615,13 +625,13 @@ function flags(D, f) {
           var c = curve(D, key, gender, g), rows = [];
           for (var p = 1; p <= 12; p++) rows.push([ordinal(p)].concat(AREAS.map(function (a) {
             var x = c[a][String(p)] || {entries: 0};
-            return x.entries >= 5 && x.median !== null ? x.entries + " entries · median " + ordinal(x.median) + " · " + x.top8 + " top 8" : x.entries + " entries";
+            return x.entries >= 5 && x.median !== null ? x.entries + " entries · median " + ordinal(x.median) + " · " + x.final + " made the final" : x.entries + " entries";
           })));
           return rows;
         })())) + "</div>";
       var c = curve(D, key, gender, g);
       curveChart("cv-main", c, "median", false);
-      curveChart("ct-main", c, "top8", false);
+      curveChart("ct-main", c, "final", false);
     }
   }
 
@@ -692,23 +702,24 @@ function flags(D, f) {
       var g = function (key, title) {
         return '<div class="panel"><h3 style="margin:0 0 6px;font-size:1.05rem">' + title + "</h3>" + grid(function (a, s) {
           var x = performance(D, state, s)[a][key];
-          return {share: x.entries ? x.top8 / x.entries : 0, html: "<b>" + (x.entries ? pctNum(x.top8, x.entries) + "%" : "–") + "</b><span>" + top8Txt(x.top8, x.entries).replace(/ \(\d+%\)$/, "") + "</span>"};
+          var shown = x.entries && x.final !== null;
+          return {share: shown ? x.final / x.entries : 0, html: "<b>" + (shown ? pctNum(x.final, x.entries) + "%" : "–") + "</b><span>" + finalTxt(x.final, x.entries).replace(/ \(\d+%\)$/, "") + "</span>"};
         }) + "</div>";
       };
       body.innerHTML = g("automatic", "Automatic qualifiers") + g("nbm_std", "Next best mark + at-large standard qualifiers") +
-        '<p class="note">Cell shading follows the top-8 rate. Small counts swing a lot.</p>';
+        '<p class="note">Cell shading follows the made-the-final rate. Small counts swing a lot.</p>';
       return;
     }
     var p = performance(D, state);
-    var rate = function (x) { return x.entries ? 100 * x.top8 / x.entries : 0; };
+    var rate = function (x) { return x.entries && x.final !== null ? 100 * x.final / x.entries : 0; };
     var ds = function (label, key, alpha) {
       return {label: label, backgroundColor: AREAS.map(function (a) { return tint(COLOR[a], alpha); }), data: AREAS.map(function (a) { return rate(p[a][key]); }),
-              endLabels: AREAS.map(function (a) { var x = p[a][key]; return short(top8Txt(x.top8, x.entries)); }),
-              tips: AREAS.map(function (a) { var x = p[a][key]; return top8Txt(x.top8, x.entries); })};
+              endLabels: AREAS.map(function (a) { var x = p[a][key]; return short(finalTxt(x.final, x.entries)); }),
+              tips: AREAS.map(function (a) { var x = p[a][key]; return finalTxt(x.final, x.entries); })};
     };
     body.innerHTML = '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="legend" id="lg-pf"></div><div class="chart" id="w-pf"><canvas id="c-pf"></canvas></div>' +
       details(numTable(["Area", "Automatic qualifiers", "Next best mark + at-large standard qualifiers"],
-        AREAS.map(function (a) { return [AREA_NAME[a], top8Txt(p[a].automatic.top8, p[a].automatic.entries), top8Txt(p[a].nbm_std.top8, p[a].nbm_std.entries)]; }))) + "</div>";
+        AREAS.map(function (a) { return [AREA_NAME[a], finalTxt(p[a].automatic.final, p[a].automatic.entries), finalTxt(p[a].nbm_std.final, p[a].nbm_std.entries)]; }))) + "</div>";
     legend("lg-pf", [["Automatic (solid)", TEXT], ["Next best mark + at-large standard (light)", tint(TEXT, .35)]]);
     hbar("c-pf", "w-pf", AREAS.map(function (a) { return AREA_NAME[a]; }), [ds("Automatic", "automatic", 1), ds("Next best mark + at-large standard", "nbm_std", .35)], {max: 100});
   }
@@ -779,25 +790,9 @@ function flags(D, f) {
         " (" + r.seasons.split("|").join(", ") + ")</td><td class=n>" + r.total_all_seasons + " spots</td></tr>"; }).join("") + "</tbody>";
   }
 
-  // ---------- Left out ----------
-  function renderLeft() {
-    var body = el("left-body");
-    if (state.season === "side") {
-      body.innerHTML = '<div class="panel">' + grid(function (a, s) {
-        var x = leftOut(D, state, s)[a];
-        return {share: x.total ? 4 * x.hits / x.total : 0, html: "<b>" + x.hits + "</b><span>of " + x.total + " best non-qualifiers at or above the cutoff</span>"};
-      }) + "</div>";
-      return;
-    }
-    var lo = leftOut(D, state);
-    body.innerHTML = '<div class="panel"><p style="font-size:1.1rem;margin:0"><b>' + lo._hits + " of " + lo._total + "</b> best non-qualifiers had an Area mark at or above the MOC top-8/9 cutoff (" +
-      seasonLabel(state.season) + ").</p>" + details(numTable(["Area", "Best non-qualifiers at or above the cutoff"],
-        AREAS.map(function (a) { return [AREA_NAME[a], spotsTxt(lo[a].hits, lo[a].total, "best non-qualifiers")]; }))) + "</div>";
-  }
-
   // ---------- render ----------
   var RENDER = {overview: renderOverview, curve: renderCurve, makeup: renderMakeup, spots: renderSpots,
-                perf: renderPerf, use: renderUse, left: renderLeft, defs: function () {}};
+                perf: renderPerf, use: renderUse, defs: function () {}};
   function render() {
     destroyAll();
     document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.toggle("active", p.id === "tab-" + state.tab); });

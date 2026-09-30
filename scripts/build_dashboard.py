@@ -40,8 +40,8 @@ DEFINITIONS = [
     ("Entries", "Athlete-events: one athlete in two events counts twice."),
     ("Competed", "Has a row in the MOC results with any status other than DNS or scratch (DNF, DQ, no height and "
                  "fouls count)."),
-    ("Top 8", "MOC final place 8th or better (9th or better in LJ, TJ, SP and DT). The 800/1600 finals seat 12 but "
-              "top 8 is used; the 3200, HJ and PV have no prelims."),
+    ("Made the final", "Finished top 9 in the long jump, triple jump, shot put or discus, or top 8 in every other "
+                       "event, relays included. (The 800 and 1600 finals seat 12; we count top 8.)"),
     ("Typical MOC finish (median place)", "The middle MOC place of the entries in a group. Finalists keep their "
                                           "final place; everyone else with a valid MOC mark is ranked after the "
                                           "finalists by their best mark. Groups under 5 entries are not shown."),
@@ -55,8 +55,6 @@ DEFINITIONS = [
                                          "field ended below 24. Under verification."),
     ("Guaranteed spots used", "(Competed + refilled) ÷ guaranteed spots. At-large standard qualifiers are listed "
                               "separately and are not part of this %."),
-    ("Left out", "The 3 best non-qualifiers per Area and event, by Area mark, compared with the 8th-best valid MOC "
-                 "mark (9th for LJ/TJ/SP/DT) across all MOC rounds, one mark per athlete."),
     ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
                            "are computed from all five seasons' entries, not averaged."),
     ("Source", "Athletic.net Area and MOC results; MOC programs (Diablo Timing); rules per season. Pre-2026 "
@@ -93,28 +91,22 @@ def build() -> dict:
     fm = fm[~fm["rollup"]]
     al = pd.read_csv(S / "at_large_share.csv")
     al = al[al["count"] > 0]
-    mp = pd.read_csv(S / "moc_performance.csv")
-    mp = mp[~mp["rollup"]]
+    mp = pd.read_csv(S / "moc_performance.csv", dtype={"season": str, "made_final": "Int64"})
+    mp = mp[mp["qualifier_type"].isin(["automatic", "at_large_combined"])]
     su = pd.read_csv(S / "spot_utilization.csv")
-    lo = pd.read_csv(S / "left_out.csv")
-    lo = lo[lo["moc_cutoff_mark"].notna()].assign(hit=lo["area_mark_would_have_been_top_finish"].fillna(False).astype(bool))
-    # Only counts are embedded, never one row per athlete.
-    lo = lo.groupby(["season", "gender", "event_code", "area"]).agg(hits=("hit", "sum"), total=("hit", "size")).reset_index()
     seasons = sorted(int(s) for s in su["season"].unique())
     events = [e for e in EVENT_ORDER if e in set(su["event_code"].astype(str))]
     return {
         "seasons": seasons, "events": events, "definitions": DEFINITIONS,
         "field_makeup": records(fm, ["season", "gender", "event_code", "field", "area", "qualifier_type", "count"]),
         "at_large_share": records(al, ["season", "gender", "event_code", "field", "spot_type", "area", "count"]),
-        "moc_performance": records(mp, ["season", "gender", "event_code", "area", "qualifier_type", "competed",
-                                        "top_finish", "scored"]),
+        "moc_performance": records(mp, ["season", "gender", "event", "area", "qualifier_type", "competed", "made_final"]),
         "spot_utilization": records(su, ["season", "gender", "event_code", "area", "guaranteed_spots", "at_large_spots",
                                          "declared", "no_show", "unfilled_spots",
                                          *[f"g_{k}" for k in SPOT_USE], *[f"al_{k}" for k in SPOT_USE if k != "unfilled"]]),
-        "left_out": records(lo, ["season", "gender", "event_code", "area", "hits", "total"]),
         "place_curve": records(pd.read_csv(S / "core_place_curve.csv", dtype={"season": str, "area_place": str,
-                                                                               "top8_count": "Int64"}),
-                               ["season", "gender", "event_group", "area", "area_place", "entries", "top8_count",
+                                                                               "made_final_count": "Int64"}),
+                               ["season", "gender", "event_group", "area", "area_place", "entries", "made_final_count",
                                 "median_moc_place"]),
         "caveats": CAVEATS,
         "flags_unfilled": records(pd.read_csv(S / "spot_utilization_flags_unfilled.csv"),

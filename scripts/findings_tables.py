@@ -3,7 +3,7 @@
     .venv/bin/python scripts/findings_tables.py [section]
 
 Sections: makeup, spots, results, core, corepooled, tests, leftout, use, pooled.
-Every number carries its unit, e.g. "25 of 284 entries finished top 8 (9%)".
+Every number carries its unit, e.g. "25 of 284 entries made the final (9%)".
 "At-large" means only athletes who met the at-large standard; the combined group is
 "next best mark + at-large standard".
 """
@@ -21,7 +21,7 @@ AREA_NAME = {"tri-valley": "Tri-Valley", "bay-shore": "Bay Shore", "redwood-empi
 TYPE_NAME = {"automatic": "Automatic", "next_best_mark": "Next best mark", "at_large_standard": "At-large standard",
              "replacement": "Replacement", "unexplained": "Unexplained",
              "at_large_combined": "Next best mark + at-large standard"}
-TOP8 = "entries finished top 8"
+TOP8 = "entries made the final"
 
 
 def rate(k, n, unit: str) -> str:
@@ -85,19 +85,22 @@ def spots() -> str:
 
 
 def results(types=("automatic", "at_large_combined", "next_best_mark", "at_large_standard", "replacement")) -> str:
-    m = pd.read_csv(S / "moc_performance.csv")
-    m = m[~m["rollup"] | (m["qualifier_type"] == "at_large_combined")]
+    m = pd.read_csv(S / "moc_performance.csv", dtype={"season": str})
+    m = m[(m["gender"] == "all") & (m["event"] == "all") & ~m["season"].str.contains("pooled")]
     rows = []
-    for s in seasons(m):
-        ms = m[m["season"] == s]
+    for s in sorted(m["season"].unique()):
         for area in AREAS:
             for t in types:
-                x = ms[(ms["area"] == area) & (ms["qualifier_type"] == t)]
-                n = x["competed"].sum()
-                if n:
-                    rows.append([s, AREA_NAME[area], TYPE_NAME[t], rate(x["top_finish"].sum(), n, TOP8),
-                                 rate(x["scored"].sum(), n, "entries scored (top 6)")])
-    return table(rows, ["Season", "Area", "Route", "Top 8 (top 9 in LJ/TJ/SP/DT)", "Scored (top 6)"])
+                x = m[(m["season"] == s) & (m["area"] == area) & (m["qualifier_type"] == t)]
+                if len(x):
+                    x = x.iloc[0]
+                    rows.append([s, AREA_NAME[area], TYPE_NAME[t], rate_or_small(x["made_final"], x["competed"], TOP8),
+                                 rate_or_small(x["scored"], x["competed"], "entries scored (top 6)")])
+    return table(rows, ["Season", "Area", "Route", "Made the final", "Scored (top 6)"])
+
+
+def rate_or_small(k, n, unit) -> str:
+    return f"{int(n)} entr{'y' if int(n) == 1 else 'ies'} (fewer than 5: not shown)" if pd.isna(k) else rate(int(k), int(n), unit)
 
 
 def core(pooled_only=False, groups_only=None) -> str:
@@ -113,10 +116,10 @@ def core(pooled_only=False, groups_only=None) -> str:
             for g in groups:
                 x = c[(c["season"] == s) & (c["area"] == area) & (c["event_group"] == g)].set_index("comparison_group")
                 lo, ot = x.loc["lowest_automatic"], x.loc["at_large_other_areas"]
-                rows.append([s, AREA_NAME[area], gname.get(g, g), rate(lo["top_finish"], lo["competed"], TOP8), med(lo),
-                             rate(ot["top_finish"], ot["competed"], TOP8), med(ot)])
-    return table(rows, ["Season", "Area (its lowest automatics)", "Events", "Lowest automatics: top 8",
-                        "Lowest automatics: median MOC place", "Other Areas' next best mark + at-large: top 8",
+                rows.append([s, AREA_NAME[area], gname.get(g, g), rate(lo["made_final"], lo["competed"], TOP8), med(lo),
+                             rate(ot["made_final"], ot["competed"], TOP8), med(ot)])
+    return table(rows, ["Season", "Area (its lowest automatics)", "Events", "Lowest automatics: made the final",
+                        "Lowest automatics: median MOC place", "Other Areas' next best mark + at-large: made the final",
                         "Other Areas' next best mark + at-large: median MOC place"])
 
 
@@ -128,21 +131,6 @@ def tests() -> str:
              f"{100 * r.expected_gap_random_areas:+.1f} percentage points", fmt(r.permutation_p)] for r in t.itertuples()]
     return table(rows, ["Area", "Lowest automatics", "Other Areas' next best mark + at-large", "Gap",
                         "Old p (independent)", "Clustered by athlete p", "Gap if Areas were random", "Permutation p"])
-
-
-def leftout() -> str:
-    lo = pd.read_csv(S / "left_out.csv")
-    lo = lo[lo["moc_cutoff_mark"].notna()]
-    rows = []
-    for s in seasons(lo):
-        for area in AREAS:
-            x = lo[(lo["season"] == s) & (lo["area"] == area)]
-            hit = x["area_mark_would_have_been_top_finish"].fillna(False).astype(bool)
-            d = x.loc[hit, "declared_anyway"].fillna(False).astype(bool).sum()
-            rows.append([s, AREA_NAME[area], rate(hit.sum(), len(x), "best non-qualifiers at or above the cutoff"),
-                         f"{int(d)} athletes"])
-    return table(rows, ["Season", "Area", "Best non-qualifiers at or above the MOC top-8/9 cutoff",
-                        "…of whom were in the MOC program anyway"])
 
 
 def use() -> str:
@@ -175,7 +163,8 @@ def pooled() -> str:
     fm = fm[(~fm["rollup"]) & (fm["field"] == "qualified")]
     al = pd.read_csv(S / "at_large_share.csv")
     al = al[(al["field"] == "qualified") & (al["spot_type"] == "at_large_combined")]
-    mp = pd.read_csv(S / "moc_performance.csv")
+    mp = pd.read_csv(S / "moc_performance.csv", dtype={"season": str})
+    mp = mp[mp["season"].str.contains("pooled") & (mp["gender"] == "all") & (mp["event"] == "all")]
     ct = pd.read_csv(S / "core_tests.csv").set_index("area")
     su = pd.read_csv(S / "spot_utilization_by_area.csv").groupby("area").sum(numeric_only=True)
     rows = []
@@ -185,18 +174,18 @@ def pooled() -> str:
         t = ct.loc[a]
         rows.append([AREA_NAME[a], rate(fm.loc[fm["area"] == a, "count"].sum(), fm["count"].sum(), "MOC spots"),
                      rate(al.loc[al["area"] == a, "count"].sum(), al["count"].sum(), "next-best-mark + at-large spots"),
-                     rate(auto["top_finish"].sum(), auto["competed"].sum(), TOP8),
-                     rate(comb["top_finish"].sum(), comb["competed"].sum(), TOP8),
+                     rate(auto["made_final"].sum(), auto["competed"].sum(), TOP8),
+                     rate(comb["made_final"].sum(), comb["competed"].sum(), TOP8),
                      rate(t.lowest_auto_top, t.lowest_auto_n, TOP8) + " vs " + rate(t.other_at_large_top, t.other_at_large_n, TOP8),
                      rate(su.loc[a, "unfilled_spots"], su.loc[a, "guaranteed_spots"], "guaranteed spots unfilled"),
                      rate(su.loc[a, "no_show"], su.loc[a, "declared"], "entries were no-shows")])
-    return table(rows, ["Area", "Share of all qualifiers", "Next-best-mark + at-large spots held", "Automatic: top 8",
-                        "Next best mark + at-large: top 8", "Lowest automatics vs other Areas' next best mark + at-large: top 8",
+    return table(rows, ["Area", "Share of all qualifiers", "Next-best-mark + at-large spots held", "Automatic: made the final",
+                        "Next best mark + at-large: made the final", "Lowest automatics vs other Areas' next best mark + at-large: made the final",
                         "Unfilled spots (provisional)", "No-shows"])
 
 
 SECTIONS = {"makeup": makeup, "spots": spots, "results": results, "core": core,
-            "corepooled": lambda: core(True), "tests": tests, "leftout": leftout, "use": use, "pooled": pooled}
+            "corepooled": lambda: core(True), "tests": tests, "use": use, "pooled": pooled}
 
 if __name__ == "__main__":
     for w in sys.argv[1:] or list(SECTIONS):

@@ -26,7 +26,7 @@ from ncs_track import paths
 HTML = paths.ROOT / "dashboard" / "index.html"
 SHOTS = paths.OUTPUTS / "tabs"
 WIDTHS = (390, 1400)
-TABS = ["overview", "curve", "makeup", "spots", "perf", "use", "left", "defs"]
+TABS = ["overview", "curve", "makeup", "spots", "perf", "use", "defs"]
 MODES = {"2026": "2026", "pooled": "all"}
 
 STATE_JS = """() => {
@@ -78,9 +78,11 @@ STATE_JS = """() => {
 }"""
 
 CARDS_JS = """() => {
-  const out = {finish: {}, tv_spots: null, unfilled: null};
-  document.querySelectorAll('[data-head="finish"]').forEach(el => {
-    out.finish[el.dataset.area] = [Number(el.dataset.entries), Number(el.dataset.median)]; });
+  const out = {sixth: {}, depth: null, tv_spots: null, unfilled: null};
+  document.querySelectorAll('[data-head="sixth"]').forEach(el => {
+    out.sixth[el.dataset.area] = [Number(el.dataset.entries), Number(el.dataset.median)]; });
+  const d = document.getElementById('card-depth').dataset;
+  out.depth = {tv: [Number(d.tvEntries), Number(d.tvMedian)], others: [Number(d.otEntries), Number(d.otMedian)]};
   const tv = document.getElementById('card-tv'), un = document.getElementById('card-unfilled');
   out.tv_spots = [Number(tv.dataset.k), Number(tv.dataset.n)];
   out.unfilled = [Number(un.dataset.k), Number(un.dataset.n)];
@@ -112,9 +114,12 @@ def check_headline(page, label: str) -> list[str]:
     from test_dashboard import expected_headline
     got, want = page.evaluate(CARDS_JS), expected_headline()
     problems = []
-    for a, v in want["finish"].items():
-        if tuple(got["finish"].get(a, [])) != tuple(v):
-            problems.append(f"{label}: finish card {a} shows {got['finish'].get(a)}, tables give {v}")
+    for a, v in want["sixth"].items():
+        if tuple(got["sixth"].get(a, [])) != tuple(v):
+            problems.append(f"{label}: 6th-place card {a} shows {got['sixth'].get(a)}, tables give {v}")
+    for k, v in want["depth"].items():
+        if tuple(got["depth"][k]) != tuple(v):
+            problems.append(f"{label}: depth card {k} shows {got['depth'][k]}, tables give {v}")
     for k in ("tv_spots", "unfilled"):
         if tuple(got[k]) != tuple(want[k]):
             problems.append(f"{label}: card {k} shows {got[k]}, tables give {want[k]}")
@@ -169,7 +174,7 @@ def run() -> dict:
                 page.screenshot(path=str(SHOTS / f"{width}_{tab}.png"), full_page=True)
             for mode, value in MODES.items():
                 set_season(page, width, value)
-                for tab in ("curve", "makeup", "spots", "perf", "use", "left"):
+                for tab in ("curve", "makeup", "spots", "perf", "use"):
                     goto_tab(page, tab)
                     pr, s = check(page, f"{width}px {tab} {mode}")
                     problems += pr

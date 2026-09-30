@@ -16,7 +16,8 @@ Describe, don't recommend: no allocation proposals unless the user designs them.
 - `data/processed/` — **ignored**: performances, relay_legs, moc_entries.
 - `data/review/` — **ignored** except `school_aliases_review.csv`.
 - `data/summary/` — tracked, name-free aggregates feeding docs + dashboard.
-- `outputs/` — **ignored**: qualifiers.csv (athlete level), replay_{season}/, verify/, screenshots.
+- `outputs/` — **ignored**: qualifiers.csv and left_out.csv (athlete level), replay_{season}/, verify/,
+  tabs/ (dashboard screenshots).
 - `docs/` — decisions.md (all judgment calls), findings_v1.md, analysis_tables.md (column defs),
   replay_2026.md, replay_seasons.md, dashboard_checks.md, allocation_engine.md, checks/.
 - `src/ncs_track/` — athleticnet.py (ingest), validate.py, programs.py (MOC program PDFs),
@@ -24,7 +25,7 @@ Describe, don't recommend: no allocation proposals unless the user designs them.
   analysis.py (summary tables), allocate.py (allocation engine), privacy.py (name-leak scan), cli.py.
 - `scripts/` — build_findings.py + findings_tables.py, build_dashboard.py,
   `checks/` (pre_push.sh, name_leaks.py, athlete_rows_history.py, dashboard_browser.py,
-  relay_splits.py, verify_round_a.py).
+  relay_splits.py, verify_round_a.py, verify_spot_use.py).
 - `dashboard/` — template.html → built index.html (single offline file; Chart.js 4.4.1 vendored,
   SHA-256 pinned in build script).
 - `configs/allocation/current.yaml` — the existing system for the allocation engine.
@@ -42,7 +43,7 @@ Describe, don't recommend: no allocation proposals unless the user designs them.
 .venv/bin/python scripts/build_findings.py                # docs/findings_v1.md
 .venv/bin/python scripts/build_dashboard.py               # dashboard/index.html
 .venv/bin/python scripts/checks/dashboard_browser.py      # Playwright, 390 + 1400 px
-.venv/bin/python -m pytest -q                             # ~191 tests
+.venv/bin/python -m pytest -q                             # ~196 tests
 scripts/checks/pre_push.sh [git push args]                # ALWAYS push through this
 ```
 Engine: `.venv/bin/python -m ncs_track allocate --config configs/allocation/current.yaml --season 2026 --compare`.
@@ -58,10 +59,15 @@ Engine: `.venv/bin/python -m ncs_track allocate --config configs/allocation/curr
 - **All qualifiers** = everyone who earned a spot (replay prediction), whether or not they entered.
   **Actual entries** = athletes in the MOC program. **Entries** = athlete-events (one athlete in two
   events counts twice).
-- **Top finish / top 8**: MOC final place ≤ 8 (≤ 9 in LJ, TJ, SP, DT).
-- **Unused guaranteed spot / unfilled spot** (corrected metric, provisional): automatic or next-best-mark
-  qualifier didn't compete, spot not refilled, AND the event's MOC field (competed in first round,
-  not DNS/SCR) ended below 24. Old "empty lane" metric kept only as `unused_not_refilled`.
+- **Made the final** (formerly "top finish / top 8"; columns `made_final*`): finished top 9 in LJ, TJ,
+  SP or DT, or top 8 in every other event, relays included (800/1600 finals seat 12; we count top 8).
+- **Spot use** (guaranteed spots only; `spot_use` column, first match wins): Competed · Refilled ·
+  Unfilled · Chose another event (competed at the MOC in other events only) · Didn't enter (competed
+  in no MOC event). **Guaranteed spots used** = (competed + refilled) ÷ guaranteed spots. At-large
+  standard qualifiers reported on a separate line, never in the donut or %.
+- **Unfilled spot** (provisional): guaranteed spot, qualifier didn't compete, not refilled, AND the
+  event's MOC field (largest competed count over its rounds, not DNS/SCR) ended below 24.
+  Old "empty lane" metric kept only as `unused_not_refilled`.
 
 ## Validated results so far
 - Replay vs real MOC entries: RAW 87–89%, **RULES 97.9–99.1% per season** (2022–2026), using the
@@ -69,20 +75,24 @@ Engine: `.venv/bin/python -m ncs_track allocate --config configs/allocation/curr
   all four meets), fill ties included, wind-aided allowed; same-Area replacement overlay; entry limit
   (4, assumed) explains nothing. Engine with current.yaml reproduces the replay exactly (tested).
 - Tri-Valley holds 464 of 659 next-best-mark + at-large spots (70%), 2022–2026.
-- Unfilled spots: 121 of 3,890 guaranteed spots (3%) over 5 seasons (old metric said 247);
-  1–6% per Area-season. Only 4 Area×event combos have unfilled spots in 3+ seasons.
-- Area place vs MOC finish (pooled): Tri-Valley 7th–8th finishers typically finish 13th at the MOC
-  (253 entries); Bay Shore 5th–6th 18th (284); Redwood Empire 5th–6th 17th (277); Class A 3rd 19.5th
-  (132). Tri-Valley 5th–6th: 10th. Lowest automatics of Bay Shore / Redwood Empire / Class A finish
-  top 8 less often than other Areas' next-best-mark + at-large qualifiers (9% vs 14%, 8% vs 13%,
+- Guaranteed spots used: 3,661 of 3,890 (94%) over 5 seasons (3,515 competed, 146 refilled); 70 chose
+  another event, 38 didn't enter, 121 unfilled (3%; 1–6% per Area-season; 4 Area×event combos in 3+
+  seasons). Unfilled stays provisional (decision #28): 121 unfilled vs 86 places short of 24 (at-large
+  fills lanes); 11 spots taken by a lower same-Area finalist not credited as refills; 7 refills no-show.
+- Area place vs MOC finish (pooled, median MOC place): 6th place — Tri-Valley 11th (141 entries),
+  Bay Shore 19th (142), Redwood Empire 18.5th (140); Class A 3rd 19.5th (132). Tri-Valley 7th–8th 13th
+  (253) vs Bay Shore + Redwood Empire 5th–6th 18th (561). Tri-Valley 5th–6th: 10th. Lowest automatics
+  of Bay Shore / Redwood Empire / Class A make the final less often than other Areas' next-best-mark + at-large qualifiers (9% vs 14%, 8% vs 13%,
   5% vs 14%; permutation and athlete-clustered p ≤ 0.03). Direction consistent; not a cause.
-- Left-out (all-rounds 8th/9th-best MOC cutoff): 6 cases in 5 seasons, all 2023 Tri-Valley.
+- Left-out (cutoff = mark of the 8th-best MOC finisher, 9th in LJ/TJ/SP/DT, any round): 6 cases in
+  5 seasons, all 2023 Tri-Valley. Local only (`outputs/left_out.csv`); findings §5 is one paragraph.
 
 ## Privacy rules (non-negotiable)
 - The public repo (github.com/pwalesdi/ncs_track) must never contain athlete names or athlete-level
   rows in tracked files, docs, dashboard data or commit history. Athlete-level work goes to
   `outputs/` or other ignored paths.
-- Small-cell rule: MOC-place figures (top-8 counts, medians) only for groups of ≥ 5 entries.
+- Small-cell rule: MOC-place figures (made-the-final counts, medians) only for groups of ≥ 5 entries
+  (core_place_curve, core_comparison, moc_performance — all pre-aggregated to the dashboard grain).
 - Every push goes through `scripts/checks/pre_push.sh` (leak test, all-history name scan, commit
   email, ignored-path check, athlete-level-table history scan). Never bypass it; if it fails, fix
   the leak or don't push.
@@ -94,15 +104,15 @@ Engine: `.venv/bin/python -m ncs_track allocate --config configs/allocation/curr
 ## Working rules
 - The user relays prompts from another Claude conversation. Do the requested steps in order,
   commit + push each part through pre_push.sh, then stop and report.
-- Log every judgment call in `docs/decisions.md` (numbered; next is #25).
-- Plain-English labels with units on every number ("19 of 59 entries finished top 8 (32%)").
+- Log every judgment call in `docs/decisions.md` (numbered; next is #32).
+- Plain-English labels with units on every number ("19 of 59 entries made the final (32%)").
 - Don't tune rules to force matches; mismatches are findings. Don't create alternative allocations.
 
 ## Open items
-- Aggregate `data/summary/left_out.csv` (athlete-level rows) and single-entry cells in
-  `moc_performance.csv` — pending user approval (may need a history rewrite).
-- Fix the Karnik/Karnick name alias (choice tag wrongly "did_not_declare", 2024).
-- Rename donut segment "Other unused" → "Chose another event" (dashboard + docs).
+- Unfilled definition (decision #28): cap at the field shortfall? credit deeper-line same-Area
+  refills? count refilled-then-no-show as unfilled? Committee/user to decide; badge stays until then.
+- Older `dashboard/index.html` blobs in history embed per-event MOC performance rows; rewriting that
+  path needs separate approval (decision #29).
 - West County / El Molino / Analy rename still unconfirmed (kept in review).
 - CIF State meet results not yet pulled (state_qualified = "pending").
 - Alternative allocations not yet designed; engine ready: `src/ncs_track/allocate.py` +

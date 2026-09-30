@@ -201,8 +201,9 @@ def cmd_analysis(args) -> int:
     analysis.core_comparison(q).to_csv(out / "core_comparison.csv", index=False)
     analysis.core_tests(q).to_csv(out / "core_tests.csv", index=False)
     analysis.core_place_curve(q).to_csv(out / "core_place_curve.csv", index=False)
-    pd.concat(los, ignore_index=True).to_csv(out / "left_out.csv", index=False)
-    print(f"wrote outputs/qualifiers.csv (git-ignored) and {out.relative_to(paths.ROOT)}/*.csv")
+    # athlete-level rows: local only (decision #29)
+    pd.concat(los, ignore_index=True).to_csv(paths.OUTPUTS / "left_out.csv", index=False)
+    print(f"wrote outputs/qualifiers.csv, outputs/left_out.csv (git-ignored) and {out.relative_to(paths.ROOT)}/*.csv")
     return 0
 
 

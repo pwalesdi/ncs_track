@@ -9,7 +9,7 @@ overlays. Everything is split by season, gender and event; main events only (no 
   data/summary/at_large_share.csv
   data/summary/moc_performance.csv
   data/summary/spot_utilization.csv       + _by_area.csv roll-up, + _flags.csv
-  data/summary/left_out.csv
+  outputs/left_out.csv                    athlete-level: git-ignored
 """
 
 from __future__ import annotations
@@ -31,6 +31,7 @@ NO_PRELIM_EVENTS = {"3200", "HJ", "PV"}                # one final round at the 
 NOT_COMPETED = {"DNS", "SCR"}
 MOC_FIELD = 24                                         # 6 + 6 + 6 + 3 automatic + 3 next best mark
 GUARANTEED_TYPES = ("automatic", "next_best_mark")     # the fixed spots; at-large standard has no cap
+COMBINED_AREA = "bay-shore+redwood-empire"   # the two other Areas whose 5th-6th are automatic (Class A: top 3)
 SPOT_USE = ("competed", "refilled", "unfilled", "chose_another_event", "did_not_enter")   # spot_use segments
 AREAS = replay.AREAS
 KEY = ["season", "gender", "event_code"]
@@ -51,9 +52,9 @@ def _with_identity(df: pd.DataFrame, name_col: str, school_col: str, school_key)
 
 
 def _moc_outcome(rows: pd.DataFrame, event: str) -> dict:
-    """competed, moc_status, moc_final_place, top_finish, reached_final_round, scored."""
+    """competed, moc_status, moc_final_place, made_final, reached_final_round, scored."""
     if rows.empty:
-        return {"competed": 0, "moc_status": "not_in_results", "moc_final_place": None, "top_finish": 0,
+        return {"competed": 0, "moc_status": "not_in_results", "moc_final_place": None, "made_final": 0,
                 "reached_final_round": 0, "scored": 0}
     final = rows[rows["round"] == "final"]
     last = final.iloc[0] if len(final) else rows.iloc[0]
@@ -64,7 +65,7 @@ def _moc_outcome(rows: pd.DataFrame, event: str) -> dict:
     else:
         reached = int(len(final) > 0 and competed == 1)
     return {"competed": competed, "moc_status": "OK" if (rows["status"] == "OK").any() else last["status"],
-            "moc_final_place": place, "top_finish": int(place is not None and place <= top_cut(event)),
+            "moc_final_place": place, "made_final": int(place is not None and place <= top_cut(event)),
             "reached_final_round": reached, "scored": int(place is not None and place <= 6)}
 
 
@@ -138,7 +139,7 @@ def qualifiers(season: int, comp: replay.Comparison, evaluated: pd.DataFrame, mo
         if rows is None:
             rows = moc_by_ident.get((r.gender, r.event_code, r.identity), moc.iloc[0:0])
         outcome = (_moc_outcome(rows, r.event_code) if declared else
-                   {"competed": 0, "moc_status": "not_declared", "moc_final_place": None, "top_finish": 0,
+                   {"competed": 0, "moc_status": "not_declared", "moc_final_place": None, "made_final": 0,
                     "reached_final_round": 0, "scored": 0})
         out.append({
             "season": season, "gender": r.gender, "event_code": r.event_code,
@@ -219,15 +220,39 @@ def at_large_share(q: pd.DataFrame) -> pd.DataFrame:
 
 
 def moc_performance(q: pd.DataFrame) -> pd.DataFrame:
-    c = q[(q["in_declared_field"] == 1) & (q["competed"] == 1)]
-    parts = [c.assign(rollup=False), c[c["at_large_combined"] == 1].assign(qualifier_type="at_large_combined", rollup=True)]
-    c = pd.concat(parts)
-    g = c.groupby(KEY + ["area", "qualifier_type", "rollup"]).agg(
-        competed=("competed", "size"), top_finish=("top_finish", "sum"), scored=("scored", "sum"),
-        reached_final_round=("reached_final_round", "sum")).reset_index()
-    for k in ("top_finish", "scored", "reached_final_round"):
-        g[f"{k}_rate"] = (g[k] / g["competed"]).round(4)
-    return g.sort_values(KEY + ["area", "qualifier_type"]).reset_index(drop=True)
+    """MOC results by route, aggregated to the dashboard's filter grain for the public repo.
+
+    Rows: season (each, plus "2022-2026 pooled") x gender (girls, boys, all) x event (each
+    event, "group:<name>", "all") x area x qualifier_type (plus the at_large_combined rollup).
+    Entries = athlete-events who competed. made_final, scored, reached_final_round and their
+    rates are blank when competed < MIN_CELL (decision #29)."""
+    c = q[(q["in_declared_field"] == 1) & (q["competed"] == 1)].copy()
+    c["event_code"] = c["event_code"].astype(str)
+    c = pd.concat([c.assign(rollup=False),
+                   c[c["at_large_combined"] == 1].assign(qualifier_type="at_large_combined", rollup=True)])
+    pooled = f"{int(c['season'].min())}-{int(c['season'].max())} pooled"
+    seasons = [(str(int(s)), c[c["season"] == s]) for s in sorted(c["season"].unique())] + [(pooled, c)]
+    events = ([(e, [e]) for e in sorted(c["event_code"].unique())]
+              + [(f"group:{g}", evs) for g, evs in EVENT_GROUPS.items()] + [("all", None)])
+    rows = []
+    for season, cs in seasons:
+        for gender in ("girls", "boys", "all"):
+            cg = cs if gender == "all" else cs[cs["gender"] == gender]
+            for ev, evs in events:
+                ce = cg if evs is None else cg[cg["event_code"].isin(evs)]
+                for (area, qtype, rollup), x in ce.groupby(["area", "qualifier_type", "rollup"]):
+                    n = len(x)
+                    ok = n >= MIN_CELL
+                    row = {"season": season, "gender": gender, "event": ev, "area": area, "qualifier_type": qtype,
+                           "rollup": rollup, "competed": n}
+                    for k in ("made_final", "scored", "reached_final_round"):
+                        row[k] = int(x[k].sum()) if ok else None
+                        row[f"{k}_rate"] = round(x[k].mean(), 4) if ok else None
+                    rows.append(row)
+    out = pd.DataFrame(rows)
+    for k in ("made_final", "scored", "reached_final_round"):
+        out[k] = out[k].astype("Int64")
+    return out
 
 
 def spot_utilization(q: pd.DataFrame) -> pd.DataFrame:
@@ -346,8 +371,8 @@ def core_comparison(q: pd.DataFrame) -> pd.DataFrame:
                     ok = len(x) >= MIN_CELL            # small cells: counts only, no MOC-place figures
                     rows.append({"season": season, "event_group": group, "area": area, "comparison_group": label,
                                  "places_compared": "|".join(map(str, places)) if label == "lowest_automatic" else "",
-                                 "competed": len(x), "top_finish": int(x["top_finish"].sum()) if ok else None,
-                                 "top_finish_rate": round(x["top_finish"].mean(), 4) if ok else None,
+                                 "competed": len(x), "made_final": int(x["made_final"].sum()) if ok else None,
+                                 "made_final_rate": round(x["made_final"].mean(), 4) if ok else None,
                                  "with_moc_place": len(placed),
                                  "median_moc_place": float(placed.median()) if ok and len(placed) else None})
     return pd.DataFrame(rows)
@@ -375,9 +400,9 @@ def core_place_curve(q: pd.DataFrame) -> pd.DataFrame:
     """Where Area finishers end up at the MOC, aggregated for the public repo.
 
     Rows: season (each, plus "2022-2026 pooled") x gender (girls, boys, all) x event_group
-    (six groups, plus all) x area x area_place ("1".."12", plus the bands "5-6" and "7-8").
+    (six groups, plus all) x area (plus COMBINED_AREA) x area_place ("1".."12", plus the bands "5-6" and "7-8").
     Entries = athlete-events who competed at the MOC (one athlete in two events counts twice).
-    top8_count and median_moc_place are blank when entries < MIN_CELL, so no row reveals a
+    made_final_count and median_moc_place are blank when entries < MIN_CELL, so no row reveals a
     single athlete's MOC place."""
     c = q[(q["in_declared_field"] == 1) & (q["competed"] == 1) & q["area"].isin(AREAS)
           & q["area_place"].between(1, 12)].copy()
@@ -392,19 +417,22 @@ def core_place_curve(q: pd.DataFrame) -> pd.DataFrame:
             cg = cs if gender == "all" else cs[cs["gender"] == gender]
             for group in (*EVENT_GROUPS, "all"):
                 ce = cg if group == "all" else cg[cg["event_group"] == group]
-                for area in AREAS:
-                    ca = ce[ce["area"] == area]
+                for area in (*AREAS, COMBINED_AREA):
+                    ca = ce[ce["area"].isin(area.split("+"))]
                     for label, pl in places:
                         x = ca[ca["area_place"].isin(pl)]
                         n = len(x)
-                        ok = n >= MIN_CELL
+                        # a combined cell is shown only when each Area in it is, so no suppressed cell
+                        # can be recovered by subtraction
+                        ok = n >= MIN_CELL and all(
+                            (x["area"] == a).sum() >= MIN_CELL for a in area.split("+"))
                         placed = x["moc_overall_place"].dropna()
                         rows.append({"season": season, "gender": gender, "event_group": group, "area": area,
                                      "area_place": label, "entries": n,
-                                     "top8_count": int(x["top_finish"].sum()) if ok else None,
+                                     "made_final_count": int(x["made_final"].sum()) if ok else None,
                                      "median_moc_place": float(placed.median()) if ok and len(placed) else None})
     out = pd.DataFrame(rows)
-    out["top8_count"] = out["top8_count"].astype("Int64")
+    out["made_final_count"] = out["made_final_count"].astype("Int64")
     return out
 
 
@@ -453,7 +481,7 @@ def core_tests(q: pd.DataFrame, n_perm: int = 10000, seed: int = 20260930) -> pd
     c["stratum"] = c["season"].astype(str) + "|" + c["gender"] + "|" + c["event_code"].astype(str)
     c = c.sort_values("stratum", kind="stable").reset_index(drop=True)
     strata = pd.factorize(c["stratum"])[0]
-    y = c["top_finish"].to_numpy(float)
+    y = c["made_final"].to_numpy(float)
     low = c["lowest_auto"].to_numpy()
     atl = c["at_large"].to_numpy()
     areas = c["area"].to_numpy()
@@ -482,7 +510,7 @@ def core_tests(q: pd.DataFrame, n_perm: int = 10000, seed: int = 20260930) -> pd
         if n1 == 0 or n2 == 0:
             rows.append({"area": a, "lowest_auto_n": n1, "other_at_large_n": n2})
             continue
-        b, p_cl = _clustered_p(sub["top_finish"], sub["lowest_auto"] & (sub["area"] == a), sub["cluster"])
+        b, p_cl = _clustered_p(sub["made_final"], sub["lowest_auto"] & (sub["area"] == a), sub["cluster"])
         nd = null[a][~np.isnan(null[a])]
         centre = nd.mean()
         p_perm = (np.sum(np.abs(nd - centre) >= abs(observed[a] - centre) - 1e-12) + 1) / (len(nd) + 1)
@@ -542,7 +570,7 @@ def left_out(season: int, evaluated: pd.DataFrame, q: pd.DataFrame, cutoffs: pd.
                          "moc_cutoff_place": cut["moc_cutoff_place"].iloc[0] if len(cut) else None,
                          "moc_cutoff_mark": cut["moc_cutoff_mark"].iloc[0] if len(cut) else None,
                          "moc_cutoff_source": cut["moc_cutoff_source"].iloc[0] if len(cut) else None,
-                         "area_mark_would_have_been_top_finish": better, "caveat": LEFT_OUT_CAVEAT})
+                         "area_mark_would_have_made_final": better, "caveat": LEFT_OUT_CAVEAT})
     return pd.DataFrame(rows)
 
 

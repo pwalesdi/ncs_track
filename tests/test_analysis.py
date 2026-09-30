@@ -9,18 +9,18 @@ def moc_rows(rows):
 
 def test_moc_outcome_rules():
     o = analysis._moc_outcome(moc_rows([("prelim", "OK", 3), ("final", "OK", 8)]), "100")
-    assert (o["competed"], o["top_finish"], o["reached_final_round"], o["scored"]) == (1, 1, 1, 0)
-    assert analysis._moc_outcome(moc_rows([("final", "OK", 9)]), "100")["top_finish"] == 0
+    assert (o["competed"], o["made_final"], o["reached_final_round"], o["scored"]) == (1, 1, 1, 0)
+    assert analysis._moc_outcome(moc_rows([("final", "OK", 9)]), "100")["made_final"] == 0
     lj = analysis._moc_outcome(moc_rows([("final", "OK", 9)]), "LJ")
-    assert lj["top_finish"] == 1 and lj["reached_final_round"] == 1          # place <= 9 fallback
+    assert lj["made_final"] == 1 and lj["reached_final_round"] == 1          # place <= 9 fallback
     assert analysis._moc_outcome(moc_rows([("final", "OK", 10)]), "LJ")["reached_final_round"] == 0
     dns = analysis._moc_outcome(moc_rows([("prelim", "DNS", None)]), "400")
     assert dns["competed"] == 0 and dns["moc_status"] == "DNS"
     dq = analysis._moc_outcome(moc_rows([("prelim", "DQ", None)]), "400")
-    assert dq["competed"] == 1 and dq["top_finish"] == 0 and dq["moc_status"] == "DQ"
+    assert dq["competed"] == 1 and dq["made_final"] == 0 and dq["moc_status"] == "DQ"
     assert analysis._moc_outcome(moc_rows([]), "400")["moc_status"] == "not_in_results"
     hj = analysis._moc_outcome(moc_rows([("final", "NH", None)]), "HJ")
-    assert hj["competed"] == 1 and hj["reached_final_round"] == 1 and hj["top_finish"] == 0
+    assert hj["competed"] == 1 and hj["reached_final_round"] == 1 and hj["made_final"] == 0
 
 
 def q_rows():
@@ -29,16 +29,16 @@ def q_rows():
                 reached_final_round=0, replacement_for_area=None, state_qualified="pending")
     rows = [
         dict(area="tri-valley", qualifier_type="automatic", in_qualified_field=1, in_declared_field=1, competed=1,
-             top_finish=1, scored=1, choice_tag=None, vacancy_refilled_by_area=None),
+             made_final=1, scored=1, choice_tag=None, vacancy_refilled_by_area=None),
         dict(area="tri-valley", qualifier_type="automatic", in_qualified_field=1, in_declared_field=1, competed=0,
-             top_finish=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
+             made_final=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
         dict(area="tri-valley", qualifier_type="next_best_mark", in_qualified_field=1, in_declared_field=0,
-             competed=0, top_finish=0, scored=0, choice_tag="chose_other_events", vacancy_refilled_by_area="tri-valley",
+             competed=0, made_final=0, scored=0, choice_tag="chose_other_events", vacancy_refilled_by_area="tri-valley",
              competed_other_moc_event=1),
         dict(area="tri-valley", qualifier_type="replacement", in_qualified_field=0, in_declared_field=1, competed=1,
-             top_finish=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
+             made_final=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
         dict(area="bay-shore", qualifier_type="at_large_standard", in_qualified_field=1, in_declared_field=1,
-             competed=1, top_finish=1, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
+             competed=1, made_final=1, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
     ]
     q = pd.DataFrame([{"competed_other_moc_event": None, **base, **r} for r in rows])
     q["at_large_combined"] = q["qualifier_type"].isin(analysis.AT_LARGE_TYPES).astype(int)
@@ -66,8 +66,9 @@ def test_field_makeup_and_at_large_share():
     comb = share[(share["field"] == "qualified") & (share["spot_type"] == "at_large_combined")].set_index("area")
     assert comb.loc["tri-valley", "area_share"] == 0.5 and comb.loc["class-a", "count"] == 0
     perf = analysis.moc_performance(q_rows())
-    auto = perf[(perf["area"] == "tri-valley") & (perf["qualifier_type"] == "automatic")].iloc[0]
-    assert auto["competed"] == 1 and auto["top_finish_rate"] == 1.0
+    auto = perf[(perf["area"] == "tri-valley") & (perf["qualifier_type"] == "automatic")]
+    assert set(auto["event"]) == {"100", "group:sprints_hurdles", "all"} and set(auto["gender"]) == {"girls", "all"}
+    assert (auto["competed"] == 1).all() and auto["made_final"].isna().all()      # 1 entry: suppressed
 
 
 def test_flags_need_three_seasons():
@@ -127,13 +128,13 @@ def test_core_comparison_groups():
     low = tv[tv["comparison_group"] == "lowest_automatic"].iloc[0]
     other = tv[tv["comparison_group"] == "at_large_other_areas"].iloc[0]
     # One athlete per group: counts are published, MOC-place figures are suppressed (< MIN_CELL).
-    assert low["competed"] == 1 and pd.isna(low["top_finish"]) and pd.isna(low["median_moc_place"])
-    assert other["competed"] == 1 and pd.isna(other["top_finish"]) and pd.isna(other["median_moc_place"])
+    assert low["competed"] == 1 and pd.isna(low["made_final"]) and pd.isna(low["median_moc_place"])
+    assert other["competed"] == 1 and pd.isna(other["made_final"]) and pd.isna(other["median_moc_place"])
     big = pd.concat([q.assign(season=s) for s in range(2020, 2026)])       # 6 seasons -> pooled cell of 6
     pooled = analysis.core_comparison(big)
     row = pooled[pooled["season"].str.contains("pooled") & (pooled["event_group"] == "sprints_hurdles")
                  & (pooled["area"] == "tri-valley") & (pooled["comparison_group"] == "lowest_automatic")].iloc[0]
-    assert (row["competed"], row["top_finish"], row["median_moc_place"]) == (6, 6, 3.0)
+    assert (row["competed"], row["made_final"], row["median_moc_place"]) == (6, 6, 3.0)
     assert set(cc["season"]) == {"2026", "2026-2026 pooled"}
     assert set(pooled["season"]) >= {"2020-2025 pooled"}
 
@@ -164,7 +165,7 @@ def _core_q():
                                             ("tri-valley", 8, "next_best_mark", 1), ("redwood-empire", 7, "at_large_standard", 0),
                                             ("class-a", 3, "automatic", 0), ("class-a", 5, "next_best_mark", 1)):
                 rows.append(dict(season=season, gender="girls", event_code=ev, area=area, area_place=place,
-                                 qualifier_type=qtype, top_finish=top, in_declared_field=1, competed=1,
+                                 qualifier_type=qtype, made_final=top, in_declared_field=1, competed=1,
                                  at_large_combined=int(qtype in analysis.AT_LARGE_TYPES),
                                  athlete_id=f"{area}{place}{ev}", school="S", moc_overall_place=float(place)))
     return pd.DataFrame(rows)
@@ -193,12 +194,12 @@ def test_clustered_se_equals_robust_when_every_row_is_its_own_cluster():
 def test_core_place_curve_aggregates_and_suppresses():
     q = _core_q().assign(in_declared_field=1, competed=1)
     c = analysis.core_place_curve(q)
-    assert {"entries", "top8_count", "median_moc_place"} <= set(c.columns)
+    assert {"entries", "made_final_count", "median_moc_place"} <= set(c.columns)
     small = c[(c["entries"] > 0) & (c["entries"] < analysis.MIN_CELL)]
-    assert small["top8_count"].isna().all() and small["median_moc_place"].isna().all()
+    assert small["made_final_count"].isna().all() and small["median_moc_place"].isna().all()
     big = c[(c["season"].str.contains("pooled")) & (c["gender"] == "all") & (c["event_group"] == "all")
             & (c["area"] == "tri-valley") & (c["area_place"] == "5-6")].iloc[0]
-    assert big["entries"] == 8 and big["top8_count"] == 8          # TV 5th/6th, 2 events x 2 seasons x 2 places
+    assert big["entries"] == 8 and big["made_final_count"] == 8          # TV 5th/6th, 2 events x 2 seasons x 2 places
     assert set(c["area_place"]) == {str(p) for p in range(1, 13)} | {"5-6", "7-8"}
 
 
@@ -231,3 +232,11 @@ def test_spot_use_segments_sum_to_guaranteed_spots():
     assert (bs["at_large_spots"], bs["al_competed"], bs["al_chose_another_event"], bs["guaranteed_spots"]) == (2, 1, 1, 0)
     roll = analysis.spot_utilization_by_area(su.reset_index()).set_index("area")
     assert roll.loc["tri-valley", "guaranteed_used_rate"] == 0.4
+
+
+def test_moc_performance_publishes_counts_from_five_entries():
+    q = pd.concat([q_rows().iloc[[0]]] * 5, ignore_index=True)
+    perf = analysis.moc_performance(q)
+    row = perf[(perf["event"] == "all") & (perf["gender"] == "all") & (perf["season"] == "2026")].iloc[0]
+    assert (row["competed"], row["made_final"], row["made_final_rate"]) == (5, 5, 1.0)
+    assert set(perf["season"]) == {"2026", "2026-2026 pooled"}

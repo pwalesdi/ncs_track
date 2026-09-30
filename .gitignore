@@ -27,3 +27,5 @@ outputs/
 # Scratch
 *.tmp
 .env
+# athlete-level; local copy lives in outputs/ (decision #29)
+data/summary/left_out.csv

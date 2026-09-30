@@ -72,7 +72,7 @@ fields together.
 | competed | See terms |
 | moc_status | `OK`, a result status, `not_in_results` (declared but absent from the results) or `not_declared` |
 | moc_final_place | Place in the MOC final round, when the athlete has a valid mark there |
-| top_finish | 1 if `moc_final_place` ≤ 9 for LJ, TJ, SP and DT, ≤ 8 for every other event. The dashboard's "made the final" metric. |
+| made_final | 1 if `moc_final_place` ≤ 9 for LJ, TJ, SP and DT, ≤ 8 for every other event. The dashboard's "made the final" metric. |
 | reached_final_round | 1 if the athlete appears in the MOC finals round (see note) |
 | scored | 1 if `moc_final_place` ≤ 6 |
 | choice_tag | For a qualified athlete not in the program: `chose_other_events` (listed elsewhere in the program, incl. the 4x800 and relay rosters) or `did_not_declare` |
@@ -84,7 +84,7 @@ fields together.
 | state_qualified | `pending` until the CIF State meet data arrives |
 
 **Notes on the finals columns**
-- **top_finish uses top 8 even where a final seats more.** The 800 and 1600 finals seat 12.
+- **made_final uses top 8 even where a final seats more.** The 800 and 1600 finals seat 12.
   The 3200, HJ and PV have no prelims, so there is no separate final and top 8 is used
   there too.
 - **reached_final_round depends on the event.**
@@ -114,9 +114,12 @@ and `area_share = count / spots` (blank when `spots` is 0).
 
 ## data/summary/moc_performance.csv
 
-Declared athletes who competed, per season × gender × event × area × qualifier_type, plus
-`at_large_combined` rollup rows. Columns: `competed` (count); `top_finish`, `scored`,
-`reached_final_round` (counts); and `*_rate` (count / competed).
+Declared athletes who competed, aggregated to the dashboard's filter grain: season (each,
+plus `2022-2026 pooled`) × gender (`girls`, `boys`, `all`) × event (each event code,
+`group:<name>`, `all`) × area × qualifier_type, plus `at_large_combined` rollup rows. Only
+groups with at least one entry have a row. Columns: `competed` (count); `made_final`,
+`scored`, `reached_final_round` (counts); and `*_rate` (count / competed).
+**Small cells:** when `competed` < 5, the counts and rates are blank (decision #29).
 
 ## data/summary/spot_utilization.csv
 
@@ -180,12 +183,12 @@ doesn't compete can't be seen in the program, so that spot is never counted as r
 `core_comparison.csv` compares each Area's lowest automatic qualifiers (Area places 5–6;
 3rd for Class A) with next-best-mark + at-large qualifiers from the other Areas. Only entries that competed
 at the MOC count, with genders combined. Rows are per season (plus `2022-2026 pooled`) ×
-event group (plus `all`) × area × `comparison_group`. Columns: `competed`, `top_finish`,
-`top_finish_rate`, `with_moc_place` and `median_moc_place`. Cells with fewer than 5
+event group (plus `all`) × area × `comparison_group`. Columns: `competed`, `made_final`,
+`made_final_rate`, `with_moc_place` and `median_moc_place`. Cells with fewer than 5
 entries publish `competed` and `with_moc_place` only; the MOC-place figures are blank.
 
 `core_tests.csv` (pooled 2022–2026, all events) gives three p-values for the
-`gap = lowest-automatic top-8 rate − other Areas' next-best-mark + at-large top-8 rate`:
+`gap = lowest-automatic made-the-final rate − other Areas' next-best-mark + at-large made-the-final rate`:
 
 | Column | Test |
 |---|---|
@@ -200,16 +203,17 @@ behind the dashboard's "Area place vs. MOC finish" tab and the Overview cards.
 - **Rows:** season (each, plus `2022-2026 pooled`) × gender (`girls`, `boys`, `all`) ×
   `event_group` (six groups, plus `all`) × area × `area_place` (`1`…`12`, plus the bands
   `5-6` and `7-8`).
-- **Columns:** `entries` (athlete-events that competed at the MOC), `top8_count` and
+- **Columns:** `entries` (athlete-events that competed at the MOC), `made_final_count` and
   `median_moc_place`.
-- **Small cells:** when `entries` < 5, `top8_count` and `median_moc_place` are blank, so no
+- **Small cells:** when `entries` < 5, `made_final_count` and `median_moc_place` are blank, so no
   row reveals one athlete's MOC place.
 - **No single events:** the table has no single-event rows.
 
-## data/summary/left_out.csv
+## outputs/left_out.csv (local only, git-ignored)
 
 Per season × gender × event × area: the 3 best non-qualifiers by Area mark (valid marks
-only; ties broken by Area place). No names.
+only; ties broken by Area place). No names, but one row per athlete, so it is kept out of
+the public repo (decision #29); `docs/findings_v1.md` §5 summarises it in one paragraph.
 
 | Column | Meaning |
 |---|---|
@@ -219,7 +223,7 @@ only; ties broken by Area place). No names.
 | declared_anyway | In the MOC program anyway, e.g. as a replacement (blank for relays) |
 | moc_cutoff_place, moc_cutoff_mark | The 8th-best valid MOC mark (9th for LJ/TJ/SP/DT) that season, across all rounds combined (prelims + finals). Each athlete or team counts once, at their best valid mark. |
 | moc_cutoff_source | `best_mark_all_rounds` |
-| area_mark_would_have_been_top_finish | The Area mark equals or beats the cutoff |
+| area_mark_would_have_made_final | The Area mark equals or beats the cutoff |
 | caveat | See below |
 
 **Caveat:** the Area mark and the MOC marks come from different meets, with different
@@ -229,7 +233,7 @@ the athlete would have placed at the MOC.
 ## Known limits
 
 - **MOC linking.** MOC results are linked by Athletic.net athlete ID, or by name and school
-  when there is no ID. 1,292 of 1,297 MOC top-8/9 finishes, 2022–2026, link to a
+  when there is no ID. 1,292 of 1,297 MOC finalists (top 8, top 9 in LJ/TJ/SP/DT), 2022–2026, link to a
   qualifiers row.
   - The rest: one 2024 program spelling differs from Athletic.net, and "West County" (2022)
     is an unconfirmed rename kept in review. Athletic.net lists those athletes under Analy.

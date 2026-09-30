@@ -49,12 +49,14 @@ def expected_headline():
     """The Overview cards' numbers, computed with pandas from data/summary/ (pooled 2022-2026)."""
     c = summary("core_place_curve.csv", dtype={"season": str, "area_place": str})
     c = c[c["season"].str.contains("pooled") & (c["gender"] == "all") & (c["event_group"] == "all")]
-    band = {"tri-valley": "7-8", "bay-shore": "5-6", "redwood-empire": "5-6", "class-a": "3"}
-    finish = {a: c[(c["area"] == a) & (c["area_place"] == band[a])].iloc[0] for a in AREAS}
+    cell = lambda area, place: c[(c["area"] == area) & (c["area_place"] == place)].iloc[0]
+    last_auto = {"tri-valley": "6", "bay-shore": "6", "redwood-empire": "6", "class-a": "3"}
+    pair = lambda r: (int(r["entries"]), float(r["median_moc_place"]))
     al = summary("at_large_share.csv")
     al = al[(al["field"] == "qualified") & (al["spot_type"] == "at_large_combined")]
     su = summary("spot_utilization_by_area.csv")
-    return {"finish": {a: (int(r["entries"]), float(r["median_moc_place"])) for a, r in finish.items()},
+    return {"sixth": {a: pair(cell(a, p)) for a, p in last_auto.items()},
+            "depth": {"tv": pair(cell("tri-valley", "7-8")), "others": pair(cell("bay-shore+redwood-empire", "5-6"))},
             "tv_spots": (int(al.loc[al["area"] == "tri-valley", "count"].sum()), int(al["count"].sum())),
             "unfilled": (int(su["unfilled_spots"].sum()), int(su["guaranteed_spots"].sum()))}
 
@@ -86,9 +88,13 @@ def test_3_next_best_mark_and_at_large_spots(tmp_path):
 
 def test_4_performance_class_a_automatic(tmp_path):
     p = js(f"performance(D, {F2026})", tmp_path)
-    m = summary("moc_performance.csv")
-    x = m[(m["season"] == 2026) & (m["area"] == "class-a") & (m["qualifier_type"] == "automatic")]
-    assert (p["class-a"]["automatic"]["top8"], p["class-a"]["automatic"]["entries"]) == (x["top_finish"].sum(), x["competed"].sum()) == (7, 83)
+    m = summary("moc_performance.csv", dtype={"season": str})
+    x = m[(m["season"] == "2026") & (m["gender"] == "all") & (m["event"] == "all") & (m["area"] == "class-a")
+          & (m["qualifier_type"] == "automatic")].iloc[0]
+    assert (p["class-a"]["automatic"]["final"], p["class-a"]["automatic"]["entries"]) == (x["made_final"], x["competed"]) == (7, 83)
+    # a suppressed cell comes through as null, never as a number
+    small = js('performance(D, {season:"2022", gender:"all", event:"all"})', tmp_path)["class-a"]["nbm_std"]
+    assert small == {"entries": 1, "final": None}
 
 
 def test_5_spot_use_every_area_every_season(tmp_path):
@@ -126,13 +132,6 @@ def test_5c_unfilled_table(tmp_path):
         assert sum(e["total"] for e in t["areas"][a]["events"].values()) == t["areas"][a]["total"]
 
 
-def test_6_left_out(tmp_path):
-    lo = js(f"leftOut(D, {F2026})", tmp_path)["tri-valley"]
-    s = summary("left_out.csv")
-    s = s[(s["season"] == 2026) & (s["area"] == "tri-valley") & s["moc_cutoff_mark"].notna()]
-    assert (lo["hits"], lo["total"]) == (int(s["area_mark_would_have_been_top_finish"].fillna(False).astype(bool).sum()), len(s)) == (0, 96)
-
-
 def test_7_place_curve(tmp_path):
     c = js('curve(D, "2022-2026 pooled", "all", "all")', tmp_path)
     t = summary("core_place_curve.csv", dtype={"season": str, "area_place": str})
@@ -145,8 +144,8 @@ def test_7_place_curve(tmp_path):
             if pd.isna(row["median_moc_place"]):
                 assert cell["median"] is None
             else:
-                assert cell["median"] == row["median_moc_place"] and cell["top8"] == row["top8_count"]
-    assert (c["tri-valley"]["5-6"]["entries"], c["tri-valley"]["5-6"]["top8"], c["tri-valley"]["5-6"]["median"]) == (293, 106, 10)
+                assert cell["median"] == row["median_moc_place"] and cell["final"] == row["made_final_count"]
+    assert (c["tri-valley"]["5-6"]["entries"], c["tri-valley"]["5-6"]["final"], c["tri-valley"]["5-6"]["median"]) == (293, 106, 10)
     g = js('curve(D, "2024", "girls", "throws")', tmp_path)
     tt = summary("core_place_curve.csv", dtype={"season": str, "area_place": str})
     x = tt[(tt["season"] == "2024") & (tt["gender"] == "girls") & (tt["event_group"] == "throws") & (tt["area"] == "bay-shore") & (tt["area_place"] == "1")].iloc[0]
@@ -157,7 +156,9 @@ def test_8_headline_matches_summary(tmp_path):
     h = js("headline(D)", tmp_path)
     e = expected_headline()
     for a in AREAS:
-        assert (h["finish"][a]["cell"]["entries"], h["finish"][a]["cell"]["median"]) == e["finish"][a]
+        assert (h["sixth"][a]["cell"]["entries"], h["sixth"][a]["cell"]["median"]) == e["sixth"][a]
+    assert (h["depth"]["tv"]["entries"], h["depth"]["tv"]["median"]) == e["depth"]["tv"] == (253, 13)
+    assert (h["depth"]["others"]["entries"], h["depth"]["others"]["median"]) == e["depth"]["others"] == (561, 18)
     assert (h["tv_spots"]["k"], h["tv_spots"]["n"]) == e["tv_spots"] == (464, 659)
     assert (h["unfilled"]["k"], h["unfilled"]["n"]) == e["unfilled"]
 
@@ -173,8 +174,8 @@ def test_9_flags_and_filters(tmp_path):
 
 
 def test_10_units_and_ordinals(tmp_path):
-    assert js('[spotsTxt(294, 818), top8Txt(19, 59), ordinal(18), ordinal(1), ordinal(22), ordinal(19.5)]', tmp_path) == \
-        ["294 of 818 MOC spots (36%)", "19 of 59 entries finished top 8 (32%)", "18th", "1st", "22nd", "19.5th"]
+    assert js('[spotsTxt(294, 818), finalTxt(19, 59), ordinal(18), ordinal(1), ordinal(22), ordinal(19.5)]', tmp_path) == \
+        ["294 of 818 MOC spots (36%)", "19 of 59 entries made the final (32%)", "18th", "1st", "22nd", "19.5th"]
 
 
 def test_render_script_compiles(tmp_path):

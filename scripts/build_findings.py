@@ -17,9 +17,15 @@ from ncs_track import paths  # noqa: E402
 DOC = f"""# What the data shows: MOC qualification by Area, 2022–2026 (findings v1)
 
 *For coaches and the committee. Built from the tables in `data/summary/`; every column is defined in
-`docs/analysis_tables.md`. Every number carries its unit, e.g. "25 of 284 entries finished top 8 (9%)".*
+`docs/analysis_tables.md`. Every number carries its unit, e.g. "25 of 284 entries made the final (9%)".*
 
 > **What changed in this update (2026-09-30, third update)**
+> - **"Top 8" is now "made the final"** (same definition: top 9 in LJ/TJ/SP/DT, top 8
+>   elsewhere).
+> - **§5, left-out athletes** is now one paragraph; its athlete-level table is no longer
+>   published.
+> - **Privacy.** `moc_performance.csv` now follows the small-cell rule: made-the-final and
+>   scored counts are published only for groups of 5 or more entries.
 > - **§6, spot use rebuilt on guaranteed spots only.** Five segments (competed, refilled,
 >   chose another event, didn't enter, unfilled); "Other unused" is gone. At-large standard
 >   qualifiers are reported separately. Unfilled stays provisional, with the three open
@@ -37,7 +43,7 @@ DOC = f"""# What the data shows: MOC qualification by Area, 2022–2026 (finding
 >   which have no fixed number. Over five seasons, 247 "empty lanes" become 121 unfilled
 >   spots.
 > - **Privacy.** MOC-place figures are published only for groups of 5 or more entries.
-> - **First update (same day).** §5 uses the all-rounds MOC cutoff; §4 adds the permutation
+> - **First update (same day).** §5 used the all-rounds MOC cutoff; §4 adds the permutation
 >   and athlete-clustered tests.
 
 ## How to read this
@@ -62,8 +68,9 @@ DOC = f"""# What the data shows: MOC qualification by Area, 2022–2026 (finding
     of real MOC entries once athlete choices and replacements are counted.
   - **Actual entries:** athletes who entered the MOC (the meet program).
 - **Entries** are athlete-events: one athlete in two events counts twice.
-- **Top 8:** 8th place or better in the MOC final (9th in the long jump, triple jump, shot
-  put and discus). **Scored:** 6th or better.
+- **Made the final:** finished top 9 in the long jump, triple jump, shot put or discus, or
+  top 8 in every other event, relays included. (The 800 and 1600 finals seat 12; we count
+  top 8.) **Scored:** 6th or better.
 - **This document describes; it doesn't recommend.** It doesn't propose any change to how
   spots are allocated.
 
@@ -105,11 +112,11 @@ mark + at-large standard qualifiers are shown. The full breakdown, including rep
 is in `data/summary/moc_performance.csv`.
 
 **What the data shows.**
-- **Automatic qualifiers.** Tri-Valley's finished top 8 in 62–65% of entries each season.
+- **Automatic qualifiers.** Tri-Valley's made the final in 62–65% of entries each season.
   Bay Shore's did in 31–34%, Redwood Empire's in 26–34%, and Class A's in 8–32%.
-- **Class A varies most:** 7 of 83 entries finished top 8 in 2026 (8%), but 27 of 84 in
+- **Class A varies most:** 7 of 83 entries made the final in 2026 (8%), but 27 of 84 in
   2024 (32%).
-- **Next best mark + at-large qualifiers** finished top 8 far less often than automatic
+- **Next best mark + at-large qualifiers** made the final far less often than automatic
   qualifiers, in every Area and season. Outside Tri-Valley these groups are small, often
   under 20 entries, so their rates move a lot with one or two athletes.
 
@@ -124,7 +131,7 @@ is in `data/summary/moc_performance.csv`.
 - **Who is counted:** only entries that competed at the MOC, with genders combined.
 
 **Two measures.**
-- **Top-8 rate.**
+- **Made-the-final rate.**
 - **Median MOC place.** Finalists keep their final place; everyone else is ranked after the
   finalists by their best MOC mark. Lower is better.
 
@@ -136,20 +143,20 @@ Groups under 5 entries show counts only.
 
 **What the data shows.**
 - **Bay Shore, Redwood Empire and Class A.** In most seasons, their lowest automatic
-  qualifiers finished top 8 *less* often than the other Areas' next-best-mark + at-large
+  qualifiers made the final *less* often than the other Areas' next-best-mark + at-large
   qualifiers, and had a worse median place.
   - Redwood Empire and Class A: lower in all 5 seasons.
   - Bay Shore: lower in 4 of 5 seasons; 2025 was the exception.
   - Several single-season gaps are small. In 2024, Bay Shore's lowest automatics had 7 of
-    57 entries finish top 8, against 13 of 102 entries for the comparison group.
-  - Each season's result rests on 0–8 top-8 finishes on the automatic side.
+    57 entries make the final, against 13 of 102 entries for the comparison group.
+  - Each season's result rests on 0–8 finalists on the automatic side.
 - **Tri-Valley.** The opposite, by a wide margin: 28–49% of its 5th–6th-place automatic
-  entries finished top 8, against 3–18% of the other Areas' next-best-mark + at-large
+  entries made the final, against 3–18% of the other Areas' next-best-mark + at-large
   entries.
 - **Who the comparison group is.** Tri-Valley holds most next-best-mark and at-large spots
   (§2), so for Bay Shore, Redwood Empire and Class A the comparison group is mostly
   Tri-Valley athletes. Across all five seasons, entries from next-best-mark + at-large
-  qualifiers finished top 8 as follows:
+  qualifiers made the final as follows:
   - Tri-Valley: 61 of 406 entries (15%)
   - Redwood Empire: 10 of 79 entries (13%)
   - Bay Shore: 3 of 57 entries (5%)
@@ -174,7 +181,7 @@ Groups under 5 entries show counts only.
   repeat (about 1.15 rows per athlete), so allowing for repeats changes little. The old
   test's pooled standard error is conservative when the two rates differ.
 - **What the permutation test adds.** With random Area labels, a lowest-automatic group
-  would be expected to finish top 8 about 2–4 percentage points *more* often than the
+  would be expected to make the final about 2–4 percentage points *more* often than the
   comparison group.
   - Bay Shore's, Redwood Empire's and Class A's lowest automatics instead did 5–8
     percentage points *worse*. Random labels almost never produce gaps that far out
@@ -201,27 +208,12 @@ place from 1st to 12th.
 
 ## 5. Left-out athletes
 
-For each Area and event, we took the three best athletes who did *not* qualify, ranked by
-their Area mark. We then checked whether that mark was at or better than the MOC top-8 mark
-that year (top 9 in the long jump, triple jump, shot put and discus).
-
-**The cutoff.** The 8th-best valid MOC mark that year (9th in LJ/TJ/SP/DT), across prelims
-and finals combined, one mark per athlete.
-
-**Caveat: these marks come from different meets**, with different days, wind, weather,
-competition and (in field events) attempts. A good Area mark doesn't mean the athlete would
-have finished that high at the MOC. This is a comparison, not a prediction.
-
-**What the data shows.**
-- **Almost never.** In 19 of the 20 Area-seasons, none of an Area's best non-qualifiers had
-  a mark at or better than the MOC cutoff.
-- **The exception is 2023 Tri-Valley:** 6 of 96 best non-qualifiers (6%), in the boys 200
-  and 400 and the girls 200 and discus.
-  - The 2023 MOC marks were unusually slow; a 22.93 won a boys 200 prelim heat.
-  - 2023 at-large standards are assumed from 2026, so Tri-Valley's places 7–14 in the boys
-    200 all qualified, and its best non-qualifiers were 15th.
-
-{T.leftout()}
+The current system rarely excludes an athlete whose Area mark would have made the MOC
+final: 6 cases in 5 seasons, all 2023 Tri-Valley. We took each Area's three best
+non-qualifiers per event, by Area mark, and compared that mark with the MOC cutoff: the
+mark of the 8th-best MOC finisher (9th in the long jump, triple jump, shot put and discus),
+taking each athlete's best mark from any MOC round. The marks come from different meets
+(wind, weather, competition), so this is a comparison, not a prediction.
 
 ## 6. Spot use
 
@@ -280,7 +272,7 @@ open questions:
 - **Unresolved school names.** "West County" (2022, 12 program entries) is kept unmatched
   pending confirmation that it is Analy. A few truncated names are also unmatched (15
   entries in 2022, 5 in 2023). These appear as "Unknown" and aren't compared.
-- **Privacy.** MOC-place figures (top-8 counts, medians) are published only for groups of 5
+- **Privacy.** MOC-place figures (made-the-final counts, medians) are published only for groups of 5
   or more entries.
 - **State results pending.** State qualification isn't included yet.
 - **What the rules replay can't see.** Scratches after the program was printed, why an

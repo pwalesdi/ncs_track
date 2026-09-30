@@ -92,3 +92,13 @@ Newest at the bottom.
 4. **moc_overall_place (added for the Part 2 comparisons).** Final place for finalists with
    a valid final mark; everyone else with a valid mark is ranked after them by their best
    mark.
+
+**Part 2, findings**
+5. **MOC cutoff when the final is short.** Some finals have fewer valid marks than places:
+   in 2026, 7 events had only 6–7 finishers because of DNS/DQ in the final. The top-8/9
+   cutoff for "left out" then comes from the overall order (final places first, then the
+   best non-finalist marks), and `moc_cutoff_source` says so. Before this, those events had
+   no cutoff at all.
+6. **Core comparison groups.** Genders are combined. "Other Areas' at-large" pools every
+   other Area's `next_best_mark` and `at_large_standard` qualifiers who competed. The
+   median MOC place uses `moc_overall_place`.

@@ -292,22 +292,70 @@ def spot_utilization_flags(t: pd.DataFrame, min_seasons: int = 3, metric: str = 
         ["seasons_flagged", "total_all_seasons"], ascending=False).reset_index(drop=True)
 
 
+EVENT_GROUPS = {
+    "sprints_hurdles": ["100", "200", "100H", "110H", "300H"], "400_800": ["400", "800"],
+    "distance": ["1600", "3200"], "jumps": ["HJ", "PV", "LJ", "TJ"], "throws": ["SP", "DT"],
+    "relays": ["4x100", "4x400"],
+}
+GROUP_OF = {e: g for g, evs in EVENT_GROUPS.items() for e in evs}
+LOWEST_AUTO_PLACES = {"tri-valley": (5, 6), "bay-shore": (5, 6), "redwood-empire": (5, 6), "class-a": (3,)}
+
+
+def core_comparison(q: pd.DataFrame) -> pd.DataFrame:
+    """Each Area's lowest automatic qualifiers (places 5-6; Class A 3rd) vs at-large
+    qualifiers (next_best_mark + at_large_standard) from the other Areas, among athletes who
+    competed at the MOC. Genders combined. Per season and pooled 2022-2026; per event group
+    and all events."""
+    c = q[(q["in_declared_field"] == 1) & (q["competed"] == 1)].copy()
+    c["event_group"] = c["event_code"].map(GROUP_OF)
+    rows = []
+    seasons = [(str(s), c[c["season"] == s]) for s in sorted(c["season"].unique())]
+    seasons.append((f"{c['season'].min()}-{c['season'].max()} pooled", c))
+    for season, cs in seasons:
+        for group in (*EVENT_GROUPS, "all"):
+            cg = cs if group == "all" else cs[cs["event_group"] == group]
+            for area, places in LOWEST_AUTO_PLACES.items():
+                low = cg[(cg["area"] == area) & (cg["qualifier_type"] == "automatic") & cg["area_place"].isin(places)]
+                other = cg[(cg["area"] != area) & (cg["area"] != "unknown") & (cg["at_large_combined"] == 1)]
+                for label, x in (("lowest_automatic", low), ("at_large_other_areas", other)):
+                    placed = x["moc_overall_place"].dropna()
+                    rows.append({"season": season, "event_group": group, "area": area, "comparison_group": label,
+                                 "places_compared": "|".join(map(str, places)) if label == "lowest_automatic" else "",
+                                 "competed": len(x), "top_finish": int(x["top_finish"].sum()),
+                                 "top_finish_rate": round(x["top_finish"].mean(), 4) if len(x) else None,
+                                 "with_moc_place": len(placed),
+                                 "median_moc_place": float(placed.median()) if len(placed) else None})
+    return pd.DataFrame(rows)
+
+
 LEFT_OUT_CAVEAT = ("Area mark and MOC marks come from different meets (different day, wind, weather, "
                    "competition and, for field events, attempts); a comparison, not a prediction.")
 
 
 def moc_cutoffs(moc: pd.DataFrame) -> pd.DataFrame:
-    """The 8th-place final mark (9th for LJ/TJ/SP/DT) per season x gender x event."""
-    f = moc[(moc["round"] == "final") & (moc["status"] == "OK") & moc["mark_value"].notna()]
+    """The mark at overall MOC place 8 (9 for LJ/TJ/SP/DT) per season x gender x event.
+
+    Overall order = the final's valid marks by place, then everyone else's best valid mark
+    (the order behind moc_overall_place). When the final has fewer valid marks than the
+    cutoff place (DNS/DQ in the final), the cutoff comes from the best non-finalist marks;
+    `moc_cutoff_source` says which."""
+    ok = moc[(moc["status"] == "OK") & moc["mark_value"].notna()].copy()
+    ok["key"] = [a if isinstance(a, str) and not r else f"{s}|{n}" for a, r, s, n in
+                 zip(ok["athlete_id"], ok["is_relay"], ok["school_name_raw"], ok["athlete_name_raw"])]
     rows = []
-    for (s, g, e), x in f.groupby(KEY):
+    for (s, g, e), x in ok.groupby(KEY):
         n = top_cut(e)
         measure = EVENTS[e][0]
-        vals = x.assign(k=(x["mark_value"] if measure == "time" else -x["mark_value"])).sort_values("k")
-        hit = vals.iloc[n - 1] if len(vals) >= n else None
+        fin = x[(x["round"] == "final") & x["place"].notna()].sort_values("place")
+        rest = x[~x["key"].isin(set(fin["key"]))]
+        rest = rest.assign(k=rest["mark_value"] if measure == "time" else -rest["mark_value"])
+        rest = rest.sort_values("k").drop_duplicates("key")
+        order = pd.concat([fin[["mark_raw", "mark_value"]], rest[["mark_raw", "mark_value"]]])
+        hit = order.iloc[n - 1] if len(order) >= n else None
         rows.append({"season": s, "gender": g, "event_code": e, "moc_cutoff_place": n,
                      "moc_cutoff_mark": hit["mark_raw"] if hit is not None else None,
-                     "moc_cutoff_value": hit["mark_value"] if hit is not None else None})
+                     "moc_cutoff_value": hit["mark_value"] if hit is not None else None,
+                     "moc_cutoff_source": None if hit is None else ("final" if len(fin) >= n else "final+prelim")})
     return pd.DataFrame(rows)
 
 
@@ -332,6 +380,7 @@ def left_out(season: int, evaluated: pd.DataFrame, q: pd.DataFrame, cutoffs: pd.
                          "declared_anyway": (g, e, str(r.athlete_id)) in decl_ids if not r.is_relay else None,
                          "moc_cutoff_place": cut["moc_cutoff_place"].iloc[0] if len(cut) else None,
                          "moc_cutoff_mark": cut["moc_cutoff_mark"].iloc[0] if len(cut) else None,
+                         "moc_cutoff_source": cut["moc_cutoff_source"].iloc[0] if len(cut) else None,
                          "area_mark_would_have_been_top_finish": better, "caveat": LEFT_OUT_CAVEAT})
     return pd.DataFrame(rows)
 

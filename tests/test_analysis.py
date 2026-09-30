@@ -97,3 +97,28 @@ def test_moc_overall_places():
         "mark_value": [12.0, 12.1, 12.3, 12.2]})
     places = analysis.moc_overall_places(moc, lambda s: "s")
     assert places[("girls", "100", "1")] == 1 and places[("girls", "100", "4")] == 3 and places[("girls", "100", "3")] == 4
+
+
+def test_core_comparison_groups():
+    q = q_rows()
+    q.loc[0, "area_place"] = 6                                   # a TV 6th-place auto who competed
+    q["moc_overall_place"] = [3.0, None, None, 12.0, 5.0]
+    cc = analysis.core_comparison(q)
+    tv = cc[(cc["season"] == "2026") & (cc["event_group"] == "sprints_hurdles") & (cc["area"] == "tri-valley")]
+    low = tv[tv["comparison_group"] == "lowest_automatic"].iloc[0]
+    other = tv[tv["comparison_group"] == "at_large_other_areas"].iloc[0]
+    assert (low["competed"], low["top_finish"], low["median_moc_place"]) == (1, 1, 3.0)
+    assert (other["competed"], other["top_finish"], other["median_moc_place"]) == (1, 1, 5.0)   # the BS at-large
+    assert set(cc["season"]) == {"2026", "2026-2026 pooled"}
+
+
+def test_cutoff_uses_prelims_when_final_is_short():
+    moc = pd.DataFrame({
+        "season": 2026, "gender": "boys", "event_code": "200", "is_relay": False, "school_name_raw": "S",
+        "athlete_name_raw": [f"A{i}" for i in range(10)], "athlete_id": [str(i) for i in range(10)],
+        "round": ["final"] * 7 + ["prelim"] * 3, "status": ["OK"] * 6 + ["DNS"] + ["OK"] * 3,
+        "place": [1, 2, 3, 4, 5, 6, None, 9, 10, 11], "mark_raw": [f"{21 + i / 10:.2f}" for i in range(10)],
+        "mark_value": [21 + i / 10 for i in range(10)]})
+    cut = analysis.moc_cutoffs(moc).iloc[0]
+    # 6 valid final marks, then the best prelim-only marks: 8th overall = the 2nd prelim mark
+    assert cut["moc_cutoff_source"] == "final+prelim" and cut["moc_cutoff_mark"] == "21.80"

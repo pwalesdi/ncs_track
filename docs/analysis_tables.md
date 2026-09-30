@@ -170,7 +170,8 @@ only; ties broken by Area place). No names.
 | area_place, area_mark, area_mark_value | Area final result (value in seconds or metres) |
 | is_relay | |
 | declared_anyway | In the MOC program anyway, e.g. as a replacement (blank for relays) |
-| moc_cutoff_place, moc_cutoff_mark | The MOC final's 8th-place mark (9th for LJ/TJ/SP/DT) that season |
+| moc_cutoff_place, moc_cutoff_mark | The mark at overall MOC place 8 (9 for LJ/TJ/SP/DT) that season: the final's valid marks by place, then the best non-finalist marks |
+| moc_cutoff_source | `final`; or `final+prelim` when the final had fewer valid marks than the cutoff place (DNS/DQ in the final), so the cutoff is a prelim mark |
 | area_mark_would_have_been_top_finish | The Area mark equals or beats the cutoff |
 | caveat | See below |
 

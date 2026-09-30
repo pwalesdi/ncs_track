@@ -342,6 +342,16 @@ def _core_rows(q: pd.DataFrame) -> pd.DataFrame:
     return c
 
 
+def core_places(q: pd.DataFrame) -> pd.DataFrame:
+    """One row per athlete-event in either core-comparison group (no names or IDs), so the
+    dashboard can filter by gender and single event: season, gender, event, Area, route,
+    top_finish, moc_overall_place."""
+    c = _core_rows(q)
+    c["route"] = c["lowest_auto"].map({True: "lowest_automatic", False: "at_large"})
+    return c[["season", "gender", "event_code", "area", "route", "top_finish", "moc_overall_place"]].sort_values(
+        ["season", "gender", "event_code", "area", "route"]).reset_index(drop=True)
+
+
 def _naive_p(k1, n1, k2, n2) -> float:
     import math
     p = (k1 + k2) / (n1 + n2)

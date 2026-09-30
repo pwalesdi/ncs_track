@@ -200,6 +200,7 @@ def cmd_analysis(args) -> int:
     analysis.no_shows_empty_lanes(su).to_csv(out / "no_shows_empty_lanes_by_area.csv", index=False)
     analysis.core_comparison(q).to_csv(out / "core_comparison.csv", index=False)
     analysis.core_tests(q).to_csv(out / "core_tests.csv", index=False)
+    analysis.core_places(q).to_csv(out / "core_places.csv", index=False)
     pd.concat(los, ignore_index=True).to_csv(out / "left_out.csv", index=False)
     print(f"wrote outputs/qualifiers.csv (git-ignored) and {out.relative_to(paths.ROOT)}/*.csv")
     return 0

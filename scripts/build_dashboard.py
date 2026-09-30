@@ -2,10 +2,12 @@
 
     .venv/bin/python scripts/build_dashboard.py
 
-The summary tables are embedded as JSON, so index.html is one self-contained file (plus
-Chart.js from a CDN). No athlete names: only data/summary/ is read.
+The summary tables are embedded as JSON and Chart.js is inlined from the pinned copy in
+dashboard/vendor/ (checksum-verified), so index.html is one self-contained file that works
+offline. No athlete names: only data/summary/ is read.
 """
 
+import hashlib
 import json
 from datetime import date
 
@@ -15,6 +17,9 @@ from ncs_track import paths
 
 S = paths.SUMMARY
 DASH = paths.ROOT / "dashboard"
+CHARTJS_VERSION = "4.4.1"
+CHARTJS = DASH / "vendor" / f"chart-{CHARTJS_VERSION}.umd.min.js"
+CHARTJS_SHA256 = "81ffafe13c37e1b25793b020d446f4d9739b949dadb7f9f79d709a0cad781c2f"   # cdnjs 4.4.1 chart.umd.min.js
 EVENT_ORDER = ["100", "200", "400", "800", "1600", "3200", "100H", "110H", "300H", "4x100", "4x400",
                "HJ", "PV", "LJ", "TJ", "SP", "DT"]
 
@@ -35,9 +40,15 @@ DEFINITIONS = [
     ("Empty lane", "A spot that went to nobody: earned but not used and not refilled. Includes no-shows, which cannot be refilled."),
     ("No-show", "Declared but did not compete."),
     ("Utilization", "Spots used by the Area's own qualifiers ÷ spots earned."),
-    ("Left out", "The 3 best non-qualifiers per Area and event, by Area mark, compared with the MOC mark at overall "
-                 "place 8 (9 for LJ/TJ/SP/DT). Marks from different meets: a comparison, not a prediction."),
+    ("Left out", "The 3 best non-qualifiers per Area and event, by Area mark, compared with the 8th-best valid MOC "
+                 "mark (9th for LJ/TJ/SP/DT) across all MOC rounds, one mark per athlete. Marks from different meets: "
+                 "a comparison, not a prediction."),
+    ("Panel 4 columns", "Used = utilization (competed ÷ spots earned); Empty = empty lanes ÷ spots earned; "
+                        "No-shows = of declared; Not decl. = qualified but not in the program; Refilled = vacancies refilled."),
     ("All seasons", "Counts summed over 2022–2026 (pooled); rates recomputed from the sums."),
+    ("Lowest automatic", "An Area's automatic qualifiers who placed 5th–6th at the Area meet (3rd for Class A)."),
+    ("Median MOC place", "Finalists keep their final place; everyone else with a valid MOC mark is ranked after the "
+                         "finalists by their best mark. Lower is better."),
     ("Source", "Athletic.net Area and MOC results, MOC programs (Diablo Timing); rules per season. "
                "Pre-2026 allocations assumed from 2026; 2023 standards assumed from 2026. State results pending."),
 ]
@@ -69,6 +80,8 @@ def build() -> dict:
         "spot_utilization": records(su, ["season", "gender", "event_code", "area", "spots_earned", "declared",
                                          "competed", "no_show", "not_declared", "vacancies_refilled", "empty_lanes"]),
         "left_out": records(lo, ["season", "gender", "event_code", "area", "has_cutoff", "hit"]),
+        "core_places": records(pd.read_csv(S / "core_places.csv"),
+                               ["season", "gender", "event_code", "area", "route", "top_finish", "moc_overall_place"]),
         "flags_empty_lanes": records(pd.read_csv(S / "spot_utilization_flags_empty_lanes.csv"),
                                      ["area", "gender", "event_code", "seasons_flagged", "seasons", "total_all_seasons"]),
         "flags_unused": records(pd.read_csv(S / "spot_utilization_flags.csv"),
@@ -80,7 +93,12 @@ def main() -> None:
     data = build()
     html = (DASH / "template.html").read_text()
     payload = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
-    html = html.replace("__DATA__", payload).replace("__BUILT__", date.today().isoformat())
+    lib = CHARTJS.read_bytes()
+    if hashlib.sha256(lib).hexdigest() != CHARTJS_SHA256:
+        raise SystemExit(f"{CHARTJS} does not match the pinned checksum")
+    html = (html.replace("__CHARTJS__", lib.decode().replace("</script", "<\\/script"))
+            .replace("__CHARTJS_VERSION__", CHARTJS_VERSION)
+            .replace("__DATA__", payload).replace("__BUILT__", date.today().isoformat()))
     (DASH / "index.html").write_text(html)
     print(f"wrote dashboard/index.html ({len(html) // 1024} KB)")
 

@@ -125,3 +125,15 @@ def test_render_script_compiles(tmp_path):
     f.write_text(f"new Function({json.dumps(main)}); 'ok';")
     out = subprocess.run(["osascript", "-l", "JavaScript", str(f)], capture_output=True, text=True)
     assert out.returncode == 0 and out.stdout.strip() == "ok", out.stderr
+
+
+def test_9_panel6_matches_core_comparison(tmp_path):
+    cc = js(f"coreCompare(D, {F2026})", tmp_path)
+    t = pd.read_csv(S / "core_comparison.csv", dtype={"season": str})
+    t = t[(t["season"] == "2026") & (t["event_group"] == "all")].set_index(["area", "comparison_group"])
+    for area in ("tri-valley", "bay-shore", "redwood-empire", "class-a"):
+        for js_key, grp in (("lowest_automatic", "lowest_automatic"), ("other_at_large", "at_large_other_areas")):
+            x = t.loc[(area, grp)]
+            assert (cc[area][js_key]["competed"], cc[area][js_key]["top_finish"]) == (x["competed"], x["top_finish"])
+            assert cc[area][js_key]["median_place"] == x["median_moc_place"]
+    assert (cc["class-a"]["lowest_automatic"]["top_finish"], cc["class-a"]["lowest_automatic"]["competed"]) == (1, 28)

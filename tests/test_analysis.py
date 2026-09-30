@@ -140,7 +140,7 @@ def _core_q():
                 rows.append(dict(season=season, gender="girls", event_code=ev, area=area, area_place=place,
                                  qualifier_type=qtype, top_finish=top, in_declared_field=1, competed=1,
                                  at_large_combined=int(qtype in analysis.AT_LARGE_TYPES),
-                                 athlete_id=f"{area}{place}{ev}", school="S"))
+                                 athlete_id=f"{area}{place}{ev}", school="S", moc_overall_place=float(place)))
     return pd.DataFrame(rows)
 
 
@@ -162,3 +162,9 @@ def test_clustered_se_equals_robust_when_every_row_is_its_own_cluster():
     b1, p1 = analysis._clustered_p(y, g, list(range(10)))
     b2, p2 = analysis._clustered_p(y, g, ["a", "a", "b", "b", "c", "d", "d", "e", "f", "g"])
     assert abs(b1 - 0.4) < 1e-12 and abs(b2 - 0.4) < 1e-12 and p1 != p2
+
+
+def test_core_places_has_no_identifiers():
+    cp = analysis.core_places(_core_q())
+    assert list(cp.columns) == ["season", "gender", "event_code", "area", "route", "top_finish", "moc_overall_place"]
+    assert set(cp["route"]) == {"lowest_automatic", "at_large"}

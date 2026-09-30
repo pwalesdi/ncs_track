@@ -147,3 +147,10 @@ Newest at the bottom.
     - **Why the clustered p-values are smaller than the old ones:** the old test used a
       pooled standard error, which is conservative when the two rates differ. Athletes
       rarely repeat (about 1.15 rows each), so clustering itself changes little.
+17. **Panel 6 data (`data/summary/core_places.csv`).** One row per athlete-event in
+    either comparison group: season, gender, event, Area, route, top finish, MOC place.
+    It has no names or IDs, but it is athlete-level. It is needed so medians follow the
+    gender and single-event filters; tell me if you'd rather ship only aggregated
+    medians.
+18. **Chart.js 4.4.1 is vendored** in `dashboard/vendor/` (MIT licence), pinned by
+    SHA-256 and inlined at build time.

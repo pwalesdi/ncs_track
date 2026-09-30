@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NCS MOC Qualification</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>/* Chart.js __CHARTJS_VERSION__ (MIT), inlined at build time */
+__CHARTJS__</script>
 <style>
   :root {
     --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #5f5f5a; --line: #e2e1dc;
@@ -17,6 +18,7 @@
     }
   }
   * { box-sizing: border-box; }
+  html, body { max-width: 100%; }
   body { margin: 0; background: var(--bg); color: var(--text);
          font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   header, main, footer { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
@@ -25,10 +27,11 @@
   .sub { color: var(--muted); margin: 0 0 14px; font-size: .9rem; }
   .controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; padding: 12px;
               background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
-  .controls label { display: flex; flex-direction: column; font-size: .8rem; color: var(--muted); gap: 4px; }
+  .controls label { display: flex; flex-direction: column; font-size: .8rem; color: var(--muted); gap: 4px; min-width: 0; max-width: 100%; }
   select, .seg button { font: inherit; font-size: .9rem; color: var(--text); background: var(--bg);
                         border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; }
-  .seg { display: inline-flex; border-radius: 7px; overflow: hidden; }
+  select { max-width: 100%; }
+  .seg { display: inline-flex; flex-wrap: wrap; border-radius: 7px; overflow: hidden; max-width: 100%; }
   .seg button { border-radius: 0; cursor: pointer; }
   .seg button + button { border-left: none; }
   .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
@@ -47,7 +50,9 @@
   td.n { text-align: right; }
   .note { font-size: .8rem; color: var(--muted); }
   .wide { grid-column: 1 / -1; }
-  .scroll { overflow-x: auto; max-height: 260px; }
+  .tablewrap { overflow-x: auto; max-width: 100%; }
+  .scroll { overflow: auto; max-height: 520px; max-width: 100%; }
+  .scroll table { min-width: 520px; }
   footer { padding-bottom: 30px; font-size: .82rem; color: var(--muted); }
   footer dt { font-weight: 600; color: var(--text); margin-top: 6px; }
   footer dd { margin: 0 0 2px 0; }
@@ -86,14 +91,14 @@
         in. Automatic = top places at the Area meet; at-large = the 3 next-best-mark spots plus the at-large standard.
         Use the Field toggle to compare everyone who qualified with who actually declared.</p>
       <div class="chart"><canvas id="c1"></canvas></div>
-      <table id="t1"></table>
+      <div class="tablewrap"><table id="t1"></table></div>
     </section>
     <section class="panel">
       <h2>2. At-large spots by Area</h2>
       <p class="how">How to read this: of all at-large spots in the selection, the share each Area took,
         split into next best mark (fill spots) and at-large standard.</p>
       <div class="chart"><canvas id="c2"></canvas></div>
-      <table id="t2"></table>
+      <div class="tablewrap"><table id="t2"></table></div>
     </section>
     <section class="panel">
       <h2>3. MOC performance</h2>
@@ -101,7 +106,7 @@
         (top 8; top 9 in LJ/TJ/SP/DT), by Area and how they qualified. Always the declared field.
         Small counts swing a lot; check the numbers.</p>
       <div class="chart"><canvas id="c3"></canvas></div>
-      <table id="t3"></table>
+      <div class="tablewrap"><table id="t3"></table></div>
     </section>
     <section class="panel">
       <h2>4. Spot utilization</h2>
@@ -109,7 +114,7 @@
         went to nobody (not used and not refilled); no-shows = declared but did not compete. Always the qualified
         field (spots earned).</p>
       <div class="chart"><canvas id="c4"></canvas></div>
-      <table id="t4"></table>
+      <div class="tablewrap"><table id="t4"></table></div>
     </section>
     <section class="panel">
       <h2>5. Left-out athletes</h2>
@@ -117,9 +122,18 @@
         often their Area mark was at or better than that year's MOC top-8/9 mark. Different meets (wind, weather,
         competition): a comparison, not a prediction.</p>
       <div class="chart"><canvas id="c5"></canvas></div>
-      <table id="t5"></table>
+      <div class="tablewrap"><table id="t5"></table></div>
     </section>
     <section class="panel">
+      <h2>6. Lowest automatic vs. at-large</h2>
+      <p class="how">How to read this: for each Area, its lowest automatic qualifiers (Area places 5–6; 3rd for
+        Class A) compared with at-large qualifiers from the <em>other</em> three Areas, among athletes who competed
+        at the MOC. Bars: top-finish rate. The table adds the median MOC place (lower is better) and the counts.
+        Most other Areas' at-large qualifiers are Tri-Valley athletes. Small counts swing a lot.</p>
+      <div class="chart"><canvas id="c6"></canvas></div>
+      <div class="tablewrap"><table id="t7"></table></div>
+    </section>
+    <section class="panel wide">
       <h2>Flag list: repeated empty lanes</h2>
       <p class="how">How to read this: Area × event combinations with empty lanes in 3 or more of the 5 seasons
         (filtered by gender and event; the season filter doesn't apply). Unused-spot counts are shown for comparison.</p>
@@ -215,6 +229,28 @@ function leftOut(D, f) {
   AREAS.forEach(function (a) {
     var ra = rows.filter(function (r) { return r.area === a; });
     out[a] = {hits: ra.filter(function (r) { return r.hit; }).length, total: ra.length};
+  });
+  return out;
+}
+function median(xs) {
+  var v = xs.filter(function (x) { return x !== null && x !== undefined && !isNaN(x); })
+            .map(Number).sort(function (a, b) { return a - b; });
+  if (!v.length) return null;
+  var m = Math.floor(v.length / 2);
+  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+}
+function coreCompare(D, f) {
+  var rows = D.core_places.filter(function (r) { return keep(r, f); });
+  var out = {};
+  AREAS.forEach(function (a) {
+    var low = rows.filter(function (r) { return r.area === a && r.route === "lowest_automatic"; });
+    var oth = rows.filter(function (r) { return r.area !== a && r.route === "at_large"; });
+    var g = function (x) {
+      var places = x.map(function (r) { return r.moc_overall_place; });
+      return {competed: x.length, top_finish: sum(x, "top_finish"), median_place: median(places),
+              with_place: places.filter(function (p) { return p !== null && p !== undefined; }).length};
+    };
+    out[a] = {lowest_automatic: g(low), other_at_large: g(oth)};
   });
   return out;
 }
@@ -333,7 +369,7 @@ function flags(D, f) {
       stackSet("Empty lanes", AREAS, AREAS.map(function (a) { return u[a].empty_lanes; }), se, .15)],
       {scales: {x: {stacked: true, ticks: {color: TEXT}, grid: {display: false}},
                 y: {stacked: true, max: 100, ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}});
-    table("t4", ["Area", "Utilization", "Empty lanes", "No-shows (of declared)", "Not declared", "Refilled"],
+    table("t4", ["Area", "Used", "Empty", "No-shows", "Not decl.", "Refilled"],
       AREAS.map(function (a) { return [AREA_NAME[a], pct(u[a].competed, u[a].spots_earned), pct(u[a].empty_lanes, u[a].spots_earned),
         pct(u[a].no_show, u[a].declared), u[a].not_declared, u[a].vacancies_refilled]; }));
     // 5. Left out
@@ -346,6 +382,21 @@ function flags(D, f) {
                 y: {ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}});
     table("t5", ["Area", "Best non-qualifiers at/above the cutoff"],
       AREAS.map(function (a) { return [AREA_NAME[a], pct(lo[a].hits, lo[a].total)]; }));
+    // 6b. Lowest automatic vs at-large
+    var cc = coreCompare(D, f);
+    var ck = function (label, key, alpha) {
+      return {label: label, backgroundColor: AREAS.map(function (a) { return tint(COLOR[a], alpha); }),
+              data: AREAS.map(function (a) { var x = cc[a][key]; return x.competed ? 100 * x.top_finish / x.competed : 0; }),
+              tips: AREAS.map(function (a) { var x = cc[a][key]; return pct(x.top_finish, x.competed); })};
+    };
+    bar("c6", AREAS.map(function (a) { return AREA_NAME[a]; }),
+        [ck("Its lowest automatics", "lowest_automatic", 1), ck("Other Areas' at-large", "other_at_large", .45)],
+        {scales: {x: {ticks: {color: TEXT}, grid: {display: false}},
+                  y: {max: 100, ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}});
+    var md = function (x) { return x.median_place === null ? "–" : x.median_place + " (n=" + x.with_place + ")"; };
+    table("t7", ["Area", "Lowest autos: top finish", "median place", "Other at-large: top finish", "median place"],
+      AREAS.map(function (a) { var l = cc[a].lowest_automatic, o = cc[a].other_at_large;
+        return [AREA_NAME[a], pct(l.top_finish, l.competed), md(l), pct(o.top_finish, o.competed), md(o)]; }));
     // 6. Flags
     var fl = flags(D, f);
     table("t6", ["Area", "Gender", "Event", "Seasons with empty lanes", "Empty lanes (5 yrs)"],

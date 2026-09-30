@@ -137,3 +137,13 @@ Newest at the bottom.
     their best valid mark in any round. Counting every round's mark separately would let
     one athlete fill several of the top 8. One slow final (e.g. the 2026 boys 4x400, 8th
     place 3:59.34) no longer sets the cutoff.
+16. **Core comparison tests** (`core_tests.csv`):
+    - **Permutation:** shuffles Area labels within season × gender × event among athletes
+      in either group, keeping each athlete's route fixed. A shuffled row keeps the
+      lowest-automatic flag from its real Area, e.g. a Tri-Valley 5th-place athlete
+      relabelled Class A still counts as a lowest automatic.
+    - **Clustered:** linear-probability model with CR1 standard errors by athlete. Relay
+      teams are clustered by school × season.
+    - **Why the clustered p-values are smaller than the old ones:** the old test used a
+      pooled standard error, which is conservative when the two rates differ. Athletes
+      rarely repeat (about 1.15 rows each), so clustering itself changes little.

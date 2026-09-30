@@ -127,3 +127,38 @@ def test_cutoff_is_nth_best_mark_across_all_rounds():
     cut = analysis.moc_cutoffs(moc).iloc[0]
     # best marks: 21.0..21.6 (7 athletes), 21.72, 21.75, ... -> 8th best = 21.72
     assert cut["moc_cutoff_mark"] == "21.72" and cut["moc_cutoff_source"] == "best_mark_all_rounds"
+
+
+def _core_q():
+    rows = []
+    for season in (2025, 2026):
+        for ev in ("100", "200"):
+            for area, place, qtype, top in (("tri-valley", 5, "automatic", 1), ("tri-valley", 6, "automatic", 1),
+                                            ("bay-shore", 5, "automatic", 0), ("bay-shore", 6, "automatic", 0),
+                                            ("tri-valley", 8, "next_best_mark", 1), ("redwood-empire", 7, "at_large_standard", 0),
+                                            ("class-a", 3, "automatic", 0), ("class-a", 5, "next_best_mark", 1)):
+                rows.append(dict(season=season, gender="girls", event_code=ev, area=area, area_place=place,
+                                 qualifier_type=qtype, top_finish=top, in_declared_field=1, competed=1,
+                                 at_large_combined=int(qtype in analysis.AT_LARGE_TYPES),
+                                 athlete_id=f"{area}{place}{ev}", school="S"))
+    return pd.DataFrame(rows)
+
+
+def test_core_tests_columns_and_logic():
+    t = analysis.core_tests(_core_q(), n_perm=200).set_index("area")
+    bs = t.loc["bay-shore"]
+    # Bay Shore lowest autos: 0 of 8; other Areas' at-large: TV nbm 4 of 4 + RE std 0 of 4 + CA nbm 4 of 4
+    assert (bs["lowest_auto_top"], bs["lowest_auto_n"], bs["other_at_large_top"], bs["other_at_large_n"]) == (0, 8, 8, 12)
+    assert bs["gap"] == round(0 - 8 / 12, 4)
+    assert pd.isna(t.loc["redwood-empire", "gap"])                 # no RE lowest autos in the fixture
+    for col in ("naive_p", "clustered_p", "permutation_p"):
+        assert 0 <= bs[col] <= 1
+    assert t.loc["bay-shore", "permutation_p"] == analysis.core_tests(_core_q(), n_perm=200).set_index("area").loc["bay-shore", "permutation_p"]
+
+
+def test_clustered_se_equals_robust_when_every_row_is_its_own_cluster():
+    y = [1, 0, 1, 1, 0, 0, 1, 0, 0, 0]
+    g = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
+    b1, p1 = analysis._clustered_p(y, g, list(range(10)))
+    b2, p2 = analysis._clustered_p(y, g, ["a", "a", "b", "b", "c", "d", "d", "e", "f", "g"])
+    assert abs(b1 - 0.4) < 1e-12 and abs(b2 - 0.4) < 1e-12 and p1 != p2

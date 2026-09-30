@@ -159,6 +159,23 @@ spots_earned`).
 **Empty lanes include no-shows.** A no-show declared, so the vacancy is invisible in the
 program and is never counted as refilled.
 
+## data/summary/core_comparison.csv and core_tests.csv
+
+`core_comparison.csv` compares each Area's lowest automatic qualifiers (Area places 5–6;
+3rd for Class A) with at-large qualifiers from the other Areas. Only athletes who competed
+at the MOC count, with genders combined. Rows are per season (plus `2022-2026 pooled`) ×
+event group (plus `all`) × area × `comparison_group`. Columns: `competed`, `top_finish`,
+`top_finish_rate`, `with_moc_place` and `median_moc_place`.
+
+`core_tests.csv` (pooled 2022–2026, all events) gives three p-values for the
+`gap = lowest-auto top-finish rate − other Areas' at-large rate`:
+
+| Column | Test |
+|---|---|
+| naive_p | Two-proportion z test; treats every athlete-event as independent (the original test) |
+| clustered_p | Difference in rates with standard errors clustered by athlete (relay teams by school × season). Repeat athletes are handled; there are `clusters` athletes. |
+| permutation_p | Area labels shuffled within season × gender × event, 10,000 times (seed 20260930), keeping each athlete's route (lowest automatic / at-large) fixed. It asks whether this Area's gap is larger than random Area labels produce. `expected_gap_random_areas` is the mean gap under shuffling, and the p-value is two-sided around it. |
+
 ## data/summary/left_out.csv
 
 Per season × gender × event × area: the 3 best non-qualifiers by Area mark (valid marks

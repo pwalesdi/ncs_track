@@ -328,6 +328,107 @@ def core_comparison(q: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _core_rows(q: pd.DataFrame) -> pd.DataFrame:
+    """Athletes in either comparison group, with a fixed 'lowest automatic' flag."""
+    c = q[(q["in_declared_field"] == 1) & (q["competed"] == 1) & (q["area"].isin(AREAS))].copy()
+    low_places = c["area"].map(LOWEST_AUTO_PLACES)
+    c["lowest_auto"] = [(t == "automatic") and (p in pl) for t, p, pl in
+                        zip(c["qualifier_type"], c["area_place"], low_places)]
+    c["at_large"] = c["at_large_combined"] == 1
+    c = c[c["lowest_auto"] | c["at_large"]].reset_index(drop=True)
+    # Cluster: the athlete (relays: the team, i.e. school x season).
+    c["cluster"] = [f"a{a}" if isinstance(a, str) else f"t{s}|{sch}" for a, s, sch in
+                    zip(c["athlete_id"], c["season"], c["school"])]
+    return c
+
+
+def _naive_p(k1, n1, k2, n2) -> float:
+    import math
+    p = (k1 + k2) / (n1 + n2)
+    se = math.sqrt(p * (1 - p) * (1 / n1 + 1 / n2))
+    return math.erfc(abs(k1 / n1 - k2 / n2) / se / math.sqrt(2)) if se else float("nan")
+
+
+def _clustered_p(y, g, clusters) -> tuple[float, float]:
+    """Difference in means (g=1 minus g=0) with an athlete-clustered (CR1) standard error,
+    from a linear probability model y = a + b*g. Returns (b, two-sided normal p)."""
+    import math
+
+    import numpy as np
+    y = np.asarray(y, float)
+    X = np.column_stack([np.ones(len(y)), np.asarray(g, float)])
+    xtx_inv = np.linalg.inv(X.T @ X)
+    beta = xtx_inv @ X.T @ y
+    u = y - X @ beta
+    codes, uniq = pd.factorize(pd.Series(clusters))
+    meat = np.zeros((2, 2))
+    for c in range(len(uniq)):
+        m = codes == c
+        s_c = X[m].T @ u[m]
+        meat += np.outer(s_c, s_c)
+    n, k, G = len(y), 2, len(uniq)
+    corr = G / (G - 1) * (n - 1) / (n - k)
+    V = corr * xtx_inv @ meat @ xtx_inv
+    se = math.sqrt(V[1, 1])
+    return float(beta[1]), math.erfc(abs(beta[1]) / se / math.sqrt(2)) if se else float("nan")
+
+
+def core_tests(q: pd.DataFrame, n_perm: int = 10000, seed: int = 20260930) -> pd.DataFrame:
+    """Pooled 2022-2026, all events: each Area's lowest automatic qualifiers vs other Areas'
+    at-large qualifiers, with three p-values.
+
+    naive_p        two-proportion z test, every athlete-event independent (the old test)
+    clustered_p    same difference, standard error clustered by athlete (repeat athletes)
+    permutation_p  Area labels shuffled within season x gender x event (route kept fixed),
+                   10,000 times: is this Area's gap larger than random Area labels give?
+                   Two-sided around the permutation mean (reported as expected_gap)."""
+    import numpy as np
+    c = _core_rows(q)
+    c["stratum"] = c["season"].astype(str) + "|" + c["gender"] + "|" + c["event_code"].astype(str)
+    c = c.sort_values("stratum", kind="stable").reset_index(drop=True)
+    strata = pd.factorize(c["stratum"])[0]
+    y = c["top_finish"].to_numpy(float)
+    low = c["lowest_auto"].to_numpy()
+    atl = c["at_large"].to_numpy()
+    areas = c["area"].to_numpy()
+
+    def gaps(area_labels):
+        out = {}
+        for a in AREAS:
+            lm = low & (area_labels == a)
+            om = atl & (area_labels != a)
+            out[a] = (y[lm].mean() - y[om].mean()) if lm.any() and om.any() else np.nan
+        return out
+
+    observed = gaps(areas)
+    rng = np.random.default_rng(seed)
+    null = {a: np.empty(n_perm) for a in AREAS}
+    for i in range(n_perm):
+        order = np.lexsort((rng.random(len(c)), strata))
+        g = gaps(areas[order])
+        for a in AREAS:
+            null[a][i] = g[a]
+    rows = []
+    for a in AREAS:
+        lm, om = low & (areas == a), atl & (areas != a)
+        k1, n1, k2, n2 = int(y[lm].sum()), int(lm.sum()), int(y[om].sum()), int(om.sum())
+        sub = c[lm | om]
+        if n1 == 0 or n2 == 0:
+            rows.append({"area": a, "lowest_auto_n": n1, "other_at_large_n": n2})
+            continue
+        b, p_cl = _clustered_p(sub["top_finish"], sub["lowest_auto"] & (sub["area"] == a), sub["cluster"])
+        nd = null[a][~np.isnan(null[a])]
+        centre = nd.mean()
+        p_perm = (np.sum(np.abs(nd - centre) >= abs(observed[a] - centre) - 1e-12) + 1) / (len(nd) + 1)
+        rows.append({"area": a, "seasons": f"{q['season'].min()}-{q['season'].max()}", "event_group": "all",
+                     "lowest_auto_top": k1, "lowest_auto_n": n1, "other_at_large_top": k2, "other_at_large_n": n2,
+                     "gap": round(k1 / n1 - k2 / n2, 4), "naive_p": round(_naive_p(k1, n1, k2, n2), 4),
+                     "clustered_p": round(p_cl, 4), "clusters": int(sub["cluster"].nunique()),
+                     "expected_gap_random_areas": round(float(centre), 4),
+                     "permutation_p": round(float(p_perm), 4), "permutations": n_perm})
+    return pd.DataFrame(rows)
+
+
 LEFT_OUT_CAVEAT = ("Area mark and MOC marks come from different meets (different day, wind, weather, "
                    "competition and, for field events, attempts); a comparison, not a prediction.")
 

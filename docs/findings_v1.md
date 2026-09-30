@@ -3,6 +3,16 @@
 *For coaches and the committee. Built from the tables in `data/summary/`; every column is defined in
 `docs/analysis_tables.md`. Rates always show their count, e.g. "42% (11 of 26)".*
 
+> **What changed in this update (2026-09-30)**
+> - **§5, left-out athletes: new cutoff.** The MOC cutoff is now the 8th-best valid mark
+>   (9th in LJ/TJ/SP/DT) across all MOC rounds, one mark per athlete. Before, it was the
+>   8th-place mark in the final, so one slow final could set it for every Area. Across
+>   2022–2026, left-out athletes at or above the cutoff fell from 95 to 6.
+> - **§4, the core comparison: two stronger tests.** A permutation test and a test that
+>   accounts for athletes appearing more than once now sit next to the original p-values.
+>   The result did not weaken.
+> - All other sections are unchanged.
+
 ## How to read this
 
 - **Seasons.** 2022, 2023, 2024, 2025 and 2026. Each season is shown on its own. A
@@ -270,18 +280,44 @@ standard and replacement, is in `data/summary/moc_performance.csv`.
   - Bay Shore 5% (3 of 57)
   - Class A 4% (1 of 26)
 
-**How confident can we be?** Pooled over five seasons, a simple two-proportion test finds
-each gap unlikely to be chance alone:
-- **Bay Shore:** 9% (25 of 284) vs 14% (72 of 511), p ≈ 0.03
-- **Redwood Empire:** 8% (22 of 277) vs 13% (65 of 489), p ≈ 0.02
-- **Class A:** 5% (7 of 132) vs 14% (74 of 542), p ≈ 0.008
-- **Tri-Valley:** 36% (106 of 293) vs 9% (14 of 162), p < 0.001
+**How confident can we be?** Pooled over five seasons, three tests:
+- **Old test** (the first version): treats every athlete-event as independent.
+- **Clustered test:** the same comparison, but it allows for the same athlete appearing in
+  several events or seasons.
+- **Permutation test:** shuffles which Area each athlete belongs to, within each season,
+  gender and event, 10,000 times, keeping how each athlete qualified fixed. It asks whether
+  this Area's gap is bigger than you'd see if Area labels were random. Random labels
+  themselves produce a small positive gap, because lowest automatics usually do a little
+  better than at-large qualifiers overall.
 
-These tests treat every athlete-event as independent. They aren't: the same athlete can
-appear in several events and seasons, so the true uncertainty is larger than the p-values
-suggest. They also don't adjust for making many comparisons. The direction is consistent
-across seasons; the size of the gap for any single season or event group is not well
-determined.
+| Area | Lowest autos: top finish | Other Areas' at-large: top finish | Gap | Old p (independent) | Clustered by athlete p | Gap if Areas were random | Permutation p |
+|---|---|---|---|---|---|---|---|
+| Tri-Valley | 36% (106 of 293) | 9% (14 of 162) | +27.5 pts | < 0.001 | < 0.001 | +3.7 pts | < 0.001 |
+| Bay Shore | 9% (25 of 284) | 14% (72 of 511) | -5.3 pts | 0.029 | 0.018 | +2.4 pts | 0.001 |
+| Redwood Empire | 8% (22 of 277) | 13% (65 of 489) | -5.3 pts | 0.025 | 0.017 | +3.3 pts | < 0.001 |
+| Class A | 5% (7 of 132) | 14% (74 of 542) | -8.3 pts | 0.008 | < 0.001 | +2.4 pts | 0.003 |
+
+**Reading the tests.**
+- **Every result holds.** No Area's result weakens under the stronger tests; every
+  p-value stays below 0.03.
+- **Why the clustered p-values are a little smaller than the old ones.** Athletes rarely
+  repeat, about 1.15 rows per athlete, so allowing for repeats changes little. The old
+  test's pooled standard error is conservative when the two rates differ.
+- **What the permutation test adds.** With random Area labels, a lowest-automatic group
+  would be expected to do 2–4 points *better* than the at-large comparison group.
+  - Bay Shore's, Redwood Empire's and Class A's lowest automatics instead did 5–8 points
+    *worse*. Random labels almost never produce gaps that far out (p ≤ 0.003).
+  - Tri-Valley's lowest automatics did 27 points better, also far outside what random
+    labels give.
+
+**What the tests can't do.**
+- **They don't explain the gap.** For example, they can't separate "the Area is weaker"
+  from "that Area's 5th–6th-place athletes are younger" or "they ran other events that
+  weekend".
+- **They don't correct for multiple comparisons.** Four Areas are tested, plus event
+  groups below. With the p-values this small, a correction would not change the pooled
+  conclusion.
+- **Per-season and per-event-group results are much less certain** than the pooled ones.
 
 **By event group (5 seasons pooled; single seasons are in `data/summary/core_comparison.csv`)**
 
@@ -329,37 +365,44 @@ mark that year (top 9 in the long jump, triple jump, shot put and discus).
 competition and (in field events) attempts. A good Area mark doesn't mean the athlete
 would have finished that high at the MOC. This is a comparison, not a prediction.
 
+**The cutoff.** The 8th-best valid MOC mark that year (9th in LJ/TJ/SP/DT), across
+prelims and finals combined, one mark per athlete. The first version used the 8th-place
+mark in the final. That let one slow final (e.g. a 2026 boys 4x400 team at 3:59.34) set
+the cutoff for every Area.
+
 **What the data shows.**
-- **How often it happens.** Between 0% and 11% of an Area's best non-qualifiers had a mark
-  at or better than the MOC cutoff.
-- **Tri-Valley has the most in 4 of 5 seasons**, e.g. 11% (11 of 96) in 2023. Its
-  non-qualifiers include 7th–12th-place finishers from a deep meet.
-- **2026 comes from one race.** Every Area shows 3% (3 of 96), and all 12 come from the
-  boys 4x400: the 8th-place team in that MOC final ran 3:59.34, nearly 30 seconds behind
-  7th. Without that event, 2026 has none in any Area.
+- **Almost never.** In 19 of the 20 Area-seasons, none of an Area's best non-qualifiers
+  had a mark at or better than the MOC cutoff.
+- **The exception is 2023 Tri-Valley:** 6% (6 of 96), in the boys 200 and 400 and the
+  girls 200 and discus.
+  - The 2023 MOC marks were unusually slow; a 22.93 won a boys 200 prelim heat.
+  - 2023 at-large standards are assumed from 2026, so Tri-Valley's places 7–14 in the
+    boys 200 all qualified at-large, and its best non-qualifiers were 15th.
+- **The first version was dominated by slow finals:** 95 cases (39 Tri-Valley, 23 Bay
+  Shore, 20 Redwood Empire, 13 Class A).
 
 | Season | Area | Best non-qualifiers with an Area mark at/above the MOC top-8/9 cutoff | …of whom were in the MOC program anyway |
 |---|---|---|---|
-| 2022 | Tri-Valley | 10% (10 of 96) | 1 |
-| 2022 | Bay Shore | 7% (7 of 96) | 0 |
-| 2022 | Redwood Empire | 3% (3 of 96) | 0 |
-| 2022 | Class A | 3% (3 of 93) | 0 |
-| 2023 | Tri-Valley | 11% (11 of 96) | 3 |
-| 2023 | Bay Shore | 1% (1 of 96) | 1 |
-| 2023 | Redwood Empire | 2% (2 of 96) | 1 |
+| 2022 | Tri-Valley | 0% (0 of 96) | 0 |
+| 2022 | Bay Shore | 0% (0 of 96) | 0 |
+| 2022 | Redwood Empire | 0% (0 of 96) | 0 |
+| 2022 | Class A | 0% (0 of 93) | 0 |
+| 2023 | Tri-Valley | 6% (6 of 96) | 0 |
+| 2023 | Bay Shore | 0% (0 of 96) | 0 |
+| 2023 | Redwood Empire | 0% (0 of 96) | 0 |
 | 2023 | Class A | 0% (0 of 95) | 0 |
-| 2024 | Tri-Valley | 6% (6 of 96) | 1 |
-| 2024 | Bay Shore | 4% (4 of 96) | 2 |
-| 2024 | Redwood Empire | 4% (4 of 96) | 1 |
-| 2024 | Class A | 4% (4 of 96) | 1 |
-| 2025 | Tri-Valley | 9% (9 of 96) | 0 |
-| 2025 | Bay Shore | 8% (8 of 96) | 0 |
-| 2025 | Redwood Empire | 8% (8 of 96) | 1 |
-| 2025 | Class A | 3% (3 of 96) | 0 |
-| 2026 | Tri-Valley | 3% (3 of 96) | 0 |
-| 2026 | Bay Shore | 3% (3 of 96) | 0 |
-| 2026 | Redwood Empire | 3% (3 of 96) | 0 |
-| 2026 | Class A | 3% (3 of 96) | 0 |
+| 2024 | Tri-Valley | 0% (0 of 96) | 0 |
+| 2024 | Bay Shore | 0% (0 of 96) | 0 |
+| 2024 | Redwood Empire | 0% (0 of 96) | 0 |
+| 2024 | Class A | 0% (0 of 96) | 0 |
+| 2025 | Tri-Valley | 0% (0 of 96) | 0 |
+| 2025 | Bay Shore | 0% (0 of 96) | 0 |
+| 2025 | Redwood Empire | 0% (0 of 96) | 0 |
+| 2025 | Class A | 0% (0 of 96) | 0 |
+| 2026 | Tri-Valley | 0% (0 of 96) | 0 |
+| 2026 | Bay Shore | 0% (0 of 96) | 0 |
+| 2026 | Redwood Empire | 0% (0 of 96) | 0 |
+| 2026 | Class A | 0% (0 of 96) | 0 |
 
 ## 6. Spot utilization: empty lanes and no-shows
 
@@ -494,7 +537,11 @@ would have finished that high at the MOC. This is a comparison, not a prediction
   10–30 points. Where the text says "consistent", it means the same direction across
   seasons, not a precisely measured gap.
 - **Comparing marks across meets.** Section 5 compares marks made at different meets.
-  Wind, weather, heats and competition differ.
+  Wind, weather, heats and competition differ. The result also depends on how the MOC
+  cutoff is defined; see the note at the top.
+- **Statistical tests.** The §4 p-values are pooled over five seasons and all events.
+  They support a consistent direction, not a precise gap, and they say nothing about
+  causes.
 - **Rules before 2026 are partly assumed.**
   - Allocation numbers for 2022–2025 are assumed to equal 2026's.
   - Each season's at-large standards come from its printed results, except 2023, where

@@ -147,7 +147,18 @@ def utilization() -> str:
     return main + "\n\n" + "\n\n".join(fl)
 
 
-SECTIONS = {"makeup": makeup, "atlarge": atlarge, "results": results, "core": core,
+def tests() -> str:
+    t = pd.read_csv(S / "core_tests.csv")
+    fmt = lambda p: "< 0.001" if p < 0.001 else f"{p:.3f}"
+    rows = [[AREA_NAME[r.area], rate(r.lowest_auto_top, r.lowest_auto_n), rate(r.other_at_large_top, r.other_at_large_n),
+             f"{100 * r.gap:+.1f} pts", fmt(r.naive_p), fmt(r.clustered_p),
+             f"{100 * r.expected_gap_random_areas:+.1f} pts", fmt(r.permutation_p)] for r in t.itertuples()]
+    return table(rows, ["Area", "Lowest autos: top finish", "Other Areas' at-large: top finish", "Gap",
+                        "Old p (independent)", "Clustered by athlete p", "Gap if Areas were random",
+                        "Permutation p"])
+
+
+SECTIONS = {"tests": tests, "makeup": makeup, "atlarge": atlarge, "results": results, "core": core,
             "corepooled": lambda: core(True), "leftout": leftout, "utilization": utilization}
 
 if __name__ == "__main__":

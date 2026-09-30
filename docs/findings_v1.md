@@ -19,6 +19,11 @@
 > - **§6, spot use** now counts no-shows: entered the event but didn't compete. Declines
 >   aren't no-shows, and field size no longer plays any part. "Unfilled" is retired.
 >
+> - **Fifth update (unattended run).** A finisher tied with the last automatic or
+>   next-best-mark qualifier who didn't enter now counts as a decline (decision #36): passed-down
+>   spots 247 → 250, left out 8,597 → 8,587. Alternative allocations are compared in
+>   `docs/scenarios_v1.md`.
+>
 > **Earlier updates (same day):** "top 8" became "made the final"; MOC-place figures only for
 > groups of 5 or more; "at-large" means only the at-large standard; §4 permutation and
 > athlete-clustered tests.
@@ -392,22 +397,22 @@ Only automatic qualifiers are compared: by design, nobody left out has a better 
 next-best-mark qualifier (checked: none does). Marks come from different Area meets.
 
 **What the data shows.**
-- **Pooled 2022–2026:** 1,582 of 8,597 left-out finishers beat at least one automatic
+- **Pooled 2022–2026:** 1,575 of 8,587 left-out finishers beat at least one automatic
   qualifier from another Area.
 - **2025 girls 1600:** 12 of 53 left-out finishers did. Redwood Empire's 10th (5:17.28) beat
   5 Bay Shore automatic qualifiers and its 11th (5:26.07) beat 3. All 5 Bay Shore qualifiers
   they beat competed at the MOC and finished 17th–24th; none made the final.
-- **How the beaten qualifiers did at the MOC (pooled):** 15 of 632 entries made the final
+- **How the beaten qualifiers did at the MOC (pooled):** 15 of 629 entries made the final
   (2%), median MOC place 20th.
 
 **Left-out athletes (rows: their Area) who beat at least one automatic qualifier from each other Area, 2022–2026 pooled**
 
 | Left out from | Beat a Tri-Valley automatic | Beat a Bay Shore automatic | Beat a Redwood Empire automatic | Beat a Class A automatic | Beat any |
 |---|---|---|---|---|---|
-| Tri-Valley | – | 412 athletes | 340 athletes | 464 athletes | 790 of 2059 left out (38%) |
-| Bay Shore | 6 athletes | – | 123 athletes | 181 athletes | 264 of 2205 left out (12%) |
-| Redwood Empire | 8 athletes | 202 athletes | – | 247 athletes | 395 of 2333 left out (17%) |
-| Class A | 2 athletes | 93 athletes | 52 athletes | – | 133 of 2000 left out (7%) |
+| Tri-Valley | – | 406 athletes | 338 athletes | 463 athletes | 783 of 2052 left out (38%) |
+| Bay Shore | 6 athletes | – | 123 athletes | 181 athletes | 264 of 2204 left out (12%) |
+| Redwood Empire | 8 athletes | 202 athletes | – | 247 athletes | 395 of 2332 left out (17%) |
+| Class A | 2 athletes | 93 athletes | 52 athletes | – | 133 of 1999 left out (7%) |
 
 ## 6. Spot use
 
@@ -424,7 +429,7 @@ passes down. Field size plays no part.
 
 **What the data shows.**
 - **Guaranteed spots:** 3,759 of 3,876 competed (97%), 111 no-shows, 6 not used.
-- **Declines:** 247 automatic spots were passed down from declines over five seasons.
+- **Declines:** 250 automatic spots were passed down from declines over five seasons.
 - **No-shows, all entries (any route):** 114 of 3,950 entries (3%); by Area, Tri-Valley 24
   of 1,375 (2%), Bay Shore 39 of 1,020 (4%), Redwood Empire 32 of 1,049 (3%), Class A 19 of
   506 (4%). 34 of the 114 competed in another MOC event that day.
@@ -436,17 +441,17 @@ passes down. Field size plays no part.
 | 2022 | Class A | 100 spots | 97 | 2 | 1 | 13 spots | none | 2 of 99 entries (2%) |
 | 2022 | Redwood Empire | 207 spots | 201 | 5 | 1 | 17 spots | none | 5 of 206 entries (2%) |
 | 2022 | Tri-Valley | 264 spots | 256 | 8 | 0 | 8 spots | 2 entrants: 2 competed, 0 no-show | 8 of 266 entries (3%) |
-| 2023 | Bay Shore | 205 spots | 193 | 11 | 1 | 14 spots | none | 11 of 204 entries (5%) |
+| 2023 | Bay Shore | 205 spots | 193 | 11 | 1 | 15 spots | none | 11 of 204 entries (5%) |
 | 2023 | Class A | 100 spots | 93 | 5 | 2 | 8 spots | 1 entrants: 1 competed, 0 no-show | 5 of 99 entries (5%) |
 | 2023 | Redwood Empire | 215 spots | 205 | 10 | 0 | 6 spots | none | 10 of 215 entries (5%) |
 | 2023 | Tri-Valley | 257 spots | 253 | 4 | 0 | 18 spots | 7 entrants: 7 competed, 0 no-show | 4 of 268 entries (1%) |
 | 2024 | Bay Shore | 209 spots | 196 | 13 | 0 | 10 spots | 1 entrants: 1 competed, 0 no-show | 13 of 210 entries (6%) |
-| 2024 | Class A | 100 spots | 98 | 1 | 1 | 13 spots | 4 entrants: 4 competed, 0 no-show | 1 of 104 entries (1%) |
+| 2024 | Class A | 100 spots | 98 | 1 | 1 | 14 spots | 4 entrants: 4 competed, 0 no-show | 1 of 104 entries (1%) |
 | 2024 | Redwood Empire | 206 spots | 199 | 7 | 0 | 14 spots | none | 7 of 207 entries (3%) |
 | 2024 | Tri-Valley | 262 spots | 258 | 4 | 0 | 8 spots | 15 entrants: 15 competed, 0 no-show | 4 of 277 entries (1%) |
 | 2025 | Bay Shore | 196 spots | 191 | 5 | 0 | 14 spots | 1 entrants: 1 competed, 0 no-show | 5 of 197 entries (3%) |
 | 2025 | Class A | 102 spots | 97 | 5 | 0 | 14 spots | 1 entrants: 1 competed, 0 no-show | 5 of 103 entries (5%) |
-| 2025 | Redwood Empire | 210 spots | 206 | 4 | 0 | 17 spots | 2 entrants: 1 competed, 1 no-show | 5 of 212 entries (2%) |
+| 2025 | Redwood Empire | 210 spots | 206 | 4 | 0 | 18 spots | 2 entrants: 1 competed, 1 no-show | 5 of 212 entries (2%) |
 | 2025 | Tri-Valley | 267 spots | 263 | 4 | 0 | 14 spots | 10 entrants: 10 competed, 0 no-show | 4 of 277 entries (1%) |
 | 2026 | Bay Shore | 204 spots | 201 | 3 | 0 | 6 spots | 3 entrants: 2 competed, 1 no-show | 4 of 207 entries (2%) |
 | 2026 | Class A | 98 spots | 93 | 5 | 0 | 9 spots | 3 entrants: 2 competed, 1 no-show | 6 of 101 entries (6%) |

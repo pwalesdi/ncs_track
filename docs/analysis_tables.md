@@ -228,12 +228,12 @@ pass-down couldn't place are outside every scenario.
 
 - **`scenario_field_makeup.csv`:** × area × `route` (`automatic`, `next_best_mark`,
   `at_large_standard`): `count`, `field_size` (athletes with a route), `share_of_field`.
-- **`scenario_changes.csv`:** × area: `added` (in the scenario's field, not in reality's),
+- **`scenario_changes.csv`:** × area (plus `all`): `added` (in the scenario's field, not in reality's),
   `removed` (the reverse), `removed_made_final` (removed athletes who made the MOC final in
   reality; blank when 1–4 removed), `added_above_cutoff` (added athletes whose Area mark is
   at or better than that season's MOC final cutoff, the 8th-best / 9th-best MOC mark across
   rounds — an estimate, different meets).
-- **`scenario_left_out.csv`:** × area (the left-out athlete's): `left_out`, `beat_any` (beat at
+- **`scenario_left_out.csv`:** × area (the left-out athlete's; plus `all`): `left_out`, `beat_any` (beat at
   least one automatic qualifier from another Area), `beat_any_excl_class_a` (same, Class A
   qualifiers not counted as beaten), `beat_<area>` per beaten Area, and
   `beats_a_next_best_mark` (always 0: checked).

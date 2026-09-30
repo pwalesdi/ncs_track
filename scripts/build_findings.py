@@ -35,6 +35,11 @@ DOC = f"""# What the data shows: MOC qualification by Area, 2022–2026 (finding
 > - **§6, spot use** now counts no-shows: entered the event but didn't compete. Declines
 >   aren't no-shows, and field size no longer plays any part. "Unfilled" is retired.
 >
+> - **Fifth update (unattended run).** A finisher tied with the last automatic or
+>   next-best-mark qualifier who didn't enter now counts as a decline (decision #36): passed-down
+>   spots 247 → 250, left out 8,597 → 8,587. Alternative allocations are compared in
+>   `docs/scenarios_v1.md`.
+>
 > **Earlier updates (same day):** "top 8" became "made the final"; MOC-place figures only for
 > groups of 5 or more; "at-large" means only the at-large standard; §4 permutation and
 > athlete-clustered tests.
@@ -214,12 +219,12 @@ Only automatic qualifiers are compared: by design, nobody left out has a better 
 next-best-mark qualifier (checked: none does). Marks come from different Area meets.
 
 **What the data shows.**
-- **Pooled 2022–2026:** 1,582 of 8,597 left-out finishers beat at least one automatic
+- **Pooled 2022–2026:** 1,575 of 8,587 left-out finishers beat at least one automatic
   qualifier from another Area.
 - **2025 girls 1600:** 12 of 53 left-out finishers did. Redwood Empire's 10th (5:17.28) beat
   5 Bay Shore automatic qualifiers and its 11th (5:26.07) beat 3. All 5 Bay Shore qualifiers
   they beat competed at the MOC and finished 17th–24th; none made the final.
-- **How the beaten qualifiers did at the MOC (pooled):** 15 of 632 entries made the final
+- **How the beaten qualifiers did at the MOC (pooled):** 15 of 629 entries made the final
   (2%), median MOC place 20th.
 
 {T.leftout()}
@@ -239,7 +244,7 @@ passes down. Field size plays no part.
 
 **What the data shows.**
 - **Guaranteed spots:** 3,759 of 3,876 competed (97%), 111 no-shows, 6 not used.
-- **Declines:** 247 automatic spots were passed down from declines over five seasons.
+- **Declines:** 250 automatic spots were passed down from declines over five seasons.
 - **No-shows, all entries (any route):** 114 of 3,950 entries (3%); by Area, Tri-Valley 24
   of 1,375 (2%), Bay Shore 39 of 1,020 (4%), Redwood Empire 32 of 1,049 (3%), Class A 19 of
   506 (4%). 34 of the 114 competed in another MOC event that day.

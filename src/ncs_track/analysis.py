@@ -65,9 +65,52 @@ def _moc_outcome(rows: pd.DataFrame, event: str) -> dict:
             "reached_final_round": reached, "scored": int(place is not None and place <= 6)}
 
 
+def competed_events(moc_all: pd.DataFrame, legs: pd.DataFrame | None) -> dict[str, set[str]]:
+    """athlete_id -> MOC events they competed in (any status but DNS/SCR), incl. relay legs
+    and the 4x800. Adaptive events excluded."""
+    m = moc_all[~moc_all["is_adaptive"].astype(bool) & ~moc_all["status"].isin(NOT_COMPETED)]
+    out: dict[str, set[str]] = {}
+    for aid, ev in zip(m["athlete_id"], m["event_code"]):
+        if isinstance(aid, str):
+            out.setdefault(aid, set()).add(ev)
+    if legs is not None and len(legs):
+        rel = m[m["is_relay"].astype(bool)][["performance_id", "event_code"]]
+        for aid, ev in legs.merge(rel, on="performance_id")[["athlete_id", "event_code"]].itertuples(index=False):
+            if isinstance(aid, str):
+                out.setdefault(aid, set()).add(ev)
+    return out
+
+
+def moc_overall_places(moc: pd.DataFrame, school_key) -> dict:
+    """(gender, event, key) -> overall MOC place, key = athlete_id or relay identity.
+
+    Finalists with a valid final mark keep their final place. Everyone else with a valid
+    mark (prelim-only athletes, and finalists without a valid final mark) is ranked after
+    them by their best valid mark. Events without prelims: the final place."""
+    m = _with_identity(moc, "athlete_name_raw", "school_name_raw", school_key)
+    m = m[(m["status"] == "OK") & m["mark_value"].notna()]
+    m["key"] = [a if isinstance(a, str) and not r else i for a, i, r in zip(m["athlete_id"], m["identity"], m["is_relay"])]
+    out = {}
+    for (g, e), x in m.groupby(["gender", "event_code"]):
+        measure = EVENTS[e][0]
+        fin = x[(x["round"] == "final") & x["place"].notna()]
+        for k, pl in zip(fin["key"], fin["place"]):
+            out[(g, e, k)] = float(pl)
+        rest = x[~x["key"].isin(set(fin["key"]))]
+        rest = rest.assign(k=rest["mark_value"] if measure == "time" else -rest["mark_value"])
+        best = rest.sort_values("k").drop_duplicates("key")
+        n = len(fin)
+        for rank, (k, v) in enumerate(zip(best["key"], best["k"]), start=1):
+            out[(g, e, k)] = float(n + rank)
+    return out
+
+
 def qualifiers(season: int, comp: replay.Comparison, evaluated: pd.DataFrame, moc: pd.DataFrame,
-               unresolved: pd.DataFrame, school_key) -> pd.DataFrame:
+               unresolved: pd.DataFrame, school_key, competed_in: dict | None = None,
+               overall: dict | None = None) -> pd.DataFrame:
     """One row per athlete (or relay team) x event: the union of the qualified and declared fields."""
+    competed_in = competed_in or {}
+    overall = overall or {}
     ev = _with_identity(evaluated, "athlete_name_raw", "school_name_raw", school_key)
     area_rows = {}
     for r in ev.itertuples():
@@ -105,6 +148,10 @@ def qualifiers(season: int, comp: replay.Comparison, evaluated: pd.DataFrame, mo
                 "reached_final_round": 0, "scored": 0}),
             "choice_tag": r.choice_tag, "replacement_for_area": r.fills_vacancy_of_area,
             "vacancy_refilled_by_area": r.vacancy_filled_by_area,
+            "competed_other_moc_event": (None if declared or r.identity.startswith("relay|") or not isinstance(aid, str)
+                                         else int(bool(competed_in.get(aid, set()) - {r.event_code}))),
+            "moc_overall_place": overall.get((r.gender, r.event_code,
+                                              r.identity if r.identity.startswith("relay|") else aid)) if declared else None,
             "state_qualified": "pending",
         })
     for r in unresolved.itertuples():        # declared, but the school has no area this season
@@ -116,6 +163,8 @@ def qualifiers(season: int, comp: replay.Comparison, evaluated: pd.DataFrame, mo
                     "qualifier_type": "unexplained", "at_large_combined": 0, "area_place": None, "area_mark": None,
                     "in_qualified_field": 0, "in_declared_field": 1, **_moc_outcome(rows, r.event_code),
                     "choice_tag": None, "replacement_for_area": None, "vacancy_refilled_by_area": None,
+                    "competed_other_moc_event": None,
+                    "moc_overall_place": overall.get((r.gender, r.event_code, ident)) if r.is_relay else None,
                     "state_qualified": "pending"})
     return pd.DataFrame(out)
 
@@ -190,31 +239,57 @@ def spot_utilization(q: pd.DataFrame) -> pd.DataFrame:
                      "not_declared_chose_other_events": int((nd["choice_tag"] == "chose_other_events").sum()),
                      "not_declared_did_not_declare": int((nd["choice_tag"] == "did_not_declare").sum()),
                      "vacancies_refilled": len(refilled),
+                     "not_declared_individual": int(nd["competed_other_moc_event"].notna().sum()),
+                     "not_declared_competed_other_event": int((nd["competed_other_moc_event"] == 1).sum()),
                      "refilled_by_area": "|".join(f"{k}:{v}" for k, v in refilled.value_counts().sort_index().items()),
                      "replacements_from_this_area": len(into)})
     t = pd.DataFrame(rows)
+    return _derived(t)
+
+
+def _derived(t: pd.DataFrame) -> pd.DataFrame:
+    t = t.copy()
     t["unused_total"] = t["spots_earned"] - t["competed"]
     t["utilization_rate"] = (t["competed"] / t["spots_earned"]).round(4)
+    t["empty_lanes"] = (t["unused_total"] - t["vacancies_refilled"]).clip(lower=0)
+    t["no_show_rate"] = (t["no_show"] / t["declared"]).where(t["declared"] > 0).round(4)
+    t["double_qualifier_share"] = (t["not_declared_competed_other_event"] / t["not_declared_individual"]).where(
+        t["not_declared_individual"] > 0).round(4)
     return t
 
 
+ADDITIVE = ["spots_earned", "declared", "competed", "no_show", "not_declared", "not_declared_chose_other_events",
+            "not_declared_did_not_declare", "vacancies_refilled", "not_declared_individual",
+            "not_declared_competed_other_event", "replacements_from_this_area"]
+
+
 def spot_utilization_by_area(t: pd.DataFrame) -> pd.DataFrame:
-    num = ["spots_earned", "declared", "competed", "no_show", "not_declared", "not_declared_chose_other_events",
-           "not_declared_did_not_declare", "vacancies_refilled", "replacements_from_this_area", "unused_total"]
-    r = t.groupby(["season", "area"])[num].sum().reset_index()
-    r["utilization_rate"] = (r["competed"] / r["spots_earned"]).round(4)
+    """Roll-up per season x area. empty_lanes is summed from the event rows (each floored
+    at 0 per event), not recomputed from the totals."""
+    r = t.groupby(["season", "area"])[ADDITIVE + ["empty_lanes"]].sum().reset_index()
+    lanes = r.pop("empty_lanes")
+    r = _derived(r)
+    r["empty_lanes"] = lanes
     return r
 
 
-def spot_utilization_flags(t: pd.DataFrame, min_seasons: int = 3) -> pd.DataFrame:
-    """Area x gender x event with unused spots in at least `min_seasons` seasons."""
-    u = t[t["unused_total"] > 0].groupby(["area", "gender", "event_code"]).agg(
-        seasons_with_unused=("season", "nunique"), seasons=("season", lambda s: "|".join(map(str, sorted(s)))),
-        unused_total_all_seasons=("unused_total", "sum")).reset_index()
+def no_shows_empty_lanes(t: pd.DataFrame) -> pd.DataFrame:
+    """Per Area x season: the counts behind no-show and empty-lane rates."""
+    r = spot_utilization_by_area(t)
+    r["empty_lane_rate"] = (r["empty_lanes"] / r["spots_earned"]).round(4)
+    return r[["season", "area", "spots_earned", "declared", "no_show", "no_show_rate", "not_declared",
+              "vacancies_refilled", "empty_lanes", "empty_lane_rate"]]
+
+
+def spot_utilization_flags(t: pd.DataFrame, min_seasons: int = 3, metric: str = "unused_total") -> pd.DataFrame:
+    """Area x gender x event with `metric` > 0 in at least `min_seasons` seasons."""
+    u = t[t[metric] > 0].groupby(["area", "gender", "event_code"]).agg(
+        seasons_flagged=("season", "nunique"), seasons=("season", lambda s: "|".join(map(str, sorted(s)))),
+        total_all_seasons=(metric, "sum")).reset_index()
     n = t.groupby(["area", "gender", "event_code"])["season"].nunique().rename("seasons_analysed").reset_index()
-    u = u.merge(n, on=["area", "gender", "event_code"])
-    return u[u["seasons_with_unused"] >= min_seasons].sort_values(
-        ["seasons_with_unused", "unused_total_all_seasons"], ascending=False).reset_index(drop=True)
+    u = u.merge(n, on=["area", "gender", "event_code"]).assign(metric=metric)
+    return u[u["seasons_flagged"] >= min_seasons].sort_values(
+        ["seasons_flagged", "total_all_seasons"], ascending=False).reset_index(drop=True)
 
 
 LEFT_OUT_CAVEAT = ("Area mark and MOC marks come from different meets (different day, wind, weather, "
@@ -271,8 +346,10 @@ def build_season(season: int, results, entries, rules, kw, legs, moc_perf):
     ent = entries[~entries["is_adaptive"].astype(bool) & entries["event_modifier"].isna()]
     ent = ent[[(g, e) in events for g, e in zip(ent["gender"], ent["event_code"])]]
     unresolved = ent[ent["school_name"].map(kw["school_area"]).isna()]
-    moc = moc_perf[(moc_perf["season"] == season) & (moc_perf["level"] == "moc") & moc_perf["in_scope"]]
-    q = qualifiers(season, comp, ev, moc, unresolved, kw["school_key"])
+    moc_all = moc_perf[(moc_perf["season"] == season) & (moc_perf["level"] == "moc")]
+    moc = moc_all[moc_all["in_scope"]]
+    q = qualifiers(season, comp, ev, moc, unresolved, kw["school_key"], competed_events(moc_all, legs),
+                   moc_overall_places(moc, kw["school_key"]))
     cut = moc_cutoffs(moc)
     lo = left_out(season, ev, q, cut, kw["school_key"])
     return q, lo, comp

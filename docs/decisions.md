@@ -76,3 +76,19 @@ Newest at the bottom.
   least 2 of its MOC entrants appear under one Athletic.net school.
 - **Scratch replacement** is a comparison overlay, not a rule reading. It never changes
   predictions, and the best rule reading is chosen with it off.
+
+
+## Overnight decisions to review (2026-09-29/30)
+
+**Part 1, spot utilization**
+1. **Empty lanes are computed per event** (`unused − refilled`, floored at 0), and the Area
+   roll-ups sum those event values. Recomputing from roll-up totals would let one event's
+   extra replacements cancel another event's empty lane.
+2. **No-shows count as empty lanes.** A declared athlete who doesn't compete leaves a gap
+   the program can't show, so it can never be counted as refilled.
+3. **double_qualifier_share counts individuals only; relay teams are left out.** "Competed
+   in another MOC event" means any other event that season with a status other than
+   DNS/SCR, including relay legs and the 4x800.
+4. **moc_overall_place (added for the Part 2 comparisons).** Final place for finalists with
+   a valid final mark; everyone else with a valid mark is ranked after them by their best
+   mark.

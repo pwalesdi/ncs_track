@@ -33,13 +33,14 @@ def q_rows():
         dict(area="tri-valley", qualifier_type="automatic", in_qualified_field=1, in_declared_field=1, competed=0,
              top_finish=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
         dict(area="tri-valley", qualifier_type="next_best_mark", in_qualified_field=1, in_declared_field=0,
-             competed=0, top_finish=0, scored=0, choice_tag="chose_other_events", vacancy_refilled_by_area="tri-valley"),
+             competed=0, top_finish=0, scored=0, choice_tag="chose_other_events", vacancy_refilled_by_area="tri-valley",
+             competed_other_moc_event=1),
         dict(area="tri-valley", qualifier_type="replacement", in_qualified_field=0, in_declared_field=1, competed=1,
              top_finish=0, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
         dict(area="bay-shore", qualifier_type="at_large_standard", in_qualified_field=1, in_declared_field=1,
              competed=1, top_finish=1, scored=0, choice_tag=None, vacancy_refilled_by_area=None),
     ]
-    q = pd.DataFrame([{**base, **r} for r in rows])
+    q = pd.DataFrame([{"competed_other_moc_event": None, **base, **r} for r in rows])
     q["at_large_combined"] = q["qualifier_type"].isin(analysis.AT_LARGE_TYPES).astype(int)
     return q
 
@@ -72,5 +73,27 @@ def test_field_makeup_and_at_large_share():
 def test_flags_need_three_seasons():
     su = pd.concat([analysis.spot_utilization(q_rows().assign(season=s)) for s in (2022, 2023, 2024)])
     flags = analysis.spot_utilization_flags(su)
-    assert list(flags["area"]) == ["tri-valley"] and flags.iloc[0]["seasons_with_unused"] == 3
+    assert list(flags["area"]) == ["tri-valley"] and flags.iloc[0]["seasons_flagged"] == 3
     assert analysis.spot_utilization_flags(su[su["season"] != 2024]).empty
+
+
+def test_empty_lanes_no_show_rate_double_qualifier():
+    tv = analysis.spot_utilization(q_rows()).set_index("area").loc["tri-valley"]
+    # unused 2 (1 no-show + 1 not declared); the not-declared spot was refilled -> 1 empty lane
+    assert tv["empty_lanes"] == 1 and tv["no_show_rate"] == 0.5
+    assert tv["not_declared_individual"] == 1 and tv["double_qualifier_share"] == 1.0
+    su = pd.concat([analysis.spot_utilization(q_rows().assign(season=s)) for s in (2022, 2023, 2024)])
+    lanes = analysis.spot_utilization_flags(su, metric="empty_lanes")
+    assert list(lanes["area"]) == ["tri-valley"] and lanes.iloc[0]["metric"] == "empty_lanes"
+    ns = analysis.no_shows_empty_lanes(su).set_index(["season", "area"])
+    assert ns.loc[(2022, "tri-valley"), "empty_lane_rate"] == round(1 / 3, 4)
+
+
+def test_moc_overall_places():
+    moc = pd.DataFrame({
+        "athlete_name_raw": ["A B", "C D", "E F", "G H"], "school_name_raw": "S", "is_relay": False,
+        "athlete_id": ["1", "2", "3", "4"], "gender": "girls", "event_code": "100",
+        "round": ["final", "final", "prelim", "prelim"], "status": "OK", "place": [1, 2, 5, 6],
+        "mark_value": [12.0, 12.1, 12.3, 12.2]})
+    places = analysis.moc_overall_places(moc, lambda s: "s")
+    assert places[("girls", "100", "1")] == 1 and places[("girls", "100", "4")] == 3 and places[("girls", "100", "3")] == 4

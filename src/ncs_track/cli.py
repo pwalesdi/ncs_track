@@ -195,6 +195,9 @@ def cmd_analysis(args) -> int:
     su.to_csv(out / "spot_utilization.csv", index=False)
     analysis.spot_utilization_by_area(su).to_csv(out / "spot_utilization_by_area.csv", index=False)
     analysis.spot_utilization_flags(su).to_csv(out / "spot_utilization_flags.csv", index=False)
+    analysis.spot_utilization_flags(su, metric="empty_lanes").to_csv(
+        out / "spot_utilization_flags_empty_lanes.csv", index=False)
+    analysis.no_shows_empty_lanes(su).to_csv(out / "no_shows_empty_lanes_by_area.csv", index=False)
     pd.concat(los, ignore_index=True).to_csv(out / "left_out.csv", index=False)
     print(f"wrote outputs/qualifiers.csv (git-ignored) and {out.relative_to(paths.ROOT)}/*.csv")
     return 0

@@ -70,6 +70,8 @@ fields together.
 | scored | 1 if `moc_final_place` ≤ 6 |
 | choice_tag | For a qualified athlete not in the program: `chose_other_events` (listed elsewhere in the program, incl. the 4x800 and relay rosters) or `did_not_declare` |
 | replacement_for_area, vacancy_refilled_by_area | The Area whose vacancy a replacement filled / the Area of the athlete who refilled a vacancy |
+| competed_other_moc_event | For a qualified athlete not in the program (individuals only): 1 if they competed in any other MOC event that season (individual, relay leg or 4x800; any status but DNS/SCR) |
+| moc_overall_place | Overall MOC place in the event (see note) |
 | state_qualified | `pending` until the CIF State meet data arrives |
 
 **Notes on the finals columns**
@@ -81,6 +83,11 @@ fields together.
   - 3200, HJ and PV: one final round, so 1 for everyone who competed.
   - LJ, TJ, SP and DT: 9 athletes get three extra attempts, but neither the Athletic.net
     nor the Hy-Tek results record attempts. The column falls back to final place ≤ 9.
+
+**moc_overall_place.** Finalists with a valid final mark keep their final place. Everyone
+else with a valid MOC mark (prelim-only athletes, and finalists without a valid final mark)
+is ranked after them by their best valid mark. In events without prelims, it is the final
+place. It is blank for athletes with no valid MOC mark.
 
 ## data/summary/field_makeup.csv
 
@@ -119,6 +126,11 @@ Per season × gender × event × area, over the spots the rules gave that Area:
 | vacancies_refilled | This Area's not-declared spots paired with a replacement |
 | refilled_by_area | Which Areas the replacements came from, `area:count` |
 | replacements_from_this_area | This Area's athletes who entered as replacements, for any Area |
+| empty_lanes | Spots that went to nobody: `unused_total − vacancies_refilled`, never below 0. Computed per event; the roll-ups sum the event values. The "wasted spot" metric. |
+| no_show_rate | `no_show / declared` |
+| not_declared_individual | Not-declared spots held by individuals (relay teams excluded) |
+| not_declared_competed_other_event | Of those, athletes who competed in another MOC event that season |
+| double_qualifier_share | `not_declared_competed_other_event / not_declared_individual` |
 
 **How to read it**
 - **No-shows are never refilled.** A vacancy can only be seen when a qualified athlete is
@@ -133,9 +145,19 @@ Per season × gender × event × area, over the spots the rules gave that Area:
 **`spot_utilization_by_area.csv`** is the roll-up per season × area over all events,
 with `utilization_rate` recomputed from the sums.
 
-**`spot_utilization_flags.csv`** lists every Area × gender × event with `unused_total > 0`
-in at least 3 of the seasons analysed. Columns: the seasons, how many there were, and
-unused spots summed over all seasons.
+**Flag lists.** Each lists every Area × gender × event with the metric above 0 in at least
+3 of the seasons analysed. Columns: the seasons, how many there were, and the metric summed
+over all seasons.
+- `spot_utilization_flags.csv`: `unused_total`
+- `spot_utilization_flags_empty_lanes.csv`: `empty_lanes`
+
+**`no_shows_empty_lanes_by_area.csv`** gives per season × area the counts behind the rates:
+`spots_earned`, `declared`, `no_show`, `no_show_rate`, `not_declared`,
+`vacancies_refilled`, `empty_lanes` and `empty_lane_rate` (= `empty_lanes /
+spots_earned`).
+
+**Empty lanes include no-shows.** A no-show declared, so the vacancy is invisible in the
+program and is never counted as refilled.
 
 ## data/summary/left_out.csv
 

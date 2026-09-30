@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NCS MOC Qualification</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #5f5f5a; --line: #e2e1dc;
+    --tv: #2563eb; --bs: #0f8b7d; --re: #c2410c; --ca: #7c3aed; --unk: #8a8a85;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171716; --card: #20201f; --text: #ecebe6; --muted: #a8a7a0; --line: #34342f;
+      --tv: #6b93f5; --bs: #3cc2b1; --re: #f0804f; --ca: #a98af5; --unk: #a3a39c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header, main, footer { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 20px; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 14px; font-size: .9rem; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; padding: 12px;
+              background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  .controls label { display: flex; flex-direction: column; font-size: .8rem; color: var(--muted); gap: 4px; }
+  select, .seg button { font: inherit; font-size: .9rem; color: var(--text); background: var(--bg);
+                        border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; }
+  .seg { display: inline-flex; border-radius: 7px; overflow: hidden; }
+  .seg button { border-radius: 0; cursor: pointer; }
+  .seg button + button { border-left: none; }
+  .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+  .seg button:disabled { opacity: .45; cursor: not-allowed; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 4px; font-size: .85rem; }
+  .legend span::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+                         margin-right: 5px; vertical-align: -1px; background: var(--c); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 14px; margin: 14px 0; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+  .panel h2 { font-size: 1rem; margin: 0 0 4px; }
+  .how { color: var(--muted); font-size: .82rem; margin: 0 0 8px; }
+  .chart { position: relative; height: 230px; }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  td.n { text-align: right; }
+  .note { font-size: .8rem; color: var(--muted); }
+  .wide { grid-column: 1 / -1; }
+  .scroll { overflow-x: auto; max-height: 260px; }
+  footer { padding-bottom: 30px; font-size: .82rem; color: var(--muted); }
+  footer dt { font-weight: 600; color: var(--text); margin-top: 6px; }
+  footer dd { margin: 0 0 2px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>NCS Meet of Champions: who qualifies, and how</h1>
+  <p class="sub">Built from the summary tables of the NCS qualification analysis (no athlete names).
+    Data version: __BUILT__. Rates always show their counts.</p>
+  <div class="controls" role="group" aria-label="Filters">
+    <label>Field
+      <span class="seg" id="field">
+        <button data-v="qualified" aria-pressed="true">Everyone who qualified</button>
+        <button data-v="declared" aria-pressed="false">Who actually declared</button>
+      </span></label>
+    <label>Rules
+      <span class="seg" id="rules">
+        <button data-v="current" aria-pressed="true">Current rules</button>
+        <button data-v="proposed" aria-pressed="false" disabled title="Coming soon">Proposed rules (coming soon)</button>
+      </span></label>
+    <label>Season <select id="season"></select></label>
+    <label>Gender <select id="gender">
+      <option value="all">Girls + boys</option><option value="girls">Girls</option><option value="boys">Boys</option>
+    </select></label>
+    <label>Event <select id="event"></select></label>
+  </div>
+  <div class="legend" id="legend"></div>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="panel">
+      <h2>1. Field makeup by Area</h2>
+      <p class="how">How to read this: each bar is one Area's share of the field, split by how its athletes got
+        in. Automatic = top places at the Area meet; at-large = the 3 next-best-mark spots plus the at-large standard.
+        Use the Field toggle to compare everyone who qualified with who actually declared.</p>
+      <div class="chart"><canvas id="c1"></canvas></div>
+      <table id="t1"></table>
+    </section>
+    <section class="panel">
+      <h2>2. At-large spots by Area</h2>
+      <p class="how">How to read this: of all at-large spots in the selection, the share each Area took,
+        split into next best mark (fill spots) and at-large standard.</p>
+      <div class="chart"><canvas id="c2"></canvas></div>
+      <table id="t2"></table>
+    </section>
+    <section class="panel">
+      <h2>3. MOC performance</h2>
+      <p class="how">How to read this: of athletes who competed at the MOC, the share who reached a top finish
+        (top 8; top 9 in LJ/TJ/SP/DT), by Area and how they qualified. Always the declared field.
+        Small counts swing a lot; check the numbers.</p>
+      <div class="chart"><canvas id="c3"></canvas></div>
+      <table id="t3"></table>
+    </section>
+    <section class="panel">
+      <h2>4. Spot utilization</h2>
+      <p class="how">How to read this: of the spots each Area earned, how many were used. Empty lanes = spots that
+        went to nobody (not used and not refilled); no-shows = declared but did not compete. Always the qualified
+        field (spots earned).</p>
+      <div class="chart"><canvas id="c4"></canvas></div>
+      <table id="t4"></table>
+    </section>
+    <section class="panel">
+      <h2>5. Left-out athletes</h2>
+      <p class="how">How to read this: for each Area and event, the 3 best non-qualifiers by Area mark. The bar is how
+        often their Area mark was at or better than that year's MOC top-8/9 mark. Different meets (wind, weather,
+        competition): a comparison, not a prediction.</p>
+      <div class="chart"><canvas id="c5"></canvas></div>
+      <table id="t5"></table>
+    </section>
+    <section class="panel">
+      <h2>Flag list: repeated empty lanes</h2>
+      <p class="how">How to read this: Area × event combinations with empty lanes in 3 or more of the 5 seasons
+        (filtered by gender and event; the season filter doesn't apply). Unused-spot counts are shown for comparison.</p>
+      <div class="scroll"><table id="t6"></table></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <h2 style="font-size:1rem;color:var(--text)">Definitions</h2>
+  <dl id="defs"></dl>
+</footer>
+
+<script id="data" type="application/json">__DATA__</script>
+
+<script id="agg">
+// Pure aggregation over the embedded summary tables (no DOM). Tested by tests/test_dashboard.py.
+var AREAS = ["tri-valley", "bay-shore", "redwood-empire", "class-a"];
+var AREA_NAME = {"tri-valley": "Tri-Valley", "bay-shore": "Bay Shore", "redwood-empire": "Redwood Empire",
+                 "class-a": "Class A", "unknown": "Unknown"};
+var EVENT_GROUPS = {"sprints_hurdles": ["100", "200", "100H", "110H", "300H"], "400_800": ["400", "800"],
+                    "distance": ["1600", "3200"], "jumps": ["HJ", "PV", "LJ", "TJ"], "throws": ["SP", "DT"],
+                    "relays": ["4x100", "4x400"]};
+
+function eventSet(ev) {
+  if (ev === "all") return null;
+  if (ev.indexOf("group:") === 0) return EVENT_GROUPS[ev.slice(6)];
+  return [ev];
+}
+function keep(r, f) {
+  if (f.season !== "all" && String(r.season) !== String(f.season)) return false;
+  if (f.gender !== "all" && r.gender !== f.gender) return false;
+  var ev = eventSet(f.event);
+  return !ev || ev.indexOf(String(r.event_code)) >= 0;
+}
+function sum(rows, key) { var s = 0; for (var i = 0; i < rows.length; i++) s += Number(rows[i][key] || 0); return s; }
+function pct(k, n) { return n ? Math.round(100 * k / n) + "% (" + k + " of " + n + ")" : "–"; }
+
+function makeup(D, f) {
+  var rows = D.field_makeup.filter(function (r) { return r.field === f.field && keep(r, f); });
+  var total = sum(rows, "count"), out = {};
+  AREAS.concat(["unknown"]).forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    var by = function (t) { return sum(ra.filter(function (r) { return t.indexOf(r.qualifier_type) >= 0; }), "count"); };
+    var o = {automatic: by(["automatic"]), at_large: by(["next_best_mark", "at_large_standard"]),
+             other: by(["replacement", "unexplained"]), total: sum(ra, "count")};
+    o.share = total ? o.total / total : 0;
+    if (a !== "unknown" || o.total) out[a] = o;
+  });
+  out._total = total;
+  return out;
+}
+function atLarge(D, f) {
+  var rows = D.at_large_share.filter(function (r) { return r.field === f.field && keep(r, f) && r.spot_type !== "at_large_combined"; });
+  var total = sum(rows, "count"), out = {_total: total};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    out[a] = {next_best_mark: sum(ra.filter(function (r) { return r.spot_type === "next_best_mark"; }), "count"),
+              at_large_standard: sum(ra.filter(function (r) { return r.spot_type === "at_large_standard"; }), "count")};
+    out[a].total = out[a].next_best_mark + out[a].at_large_standard;
+  });
+  return out;
+}
+function performance(D, f) {
+  var rows = D.moc_performance.filter(function (r) { return keep(r, f); });
+  var out = {};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    var g = function (types) {
+      var x = ra.filter(function (r) { return types.indexOf(r.qualifier_type) >= 0; });
+      return {competed: sum(x, "competed"), top_finish: sum(x, "top_finish"), scored: sum(x, "scored")};
+    };
+    out[a] = {automatic: g(["automatic"]), at_large: g(["next_best_mark", "at_large_standard"]),
+              replacement: g(["replacement"])};
+  });
+  return out;
+}
+function utilization(D, f) {
+  var rows = D.spot_utilization.filter(function (r) { return keep(r, f); });
+  var out = {};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    var o = {};
+    ["spots_earned", "declared", "competed", "no_show", "not_declared", "vacancies_refilled", "empty_lanes"]
+      .forEach(function (k) { o[k] = sum(ra, k); });
+    out[a] = o;
+  });
+  return out;
+}
+function leftOut(D, f) {
+  var rows = D.left_out.filter(function (r) { return keep(r, f) && r.has_cutoff; });
+  var out = {};
+  AREAS.forEach(function (a) {
+    var ra = rows.filter(function (r) { return r.area === a; });
+    out[a] = {hits: ra.filter(function (r) { return r.hit; }).length, total: ra.length};
+  });
+  return out;
+}
+function flags(D, f) {
+  var g = function (r) { return (f.gender === "all" || r.gender === f.gender) &&
+    (!eventSet(f.event) || eventSet(f.event).indexOf(String(r.event_code)) >= 0); };
+  return {empty_lanes: D.flags_empty_lanes.filter(g), unused: D.flags_unused.filter(g)};
+}
+</script>
+
+<script>
+(function () {
+  var D = JSON.parse(document.getElementById("data").textContent);
+  var css = getComputedStyle(document.documentElement);
+  var COLOR = {"tri-valley": css.getPropertyValue("--tv").trim(), "bay-shore": css.getPropertyValue("--bs").trim(),
+               "redwood-empire": css.getPropertyValue("--re").trim(), "class-a": css.getPropertyValue("--ca").trim(),
+               "unknown": css.getPropertyValue("--unk").trim()};
+  var TEXT = css.getPropertyValue("--muted").trim(), LINE = css.getPropertyValue("--line").trim();
+  function tint(hex, a) {
+    var h = hex.replace("#", ""), n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16);
+    return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  var state = {field: "qualified", season: String(D.seasons[D.seasons.length - 1]), gender: "all", event: "all"};
+
+  // Controls
+  var season = document.getElementById("season");
+  D.seasons.forEach(function (s) { season.add(new Option(String(s), String(s))); });
+  season.add(new Option("All seasons (pooled counts)", "all"));
+  season.value = state.season;
+  var event = document.getElementById("event");
+  event.add(new Option("All events", "all"));
+  Object.keys(EVENT_GROUPS).forEach(function (g) {
+    event.add(new Option("Group: " + g.replace("_", g === "400_800" ? "/" : " / ").replace("sprints / hurdles", "sprints & hurdles"), "group:" + g));
+  });
+  D.events.forEach(function (e) { event.add(new Option(e, e)); });
+  document.querySelectorAll("#field button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.field = b.dataset.v;
+      document.querySelectorAll("#field button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+      render();
+    });
+  });
+  [["season", season], ["gender", document.getElementById("gender")], ["event", event]].forEach(function (p) {
+    p[1].addEventListener("change", function () { state[p[0]] = p[1].value; render(); });
+  });
+  document.getElementById("legend").innerHTML = AREAS.map(function (a) {
+    return '<span style="--c:' + COLOR[a] + '">' + AREA_NAME[a] + "</span>";
+  }).join("");
+  document.getElementById("defs").innerHTML = D.definitions.map(function (d) {
+    return "<dt>" + d[0] + "</dt><dd>" + d[1] + "</dd>";
+  }).join("");
+
+  var charts = {};
+  function bar(id, labels, datasets, opts) {
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(document.getElementById(id), {
+      type: "bar", data: {labels: labels, datasets: datasets},
+      options: Object.assign({
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: {legend: {labels: {color: TEXT, boxWidth: 12}},
+                  tooltip: {callbacks: {label: function (c) { return c.dataset.label + ": " + c.dataset.tips[c.dataIndex]; }}}},
+        scales: {x: {stacked: true, ticks: {color: TEXT}, grid: {display: false}},
+                 y: {stacked: true, ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}
+      }, opts || {})
+    });
+  }
+  function table(id, head, rows) {
+    document.getElementById(id).innerHTML = "<thead><tr>" + head.map(function (h, i) {
+      return "<th" + (i ? ' class="n"' : "") + ">" + h + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function (r) { return "<tr>" + r.map(function (c, i) {
+        return "<td" + (i ? ' class="n"' : "") + ">" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody>";
+  }
+  function stackSet(label, areas, vals, denoms, alpha) {
+    return {label: label, data: vals.map(function (v, i) { return denoms[i] ? 100 * v / denoms[i] : 0; }),
+            backgroundColor: areas.map(function (a) { return tint(COLOR[a], alpha); }),
+            tips: vals.map(function (v, i) { return pct(v, denoms[i]); })};
+  }
+
+  function render() {
+    var f = state;
+    // 1. Makeup
+    var m = makeup(D, f), areas1 = Object.keys(m).filter(function (k) { return k[0] !== "_"; });
+    var tot = areas1.map(function () { return m._total; });
+    var sets1 = [stackSet("Automatic", areas1, areas1.map(function (a) { return m[a].automatic; }), tot, 1),
+                 stackSet("At-large", areas1, areas1.map(function (a) { return m[a].at_large; }), tot, .55)];
+    if (f.field === "declared") sets1.push(stackSet("Replacement / unexplained", areas1, areas1.map(function (a) { return m[a].other; }), tot, .25));
+    bar("c1", areas1.map(function (a) { return AREA_NAME[a]; }), sets1);
+    table("t1", ["Area", "Share of field", "Automatic", "At-large"].concat(f.field === "declared" ? ["Repl./unexpl."] : []),
+      areas1.map(function (a) { return [AREA_NAME[a], pct(m[a].total, m._total), m[a].automatic, m[a].at_large]
+        .concat(f.field === "declared" ? [m[a].other] : []); }));
+    // 2. At-large
+    var al = atLarge(D, f), t2 = AREAS.map(function () { return al._total; });
+    bar("c2", AREAS.map(function (a) { return AREA_NAME[a]; }), [
+      stackSet("Next best mark", AREAS, AREAS.map(function (a) { return al[a].next_best_mark; }), t2, 1),
+      stackSet("At-large standard", AREAS, AREAS.map(function (a) { return al[a].at_large_standard; }), t2, .5)]);
+    table("t2", ["Area", "Share of at-large spots", "Next best mark", "Standard"],
+      AREAS.map(function (a) { return [AREA_NAME[a], pct(al[a].total, al._total), al[a].next_best_mark, al[a].at_large_standard]; }));
+    // 3. Performance
+    var p = performance(D, f);
+    var mk = function (label, key, alpha) {
+      return {label: label, backgroundColor: AREAS.map(function (a) { return tint(COLOR[a], alpha); }),
+              data: AREAS.map(function (a) { var x = p[a][key]; return x.competed ? 100 * x.top_finish / x.competed : 0; }),
+              tips: AREAS.map(function (a) { var x = p[a][key]; return pct(x.top_finish, x.competed); })};
+    };
+    bar("c3", AREAS.map(function (a) { return AREA_NAME[a]; }), [mk("Automatic", "automatic", 1), mk("At-large", "at_large", .5)],
+        {scales: {x: {ticks: {color: TEXT}, grid: {display: false}},
+                  y: {max: 100, ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}});
+    table("t3", ["Area", "Automatic: top finish", "At-large: top finish", "Replacement: top finish"],
+      AREAS.map(function (a) { return [AREA_NAME[a], pct(p[a].automatic.top_finish, p[a].automatic.competed),
+        pct(p[a].at_large.top_finish, p[a].at_large.competed), pct(p[a].replacement.top_finish, p[a].replacement.competed)]; }));
+    // 4. Utilization
+    var u = utilization(D, f), se = AREAS.map(function (a) { return u[a].spots_earned; });
+    bar("c4", AREAS.map(function (a) { return AREA_NAME[a]; }), [
+      stackSet("Used (competed)", AREAS, AREAS.map(function (a) { return u[a].competed; }), se, 1),
+      stackSet("Unused but refilled", AREAS, AREAS.map(function (a) { return u[a].spots_earned - u[a].competed - u[a].empty_lanes; }), se, .45),
+      stackSet("Empty lanes", AREAS, AREAS.map(function (a) { return u[a].empty_lanes; }), se, .15)],
+      {scales: {x: {stacked: true, ticks: {color: TEXT}, grid: {display: false}},
+                y: {stacked: true, max: 100, ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}});
+    table("t4", ["Area", "Utilization", "Empty lanes", "No-shows (of declared)", "Not declared", "Refilled"],
+      AREAS.map(function (a) { return [AREA_NAME[a], pct(u[a].competed, u[a].spots_earned), pct(u[a].empty_lanes, u[a].spots_earned),
+        pct(u[a].no_show, u[a].declared), u[a].not_declared, u[a].vacancies_refilled]; }));
+    // 5. Left out
+    var lo = leftOut(D, f);
+    bar("c5", AREAS.map(function (a) { return AREA_NAME[a]; }), [{label: "At/above MOC top-8/9 mark",
+      backgroundColor: AREAS.map(function (a) { return COLOR[a]; }),
+      data: AREAS.map(function (a) { return lo[a].total ? 100 * lo[a].hits / lo[a].total : 0; }),
+      tips: AREAS.map(function (a) { return pct(lo[a].hits, lo[a].total); })}],
+      {scales: {x: {ticks: {color: TEXT}, grid: {display: false}},
+                y: {ticks: {color: TEXT, callback: function (v) { return v + "%"; }}, grid: {color: LINE}}}});
+    table("t5", ["Area", "Best non-qualifiers at/above the cutoff"],
+      AREAS.map(function (a) { return [AREA_NAME[a], pct(lo[a].hits, lo[a].total)]; }));
+    // 6. Flags
+    var fl = flags(D, f);
+    table("t6", ["Area", "Gender", "Event", "Seasons with empty lanes", "Empty lanes (5 yrs)"],
+      fl.empty_lanes.map(function (r) { return [AREA_NAME[r.area], r.gender, r.event_code,
+        r.seasons_flagged + " (" + r.seasons.split("|").join(", ") + ")", r.total_all_seasons]; })
+      .concat([["<span class=note>" + fl.unused.length + " combinations have unused spots (incl. refilled) in 3+ seasons</span>", "", "", "", ""]]));
+  }
+  render();
+})();
+</script>
+</body>
+</html>

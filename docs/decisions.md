@@ -102,3 +102,16 @@ Newest at the bottom.
 6. **Core comparison groups.** Genders are combined. "Other Areas' at-large" pools every
    other Area's `next_best_mark` and `at_large_standard` qualifiers who competed. The
    median MOC place uses `moc_overall_place`.
+
+**Part 3, dashboard**
+7. **"All seasons" is offered in every panel.** Every panel's numbers are counts, so the
+   pooled view sums the counts and recomputes the rates. It is labelled "pooled counts".
+8. **The field toggle only changes panels 1–2.** MOC performance always uses the declared
+   field (only declared athletes can compete). Utilization always uses spots earned. Each
+   panel's note says which.
+9. **Every chart has a table of the same numbers under it.** This keeps counts visible on
+   a phone without hovering, and keeps the numbers readable if the CDN chart library
+   fails to load.
+10. **The dashboard is tested through macOS's JavaScript engine** (`osascript`), because
+    Node isn't installed. The page's own aggregation code runs against pandas; the
+    rendering script is only syntax-checked.

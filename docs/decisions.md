@@ -176,3 +176,19 @@ Newest at the bottom.
     - On phones (< 560 px) the bar-end labels drop the median, which stays in "Show
       numbers", so the Area names are never cut off.
 
+21. **Aggregated place curve replaces `core_place_counts.csv`** (2026-09-30, Patrick).
+    - **New table:** `data/summary/core_place_curve.csv`. Rows: season (each + pooled) ×
+      gender (girls / boys / all) × event group (six + all) × Area × Area place (1st–12th,
+      plus the bands 5–6 and 7–8). Figures: entries, top-8 count, median MOC place.
+    - **Small cells:** any cell with fewer than 5 entries publishes its entry count only,
+      with the top-8 count and median blanked. The same rule now applies to
+      `core_comparison.csv`, where 35 of 336 cells are suppressed.
+    - **Single-event filtering is dropped** for place-based charts; event groups remain.
+    - **Gender and pooled rows were added beyond the requested grain**, because the new
+      "Area place vs. MOC finish" chart has a gender filter and medians can't be combined
+      afterwards. The small-cell rule protects those rows too.
+22. **History rewrite, second pass** (2026-09-30, Patrick). Removed from every commit:
+    `dashboard/index.html` (older versions embedded athlete-level JSON) and
+    `data/summary/core_place_counts.csv`. Backup taken first. Pushed with
+    `--force-with-lease` through `pre_push.sh`. The dashboard is rebuilt and re-added in a
+    new commit.

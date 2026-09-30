@@ -107,9 +107,16 @@ def test_core_comparison_groups():
     tv = cc[(cc["season"] == "2026") & (cc["event_group"] == "sprints_hurdles") & (cc["area"] == "tri-valley")]
     low = tv[tv["comparison_group"] == "lowest_automatic"].iloc[0]
     other = tv[tv["comparison_group"] == "at_large_other_areas"].iloc[0]
-    assert (low["competed"], low["top_finish"], low["median_moc_place"]) == (1, 1, 3.0)
-    assert (other["competed"], other["top_finish"], other["median_moc_place"]) == (1, 1, 5.0)   # the BS at-large
+    # One athlete per group: counts are published, MOC-place figures are suppressed (< MIN_CELL).
+    assert low["competed"] == 1 and pd.isna(low["top_finish"]) and pd.isna(low["median_moc_place"])
+    assert other["competed"] == 1 and pd.isna(other["top_finish"]) and pd.isna(other["median_moc_place"])
+    big = pd.concat([q.assign(season=s) for s in range(2020, 2026)])       # 6 seasons -> pooled cell of 6
+    pooled = analysis.core_comparison(big)
+    row = pooled[pooled["season"].str.contains("pooled") & (pooled["event_group"] == "sprints_hurdles")
+                 & (pooled["area"] == "tri-valley") & (pooled["comparison_group"] == "lowest_automatic")].iloc[0]
+    assert (row["competed"], row["top_finish"], row["median_moc_place"]) == (6, 6, 3.0)
     assert set(cc["season"]) == {"2026", "2026-2026 pooled"}
+    assert set(pooled["season"]) >= {"2020-2025 pooled"}
 
 
 def test_cutoff_is_nth_best_mark_across_all_rounds():
@@ -164,9 +171,13 @@ def test_clustered_se_equals_robust_when_every_row_is_its_own_cluster():
     assert abs(b1 - 0.4) < 1e-12 and abs(b2 - 0.4) < 1e-12 and p1 != p2
 
 
-def test_core_place_counts_are_counts():
-    cc = analysis.core_place_counts(_core_q())
-    assert list(cc.columns) == ["season", "gender", "event_code", "area", "route", "moc_overall_place",
-                                "top_finish", "count"]
-    assert cc["count"].sum() == len(analysis._core_rows(_core_q()))
-    assert set(cc["route"]) == {"lowest_automatic", "at_large"}
+def test_core_place_curve_aggregates_and_suppresses():
+    q = _core_q().assign(in_declared_field=1, competed=1)
+    c = analysis.core_place_curve(q)
+    assert {"entries", "top8_count", "median_moc_place"} <= set(c.columns)
+    small = c[(c["entries"] > 0) & (c["entries"] < analysis.MIN_CELL)]
+    assert small["top8_count"].isna().all() and small["median_moc_place"].isna().all()
+    big = c[(c["season"].str.contains("pooled")) & (c["gender"] == "all") & (c["event_group"] == "all")
+            & (c["area"] == "tri-valley") & (c["area_place"] == "5-6")].iloc[0]
+    assert big["entries"] == 8 and big["top8_count"] == 8          # TV 5th/6th, 2 events x 2 seasons x 2 places
+    assert set(c["area_place"]) == {str(p) for p in range(1, 13)} | {"5-6", "7-8"}

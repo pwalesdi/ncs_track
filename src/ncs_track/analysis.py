@@ -319,12 +319,13 @@ def core_comparison(q: pd.DataFrame) -> pd.DataFrame:
                 other = cg[(cg["area"] != area) & (cg["area"] != "unknown") & (cg["at_large_combined"] == 1)]
                 for label, x in (("lowest_automatic", low), ("at_large_other_areas", other)):
                     placed = x["moc_overall_place"].dropna()
+                    ok = len(x) >= MIN_CELL            # small cells: counts only, no MOC-place figures
                     rows.append({"season": season, "event_group": group, "area": area, "comparison_group": label,
                                  "places_compared": "|".join(map(str, places)) if label == "lowest_automatic" else "",
-                                 "competed": len(x), "top_finish": int(x["top_finish"].sum()),
-                                 "top_finish_rate": round(x["top_finish"].mean(), 4) if len(x) else None,
+                                 "competed": len(x), "top_finish": int(x["top_finish"].sum()) if ok else None,
+                                 "top_finish_rate": round(x["top_finish"].mean(), 4) if ok else None,
                                  "with_moc_place": len(placed),
-                                 "median_moc_place": float(placed.median()) if len(placed) else None})
+                                 "median_moc_place": float(placed.median()) if ok and len(placed) else None})
     return pd.DataFrame(rows)
 
 
@@ -342,17 +343,45 @@ def _core_rows(q: pd.DataFrame) -> pd.DataFrame:
     return c
 
 
-def core_place_counts(q: pd.DataFrame) -> pd.DataFrame:
-    """Counts of athletes at each MOC place, per season x gender x event x Area x route
-    (lowest_automatic / at_large), for the core comparison. No athlete-level rows: the
-    dashboard computes top-finish rates and medians from these counts, and single-event
-    filtering still works. moc_overall_place is blank for athletes with no valid MOC mark."""
-    c = _core_rows(q)
-    c["route"] = c["lowest_auto"].map({True: "lowest_automatic", False: "at_large"})
-    c["moc_overall_place"] = c["moc_overall_place"].astype("Int64")
-    keys = ["season", "gender", "event_code", "area", "route", "moc_overall_place", "top_finish"]
-    return (c.groupby(keys, dropna=False).size().rename("count").reset_index()
-            .sort_values(keys).reset_index(drop=True))
+MIN_CELL = 5          # public tables: MOC-place figures only for cells with at least this many entries
+PLACE_BANDS = {"5-6": (5, 6), "7-8": (7, 8)}
+
+
+def core_place_curve(q: pd.DataFrame) -> pd.DataFrame:
+    """Where Area finishers end up at the MOC, aggregated for the public repo.
+
+    Rows: season (each, plus "2022-2026 pooled") x gender (girls, boys, all) x event_group
+    (six groups, plus all) x area x area_place ("1".."12", plus the bands "5-6" and "7-8").
+    Entries = athlete-events who competed at the MOC (one athlete in two events counts twice).
+    top8_count and median_moc_place are blank when entries < MIN_CELL, so no row reveals a
+    single athlete's MOC place."""
+    c = q[(q["in_declared_field"] == 1) & (q["competed"] == 1) & q["area"].isin(AREAS)
+          & q["area_place"].between(1, 12)].copy()
+    c["event_group"] = c["event_code"].astype(str).map(GROUP_OF)
+    c["area_place"] = c["area_place"].astype(int)
+    pooled = f"{int(c['season'].min())}-{int(c['season'].max())} pooled"
+    seasons = [(str(int(s)), c[c["season"] == s]) for s in sorted(c["season"].unique())] + [(pooled, c)]
+    places = [(str(p), (p,)) for p in range(1, 13)] + list(PLACE_BANDS.items())
+    rows = []
+    for season, cs in seasons:
+        for gender in ("girls", "boys", "all"):
+            cg = cs if gender == "all" else cs[cs["gender"] == gender]
+            for group in (*EVENT_GROUPS, "all"):
+                ce = cg if group == "all" else cg[cg["event_group"] == group]
+                for area in AREAS:
+                    ca = ce[ce["area"] == area]
+                    for label, pl in places:
+                        x = ca[ca["area_place"].isin(pl)]
+                        n = len(x)
+                        ok = n >= MIN_CELL
+                        placed = x["moc_overall_place"].dropna()
+                        rows.append({"season": season, "gender": gender, "event_group": group, "area": area,
+                                     "area_place": label, "entries": n,
+                                     "top8_count": int(x["top_finish"].sum()) if ok else None,
+                                     "median_moc_place": float(placed.median()) if ok and len(placed) else None})
+    out = pd.DataFrame(rows)
+    out["top8_count"] = out["top8_count"].astype("Int64")
+    return out
 
 
 def _naive_p(k1, n1, k2, n2) -> float:

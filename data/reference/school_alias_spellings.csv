@@ -1,242 +1,307 @@
 raw,school_key,method,sources,meet_keys,seen_at_areas
-Acalanes,acalanes,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Acalanes,acalanes,athleticnet_id,athleticnet,,
 Acalanes (Nc),acalanes,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Alameda,alameda,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Alameda,alameda,athleticnet_id,athleticnet,,
 Alameda (Nc),alameda,exact,hytek,2023-moc,
-Albany,albany,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Albany,albany,athleticnet_id,athleticnet,,
 Albany (Nc),albany,exact,hytek,2022-moc|2023-moc,
 Alhambra,alhambra-martinez,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Alhambra (Martinez),alhambra-martinez,athleticnet_id,athleticnet,,
 Alhambra (Nc),alhambra-martinez,base,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
 Amador Valle,amador-valley,prefix,hytek,2019-area-tri-valley|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
-Amador Valley,amador-valley,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Amador Valley,amador-valley,athleticnet_id,athleticnet,,
 Amador Valley (Nc),amador-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
-American,american,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+American,american,athleticnet_id,athleticnet,,
 American (Nc),american,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 American Can,american-canyon,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc,
-American Canyon,american-canyon,exact,hytek|moc_program,2019-moc|2024-moc|2025-moc|2026-moc,
+American Canyon,american-canyon,athleticnet_id,athleticnet,,
 American Canyon (Nc),american-canyon,exact,hytek,2024-moc|2025-moc|2026-moc,
-Analy,analy,exact,hytek|moc_program,2019-moc|2026-moc,
+Analy,analy,athleticnet_id,athleticnet,,
 Analy (Nc),analy,exact,hytek|moc_program,2023-moc|2024-moc|2025-moc,
-Antioch,antioch,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley|2026-moc,tri-valley
+Anderson Valley,anderson-valley,athleticnet_id,athleticnet,,
+Antioch,antioch,athleticnet_id,athleticnet,,
 Antioch (Nc),antioch,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2024-area-tri-valley|2024-moc,tri-valley
-Arcata,arcata,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Arcata,arcata,athleticnet_id,athleticnet,,
 Arcata (Nc),arcata,exact,hytek,2024-moc|2026-moc,
 Archie Willi,archie-williams,prefix,hytek|moc_program,2023-moc|2026-moc,
-Archie Williams,archie-williams,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Archie Williams,archie-williams,athleticnet_id,athleticnet,,
 Archie Williams (Nc),archie-williams,exact,hytek,2022-moc|2024-moc|2025-moc,
 Arroyo,arroyo-nc,base,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Arroyo (NC),arroyo-nc,athleticnet_id,athleticnet,,
 Arroyo (Nc),arroyo-nc,base,hytek,2023-moc|2024-area-bay-shore,bay-shore
-Athenian,athenian,exact,hytek|moc_program,2024-moc|2025-moc|2026-moc,
+Athenian,athenian,athleticnet_id,athleticnet,,
 Athenian (Nc),athenian,exact,hytek,2024-moc|2026-moc,
-Bay School of San Francisco,bay-school-of-san-francisco,exact,hytek,2023-moc|2024-moc|2026-moc,
-Benicia,benicia,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Bay School o,bay-school-of-san-francisco,athlete (6 athletes),hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Bay School of San Francisco,bay-school-of-san-francisco,athleticnet_id,athleticnet,,
+Benicia,benicia,athleticnet_id,athleticnet,,
 Benicia (Nc),benicia,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Bentley Upper,bentley-upper,athleticnet_id,athleticnet,,
 Berean Chris,berean-christian,prefix,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc,
-Berean Christian,berean-christian,exact,hytek|moc_program,2026-moc,
-Berkeley,berkeley,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Berean Christian,berean-christian,athleticnet_id,athleticnet,,
+Berkeley,berkeley,athleticnet_id,athleticnet,,
 Berkeley (Nc),berkeley,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Bishop O'Dow,bishop-odowd,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore,bay-shore
-Bishop O'Dowd,bishop-odowd,exact,hytek|moc_program,2019-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Bishop O'Dowd,bishop-odowd,athleticnet_id,athleticnet,,
 Bishop O'Dowd (Nc),bishop-odowd,exact,hytek,2024-moc|2025-moc|2026-moc,
 Bishop Odowd (Nc),bishop-odowd,exact,hytek,2022-moc|2023-moc,
-Branson,branson,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Branson,branson,athleticnet_id,athleticnet,,
 Branson (Nc),branson,exact,hytek,2024-moc|2025-moc|2026-moc,
 California,california-san-ramon,base+area,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 California (Nc),california-san-ramon,base+area,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Calistoga,calistoga,exact,hytek|moc_program,2019-moc|2026-moc,
-Campolindo,campolindo,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+California (San Ramon),california-san-ramon,athleticnet_id,athleticnet,,
+California - Fremont,california-fremont,athleticnet_id,athleticnet,,
+California Crosspoint,california-crosspoint,athleticnet_id,athleticnet,,
+California S,california-fremont,athlete (4 athletes),hytek|moc_program,2022-moc|2024-moc|2025-moc,
+Calistoga,calistoga,athleticnet_id,athleticnet,,
+Campolindo,campolindo,athleticnet_id,athleticnet,,
 Campolindo (Nc),campolindo,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 Cardinal New,cardinal-newman,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Cardinal Newman,cardinal-newman,athleticnet_id,athleticnet,,
 Cardinal Newman (Nc),cardinal-newman,exact,hytek,2023-moc|2024-moc|2025-moc,
-Carondelet,carondelet,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Carondelet,carondelet,athleticnet_id,athleticnet,,
 Carondelet (Nc),carondelet,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Casa Grande,casa-grande,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Casa Grande,casa-grande,athleticnet_id,athleticnet,,
 Casa Grande (Nc),casa-grande,exact,hytek,2023-moc|2025-moc,
 Castro Valle,castro-valley,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
-Castro Valley,castro-valley,exact,hytek,2019-moc|2024-area-bay-shore,bay-shore
+Castro Valley,castro-valley,athleticnet_id,athleticnet,,
 Castro Valley (Nc),castro-valley,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Clayton Vall,clayton-valley,prefix,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Clayton Valley,clayton-valley,exact,hytek,2019-area-tri-valley|2019-moc,tri-valley
+Clayton Valley,clayton-valley,athleticnet_id,athleticnet,,
 Clayton Valley (Nc),clayton-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
-Clear Lake,clear-lake,exact,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc,
-Cloverdale,cloverdale,exact,hytek|moc_program,2022-moc|2023-moc|2025-moc|2026-moc,
+Clear Lake,clear-lake,athleticnet_id,athleticnet,,
+Cloverdale,cloverdale,athleticnet_id,athleticnet,,
 Cloverdale (Nc),cloverdale,exact,hytek,2023-moc,
-College Park,college-park,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+College Park,college-park,athleticnet_id,athleticnet,,
 College Park (Nc),college-park,exact,hytek,2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
 College Prep,college-preparatory,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 College Prep (Nc),college-preparatory,exact,hytek,2023-moc|2024-moc|2025-moc|2026-moc,
-Concord,concord,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley|2026-moc,tri-valley
+College Preparatory,college-preparatory,athleticnet_id,athleticnet,,
+Concord,concord,athleticnet_id,athleticnet,,
 Concord (Nc),concord,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Contra Costa Christian,contra-costa-christian,athleticnet_id,athleticnet,,
+Convent & Stuart Hall,convent-and-stuart-hall,athleticnet_id,athleticnet,,
 Convent & Stuart Hall (Nc),convent-and-stuart-hall,exact,hytek,2024-moc|2025-moc|2026-moc,
 Convent and,convent-and-stuart-hall,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Convent and Stuart Hall,convent-and-stuart-hall,exact,hytek,2019-moc,
 Convent and Stuart Hall (Nc),convent-and-stuart-hall,exact,hytek,2022-moc|2023-moc,
-Credo,credo,exact,moc_program,2023-moc,
-De Anza,de-anza,exact,hytek|moc_program,2022-moc|2026-moc,
+Cornerstone Christian,cornerstone-christian,athleticnet_id,athleticnet,,
+Credo,credo,athleticnet_id,athleticnet,,
+De Anza,de-anza,athleticnet_id,athleticnet,,
 De Anza (Nc),de-anza,exact,hytek,2026-moc,
-De La Salle,de-la-salle,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+De La Salle,de-la-salle,athleticnet_id,athleticnet,,
 De La Salle (Nc),de-la-salle,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 DeAnza,de-anza,nospace,hytek,2019-moc,
 DeLaSalle,de-la-salle,nospace,hytek,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
-Deer Valley,deer-valley,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Deer Valley,deer-valley,athleticnet_id,athleticnet,,
 Deer Valley (Nc),deer-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley,tri-valley
-Del Norte,del-norte,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Del Norte,del-norte,athleticnet_id,athleticnet,,
 Del Norte (Nc),del-norte,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc,
 Dougherty Va,dougherty-valley,prefix,hytek,2019-area-tri-valley|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
-Dougherty Valley,dougherty-valley,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,tri-valley
+Dougherty Valley,dougherty-valley,athleticnet_id,athleticnet,,
 Dougherty Valley (Nc),dougherty-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Drew,drew,exact,hytek|moc_program,2022-moc|2023-moc,
-Dublin,dublin,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Drew,drew,athleticnet_id,athleticnet,,
+Dublin,dublin,athleticnet_id,athleticnet,,
 Dublin (Nc),dublin,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-El Cerrito,el-cerrito,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+El Cerrito,el-cerrito,athleticnet_id,athleticnet,,
 El Cerrito (Nc),el-cerrito,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-Emerald,emerald,exact,hytek|moc_program,2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
+Elsie Allen,elsie-allen,athleticnet_id,athleticnet,,
+Emerald,emerald,athleticnet_id,athleticnet,,
 Emerald (Nc),emerald,exact,hytek,2025-area-tri-valley|2026-area-tri-valley,tri-valley
-Emery,emery,exact,hytek|moc_program,2023-moc|2024-moc|2025-moc,
+Emery,emery,athleticnet_id,athleticnet,,
 Emery (Nc),emery,exact,hytek,2024-moc,
-Encinal,encinal,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Encinal,encinal,athleticnet_id,athleticnet,,
 Encinal (Nc),encinal,exact,hytek,2022-moc|2024-moc|2025-moc|2026-moc,
-Eureka,eureka,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Eureka,eureka,athleticnet_id,athleticnet,,
 Eureka (Nc),eureka,exact,hytek,2023-moc|2024-moc|2025-moc,
-Ferndale,ferndale,exact,hytek|moc_program,2023-moc|2024-moc|2025-moc,
+Ferndale,ferndale,athleticnet_id,athleticnet,,
 Foothill,foothill-pleasanton,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc,tri-valley
 Foothill (Nc),foothill-pleasanton,base,hytek|moc_program,2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Foothill (Pleasanton),foothill-pleasanton,athleticnet_id,athleticnet,,
 Foothill Pleasanton (Nc),foothill-pleasanton,exact,hytek,2022-area-tri-valley|2022-moc,tri-valley
-Fort Bragg,fort-bragg,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Fort Bragg,fort-bragg,athleticnet_id,athleticnet,,
 Fort Bragg (Nc),fort-bragg,exact,hytek,2026-moc,
-Fortuna,fortuna,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Fortuna,fortuna,athleticnet_id,athleticnet,,
 Fortuna (Nc),fortuna,exact,hytek,2026-moc,
-Freedom,freedom,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Freedom,freedom,athleticnet_id,athleticnet,,
 Freedom (Nc),freedom,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley,tri-valley
-Granada,granada,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Fremont Christian,fremont-christian,athleticnet_id,athleticnet,,
+Gateway,gateway,athleticnet_id,athleticnet,,
+Grace Christian Academy,grace-christian-academy,athleticnet_id,athleticnet,,
+Granada,granada,athleticnet_id,athleticnet,,
 Granada (Nc),granada,exact,hytek,2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Hayward,hayward,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Hayward,hayward,athleticnet_id,athleticnet,,
 Hayward (Nc),hayward,exact,hytek,2025-moc|2026-moc,
 Head Royce,head-royce,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Head Royce (Nc),head-royce,exact,hytek,2023-moc|2025-moc|2026-moc,
-Healdsburg,healdsburg,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
+Head-Royce,head-royce,athleticnet_id,athleticnet,,
+Healdsburg,healdsburg,athleticnet_id,athleticnet,,
 Healdsburg (Nc),healdsburg,exact,hytek,2026-moc,
-Hercules,hercules,exact,hytek,2024-area-bay-shore,bay-shore
+Hercules,hercules,athleticnet_id,athleticnet,,
 Heritage,heritage-brentwood,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Heritage (Brentwood),heritage-brentwood,athleticnet_id,athleticnet,,
 Heritage (Nc),heritage-brentwood,base,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Hoopa Valley,hoopa-valley,exact,hytek|moc_program,2025-moc,
+High Tech High NC,high-tech-high-nc,athleticnet_id,athleticnet,,
+Holy Names,holy-names,athleticnet_id,athleticnet,,
+Hoopa Valley,hoopa-valley,athleticnet_id,athleticnet,,
 Internationa,international,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+International,international,athleticnet_id,athleticnet,,
 International (Nc),international,exact,hytek,2023-moc|2024-moc|2025-moc|2026-moc,
-Irvington,irvington,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Irvington,irvington,athleticnet_id,athleticnet,,
 Irvington (N,irvington,exact,hytek,2024-area-bay-shore,bay-shore
 Irvington (Nc),irvington,exact,hytek,2022-moc|2023-moc,
-James Logan,james-logan,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+James Logan,james-logan,athleticnet_id,athleticnet,,
 James Logan (Nc),james-logan,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-Jesse Bethel,jesse-bethel,exact,hytek|moc_program,2019-moc|2023-moc|2024-area-bay-shore|2025-moc|2026-moc,bay-shore
+Jesse Bethel,jesse-bethel,athleticnet_id,athleticnet,,
 Jesse Bethel (Nc),jesse-bethel,exact,hytek,2023-moc,
-John F. Kennedy (Richmond),john-f-kennedy-richmond,exact,hytek,2024-area-bay-shore,bay-shore
-Justin-Siena,justin-siena,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Jfk(Frem),john-f-kennedy-fremont,athlete (2 athletes),hytek|moc_program,2026-moc,
+John F. Kennedy (Fremont),john-f-kennedy-fremont,athleticnet_id,athleticnet,,
+John F. Kennedy (Richmond),john-f-kennedy-richmond,athleticnet_id,athleticnet,,
+John Swett,john-swett,athleticnet_id,athleticnet,,
+Justin-Siena,justin-siena,athleticnet_id,athleticnet,,
 Justin-Siena (Nc),justin-siena,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-Kelseyville,kelseyville,exact,hytek|moc_program,2023-moc|2024-moc,
-Las Lomas,las-lomas,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Kelseyville,kelseyville,athleticnet_id,athleticnet,,
+Kennedy-Fremont,john-f-kennedy-fremont,athlete (6 athletes),hytek|moc_program,2022-moc|2024-moc|2025-moc,
+Las Lomas,las-lomas,athleticnet_id,athleticnet,,
 Las Lomas (Nc),las-lomas,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 Liberty,liberty-brentwood,base,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 Liberty (Nc),liberty-brentwood,base,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2026-area-tri-valley,tri-valley
+Liberty - Brentwood,liberty-brentwood,athleticnet_id,athleticnet,,
+Lick Wilmerding,lick-wilmerding,athleticnet_id,athleticnet,,
 Lick-Wilmerd,lick-wilmerding,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Lick-Wilmerding (Nc),lick-wilmerding,exact,hytek,2022-moc|2023-moc|2025-moc|2026-moc,
-Livermore,livermore,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2024-moc,tri-valley
+Livermore,livermore,athleticnet_id,athleticnet,,
 Livermore (N,livermore,exact,hytek|moc_program,2023-area-tri-valley|2023-moc|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 Livermore (Nc),livermore,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2026-area-tri-valley|2026-moc,tri-valley
-Lower Lake,lower-lake,exact,hytek|moc_program,2024-moc|2026-moc,
-Maria Carrillo,maria-carrillo,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Lower Lake,lower-lake,athleticnet_id,athleticnet,,
+Making Waves Academy,making-waves-academy,athleticnet_id,athleticnet,,
+Maria Carrillo,maria-carrillo,athleticnet_id,athleticnet,,
 Maria Carrillo (Nc),maria-carrillo,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Marin Academ,marin-academy,prefix,hytek|moc_program,2019-moc|2025-moc|2026-moc,
+Marin Academy,marin-academy,athleticnet_id,athleticnet,,
 Marin Cathol,marin-catholic,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-Marin Catholic,marin-catholic,exact,hytek,2019-moc,
+Marin Catholic,marin-catholic,athleticnet_id,athleticnet,,
 Marin Catholic (Nc),marin-catholic,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc,
 McKinleyvill,mckinleyville,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc,
-McKinleyville,mckinleyville,exact,hytek,2019-moc,
-Mendocino,mendocino,exact,hytek|moc_program,2023-moc,
-Middletown,middletown,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+McKinleyville,mckinleyville,athleticnet_id,athleticnet,,
+Mendocino,mendocino,athleticnet_id,athleticnet,,
+Middletown,middletown,athleticnet_id,athleticnet,,
 Middletown (Nc),middletown,exact,hytek,2026-moc,
-Miramonte,miramonte,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Miramonte,miramonte,athleticnet_id,athleticnet,,
 Miramonte (Nc),miramonte,exact,hytek,2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 Mission San,mission-san-jose,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
-Mission San Jose,mission-san-jose,exact,hytek,2019-moc,
+Mission San Jose,mission-san-jose,athleticnet_id,athleticnet,,
 Mission San Jose (Nc),mission-san-jose,exact,hytek,2023-moc|2024-area-bay-shore|2024-moc|2026-moc,bay-shore
-Monte Vista,monte-vista,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Monte Vista,monte-vista,athleticnet_id,athleticnet,,
 Monte Vista (Nc),monte-vista,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Montgomery,montgomery,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Montgomery,montgomery,athleticnet_id,athleticnet,,
 Montgomery (Nc),montgomery,exact,hytek,2022-moc|2023-moc|2025-moc|2026-moc,
 Moreau Catho,moreau-catholic,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Moreau Catholic,moreau-catholic,athleticnet_id,athleticnet,,
 Moreau Catholic (Nc),moreau-catholic,exact,hytek,2022-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
-Mt Eden,mt-eden,exact,hytek|moc_program,2022-moc,
-Napa,napa,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2026-moc,
+Mt Eden,mt-eden,athleticnet_id,athleticnet,,
+Napa,napa,athleticnet_id,athleticnet,,
 Newark Memor,newark-memorial,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
-Newark Memorial,newark-memorial,exact,hytek,2019-moc,
+Newark Memorial,newark-memorial,athleticnet_id,athleticnet,,
 Newark Memorial (Nc),newark-memorial,exact,hytek,2023-moc|2024-area-bay-shore|2024-moc,bay-shore
-Northgate,northgate,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Northcoast Preparatory,northcoast-preparatory,athleticnet_id,athleticnet,,
+Northgate,northgate,athleticnet_id,athleticnet,,
 Northgate (Nc),northgate,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Novato,novato,exact,hytek|moc_program,2019-moc|2024-moc|2025-moc,
+Novato,novato,athleticnet_id,athleticnet,,
 Oakland Mili,oakland-military-institute,prefix,hytek,2019-moc,
-Petaluma,petaluma,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Oakland Military Institute,oakland-military-institute,athleticnet_id,athleticnet,,
+Pacific Union College Prep,pacific-union-college-preparatory,athleticnet_id,athleticnet,,
+Petaluma,petaluma,athleticnet_id,athleticnet,,
 Petaluma (Nc),petaluma,exact,hytek,2023-moc|2024-moc|2025-moc|2026-moc,
-Piedmont,piedmont,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Piedmont,piedmont,athleticnet_id,athleticnet,,
 Piedmont (Nc),piedmont,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-Piner,piner,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Piner,piner,athleticnet_id,athleticnet,,
 Piner (Nc),piner,exact,hytek,2023-moc,
+Pinole,pinole-valley,athlete (5 athletes),hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc,
 Pinole Valle,pinole-valley,prefix,hytek,2024-area-bay-shore,bay-shore
-Pinole Valley,pinole-valley,exact,hytek,2024-area-bay-shore,bay-shore
-Pittsburg,pittsburg,exact,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
+Pinole Valley,pinole-valley,athleticnet_id,athleticnet,,
+Pittsburg,pittsburg,athleticnet_id,athleticnet,,
 Pittsburg (Nc),pittsburg,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
 Rancho Cotat,rancho-cotate,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Rancho Cotate,rancho-cotate,athleticnet_id,athleticnet,,
 Rancho Cotate (Nc),rancho-cotate,exact,hytek,2022-moc|2023-moc|2024-moc,
 Redwood,redwood-larkspur,base,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Redwood (Larkspur),redwood-larkspur,athleticnet_id,athleticnet,,
 Redwood (Nc),redwood-larkspur,base,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Redwood Chri,redwood-christian,prefix,hytek|moc_program,2025-moc|2026-moc,
+Redwood Christian,redwood-christian,athleticnet_id,athleticnet,,
+Richmond,richmond,athleticnet_id,athleticnet,,
+Roseland Uni,roseland-university-preparatory,prefix,hytek|moc_program,2022-moc,
+Roseland University Prep,roseland-university-preparatory,athleticnet_id,athleticnet,,
 Saint Mary's College,st-mary-college,exact,hytek,2019-moc,
 Salesian,salesian-college-preparatory,generic,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc|2026-moc,
 Salesian (Nc),salesian-college-preparatory,generic,hytek,2022-moc|2024-moc,
 Salesian Col,salesian-college-preparatory,prefix,hytek,2024-area-bay-shore,bay-shore
-Salesian College Preparatory,salesian-college-preparatory,exact,hytek,2024-area-bay-shore,bay-shore
-San Domenico,san-domenico,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-San Francisc,san-francisco-university,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
-San Francisco University,san-francisco-university,exact,hytek,2019-moc|2025-moc|2026-moc,
-San Leandro,san-leandro,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+Salesian College Preparatory,salesian-college-preparatory,athleticnet_id,athleticnet,,
+San Domenico,san-domenico,athleticnet_id,athleticnet,,
+San Francisc,san-francisco-university,athlete (36 athletes),hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
+San Francisco University,san-francisco-university,athleticnet_id,athleticnet,,
+San Francisco Waldorf,san-francisco-waldorf,athleticnet_id,athleticnet,,
+San Leandro,san-leandro,athleticnet_id,athleticnet,,
 San Leandro (Nc),san-leandro,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-San Lorenzo,san-lorenzo,exact,hytek|moc_program,2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
-San Marin,san-marin,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+San Lorenzo,san-lorenzo,athleticnet_id,athleticnet,,
+San Marin,san-marin,athleticnet_id,athleticnet,,
 San Marin (Nc),san-marin,exact,hytek,2026-moc,
-San Rafael,san-rafael,exact,hytek|moc_program,2019-moc|2022-moc|2024-moc|2025-moc|2026-moc,
+San Rafael,san-rafael,athleticnet_id,athleticnet,,
 San Ramon Va,san-ramon-valley,prefix,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-San Ramon Valley,san-ramon-valley,exact,hytek,2019-area-tri-valley,tri-valley
+San Ramon Valley,san-ramon-valley,athleticnet_id,athleticnet,,
 San Ramon Valley (Nc),san-ramon-valley,exact,hytek,2022-area-tri-valley|2022-moc|2023-area-tri-valley|2023-moc|2024-area-tri-valley|2024-moc|2025-area-tri-valley|2025-moc|2026-area-tri-valley|2026-moc,tri-valley
-Santa Rosa,santa-rosa,exact,hytek,2019-moc,
+Santa Rosa,santa-rosa,athleticnet_id,athleticnet,,
 Santa Rosa (,santa-rosa,exact,hytek|moc_program,2022-moc|2024-moc|2025-moc|2026-moc,
 Santa Rosa (Nc),santa-rosa,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Sir Francis,archie-williams,confirmed,hytek,2019-moc,
+Sir Francis Drake,archie-williams,confirmed,hytek,2019-moc,
 Sonoma Acade,sonoma-academy,prefix,hytek|moc_program,2019-moc|2022-moc|2023-moc|2025-moc|2026-moc,
+Sonoma Academy,sonoma-academy,athleticnet_id,athleticnet,,
 Sonoma Academy (Nc),sonoma-academy,exact,hytek,2025-moc,
 Sonoma Valle,sonoma-valley,prefix,hytek|moc_program,2019-moc|2022-moc|2026-moc,
+Sonoma Valley,sonoma-valley,athleticnet_id,athleticnet,,
+South Fork,south-fork,athleticnet_id,athleticnet,,
+Southern Tri,southern-trinity,prefix,hytek|moc_program,2024-moc,
+Southern Trinity,southern-trinity,athleticnet_id,athleticnet,,
+St Bernard C,st-bernard-academy,athlete (5 athletes),hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc,
+St Helena,st-helena,athleticnet_id,athleticnet,,
+St Joseph Notre Dame,st-joseph-notre-dame,athleticnet_id,athleticnet,,
 St Mary's Co,st-mary-college,prefix,hytek,2024-area-bay-shore,bay-shore
-St Mary's College,st-mary-college,exact,hytek,2024-area-bay-shore,bay-shore
+St Mary's College,st-mary-college,athleticnet_id,athleticnet,,
+St Patrick/St Vincent,st-patrick-st-vincent,athleticnet_id,athleticnet,,
 St. Bernard (Nc),st-bernard-academy,generic,hytek|moc_program,2025-moc|2026-moc,
+St. Bernard's Academy,st-bernard-academy,athleticnet_id,athleticnet,,
 St. Helena,st-helena,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2026-moc,
 St. Helena (Nc),st-helena,exact,hytek,2022-moc,
 St. Joseph Notre Dame (Nc),st-joseph-notre-dame,exact,hytek,2022-moc,
 St. Mary's,st-mary-college,generic,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Summerfield,summerfield-waldorf-of-santa-rosa,prefix,hytek|moc_program,2025-moc|2026-moc,
-Tamalpais,tamalpais,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Summerfield Waldorf of Santa Rosa,summerfield-waldorf-of-santa-rosa,athleticnet_id,athleticnet,,
+Tamalpais,tamalpais,athleticnet_id,athleticnet,,
 Tamalpais (Nc),tamalpais,exact,hytek,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
-Technology,technology,exact,hytek,2019-moc,
+Tech HS,high-tech-high-nc,athlete (2 athletes),hytek|moc_program,2023-moc,
+Technology,technology,athleticnet_id,athleticnet,,
 Technology (Nc),technology,exact,hytek|moc_program,2024-moc|2025-moc|2026-moc,
-Terra Linda,terra-linda,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Tennyson,tennyson,athleticnet_id,athleticnet,,
+Terra Linda,terra-linda,athleticnet_id,athleticnet,,
 Terra Linda (Nc),terra-linda,exact,hytek,2024-moc|2026-moc,
-Ukiah,ukiah,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Ukiah,ukiah,athleticnet_id,athleticnet,,
 Ukiah (Nc),ukiah,exact,hytek,2026-moc,
-Upper Lake,upper-lake,exact,hytek|moc_program,2024-moc|2025-moc|2026-moc,
-Vallejo,vallejo,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2025-moc|2026-moc,bay-shore
+University-SF,san-francisco-university,confirmed,hytek|moc_program,2023-moc|2024-moc,
+University-SF (Nc),san-francisco-university,confirmed,hytek,2022-moc|2023-moc|2024-moc,
+Upper Lake,upper-lake,athleticnet_id,athleticnet,,
+Urban of San Francisco,urban-of-san-francisco,athleticnet_id,athleticnet,,
+Urban-SF (Nc),urban-of-san-francisco,athlete (7 athletes),hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Vallejo,vallejo,athleticnet_id,athleticnet,,
 Vallejo (Nc),vallejo,exact,hytek,2025-moc|2026-moc,
-Vintage,vintage,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Vintage,vintage,athleticnet_id,athleticnet,,
 Vintage (Nc),vintage,exact,hytek,2024-moc|2025-moc|2026-moc,
-Washington,washington,exact,hytek|moc_program,2019-moc|2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
+Washington,washington,athleticnet_id,athleticnet,,
 Washington (,washington,exact,hytek,2024-area-bay-shore,bay-shore
 Washington (Nc),washington,exact,hytek,2022-moc|2023-moc|2024-area-bay-shore|2024-moc|2026-moc,bay-shore
-Willits,willits,exact,hytek|moc_program,2019-moc|2022-moc|2025-moc|2026-moc,
-Windsor,windsor,exact,hytek,2019-moc,
+Willits,willits,athleticnet_id,athleticnet,,
+Willits Charter,willits-charter,athleticnet_id,athleticnet,,
+Windsor,windsor,athleticnet_id,athleticnet,,
 Windsor (Nc),windsor,exact,hytek|moc_program,2022-moc|2023-moc|2024-moc|2025-moc|2026-moc,
 Ygnacio Vall,ygnacio-valley,prefix,hytek|moc_program,2019-area-tri-valley|2019-moc|2022-area-tri-valley|2023-area-tri-valley|2024-area-tri-valley|2025-area-tri-valley|2025-moc|2026-area-tri-valley,tri-valley
+Ygnacio Valley,ygnacio-valley,athleticnet_id,athleticnet,,

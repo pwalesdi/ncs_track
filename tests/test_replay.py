@@ -12,7 +12,7 @@ import pytest
 
 from ncs_track import paths
 from ncs_track.replay import (DEFAULT_GRID, Interpretation, compare, evaluate, interpretation_grid,
-                              predict, score, sweep)
+                              predict, rates, score, sweep, switch_effects)
 from ncs_track.rules import load_rules
 
 AREA_CODE = {"TV": "tri-valley", "BS": "bay-shore", "RE": "redwood-empire", "CA": "class-a"}
@@ -167,9 +167,10 @@ def test_compare_outcomes(rules):
     by = comp.rows.groupby("outcome")["athlete_name"].apply(sorted).to_dict()
     assert by["predicted_not_entered"] == ["TV8, Runner"]
     assert by["entered_not_predicted"] == ["TV9, Runner"]
-    assert by["match_last_name_school"] == ["BS7, Runner"]
+    assert by["match_name_variant"] == ["BS7, Runner"]
     tv9 = comp.rows[comp.rows["athlete_name"] == "TV9, Runner"].iloc[0]
-    assert "Area place 9" in tv9["diagnosis"] and "below standard" in tv9["diagnosis"]
+    assert tv9["reason"] == "below_standard_not_fill"
+    assert "tri-valley place 9" in tv9["detail"] and "fill rank 8" in tv9["detail"]
     s = score(comp)
     assert s["match"] == 24 and s["not_comparable_area_unknown"] == 1
     assert comp.notes == []                                   # all four Areas present
@@ -196,3 +197,39 @@ def test_sweep_ranks_the_reading_that_reproduces_entries(rules):
     assert best["interpretation"] == "class_a_at_large_outside_top=6;fill_before_at_large=False"
     assert best["mismatches"] == 0 and best["precision"] == 1.0 and best["recall"] == 1.0
     assert (table["mismatches"].iloc[1:] > 0).all()
+
+
+def test_name_order_does_not_matter(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    ent = entries_from(pred)
+    ent["athlete_name"] = [" ".join(reversed(n.split(", "))) for n in ent["athlete_name"]]   # "Runner TV1"
+    assert score(compare(ev, ent, rules, school_key=key, school_area=area))["mismatches"] == 0
+
+
+def test_scratch_replacement_pairs_next_in_line(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    ent = entries_from(pred, drop={"TV3"}, add=[("TV9, Runner", "TV School 9", "12.50")])
+    off = compare(ev, ent, rules, school_key=key, school_area=area)
+    assert score(off)["mismatches"] == 2
+    on = compare(ev, ent, rules, school_key=key, school_area=area, interp=Interpretation(scratch_replacement=True))
+    s = score(on)
+    assert s["mismatches"] == 0 and s["probable_scratch_replacement"] == 2
+    # TV10 is not next in line (TV9 is), so it is not paired.
+    ent2 = entries_from(pred, drop={"TV3"}, add=[("TV10, Runner", "TV School 10", "12.60")])
+    on2 = compare(ev, ent2, rules, school_key=key, school_area=area, interp=Interpretation(scratch_replacement=True))
+    assert score(on2)["mismatches"] == 2
+
+
+def test_rates_and_switch_effects(rules):
+    truth = predict(results(), rules, Interpretation())
+    ent = entries_from(truth)
+    axes = dict(class_a_at_large_outside_top=[3, 6], wind_aided_at_large=[True, False])
+    table = sweep(results(), rules, ent, interpretation_grid(**axes), school_key=key, school_area=area)
+    eff = switch_effects(table, axes).set_index("switch")
+    assert eff.loc["class_a_at_large_outside_top", "predicted_list_changes_in"] == 2
+    assert eff.loc["wind_aided_at_large", "predicted_list_changes_in"] == 0     # no wind-aided marks
+    comp = compare(evaluate(results(), rules), ent, rules, school_key=key, school_area=area)
+    r = rates(comp.rows, "area")
+    assert (r["match_rate"] == 1.0).all() and set(r.index) == set(AREA_CODE.values())

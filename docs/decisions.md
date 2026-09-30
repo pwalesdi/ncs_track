@@ -59,3 +59,20 @@ Newest at the bottom.
 - Commits use the GitHub noreply address.
 - The 2026 MOC Athletic.net file was downloaded four times. The kept copy is the full one
   with the "(Unified)" / "(Relay Split)" labels (see the manifest notes).
+
+## 2026-09-29: Athletic.net as primary source; 2026 replay
+
+- **Scope:** Athletic.net is the replay's source. In scope means the Varsity division
+  only; Unified, Ambulatory and Open divisions, "(Relay Split)" rows and place-"X"
+  (exhibition) rows are out of scope. Area places were checked: they are overall, not
+  per section (validation V06 stops a file that restarts places per section).
+- **Renames:** Sir Francis Drake → Archie Williams, and University-SF / SF University →
+  San Francisco University, are confirmed and merged. West County, El Molino and Analy
+  stay in review, even though Athletic.net lists West County's athletes under Analy.
+- **Schools:** schools not on the source-of-truth list are added from Athletic.net. Each
+  season's area comes from the Area meet the school competed at ("area from meet
+  participation"). The 2026 participation areas match the list for every listed school.
+- **Athlete link:** a program school spelling is matched through its athletes, when at
+  least 2 of its MOC entrants appear under one Athletic.net school.
+- **Scratch replacement** is a comparison overlay, not a rule reading. It never changes
+  predictions, and the best rule reading is chosen with it off.

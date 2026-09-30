@@ -72,12 +72,66 @@ def test_hytek_school_strings():
     assert schools.clean_raw("California C") == "California C"
 
 
-def test_alias_table_has_every_season(canon):
-    matched = pd.DataFrame([{"raw": "DeLaSalle", "school_key": "de-la-salle"}])
-    t = schools.alias_table(canon, matched).set_index("school_key")
-    assert t.loc["de-la-salle", "spellings"] == "DeLaSalle"
-    assert {f"area_{s}" for s in schools.SEASONS} <= set(t.columns)
-    assert t.loc["analy", "area_2019"] == "redwood-empire" and t.loc["analy", "athleticnet_school_id"] == ""
+def _perf(rows):
+    cols = ["meet_key", "level", "meet_area", "season", "school_id", "school_name_raw",
+            "athlete_name_raw", "gender", "event_code"]
+    return pd.DataFrame(rows, columns=cols)
+
+
+def test_athleticnet_ids_and_new_schools(canon):
+    perf = _perf([
+        ("2026-area-tri-valley", "area", "tri-valley", 2026, "1023", "California (San Ramon)", "A B", "girls", "100"),
+        ("2026-area-bay-shore", "area", "bay-shore", 2026, "929", "Tennyson", "C D", "girls", "100"),
+        ("2026-area-class-a", "area", "class-a", 2026, "0", None, "E F", "girls", "100"),
+    ])
+    id_map, new, review = schools.athleticnet_ids(perf, canon)
+    assert id_map == {"1023": "california-san-ramon", "929": "tennyson"}
+    assert list(new["canonical_name"]) == ["Tennyson"] and not new["in_source_list"].any()
+    assert any("school_id 0" in r["raw"] for r in review)
+
+
+def test_one_school_one_id(canon):
+    perf = _perf([("m", "area", "tri-valley", 2026, "1", "De La Salle", "A B", "boys", "100"),
+                  ("m", "area", "tri-valley", 2026, "2", "DeLaSalle", "C D", "boys", "100")])
+    id_map, _, review = schools.athleticnet_ids(perf, canon)
+    assert id_map == {} and "several Athletic.net school_ids" in review[0]["reason"]
+
+
+def test_area_from_participation(canon):
+    id_map = {"1": "de-la-salle", "2": "analy"}
+    perf = _perf([("2026-area-tri-valley", "area", "tri-valley", 2026, "1", "De La Salle", "A B", "boys", "100"),
+                  ("2026-moc", "moc", None, 2026, "1", "De La Salle", "A B", "boys", "100"),
+                  ("2022-area-class-a", "area", "class-a", 2022, "2", "Analy", "C D", "boys", "100"),
+                  ("2022-area-redwood-empire", "area", "redwood-empire", 2022, "2", "Analy", "C D", "boys", "100")])
+    part = schools.participation(perf, id_map)
+    t, review = schools.alias_table(canon, pd.DataFrame(columns=["raw", "school_key"]), id_map, part)
+    t = t.set_index("school_key")
+    assert t.loc["de-la-salle", "area_2026"] == "tri-valley" and t.loc["de-la-salle", "athleticnet_school_id"] == "1"
+    assert t.loc["de-la-salle", "area_2019"] == "" and t.loc["de-la-salle", "list_area"] == "tri-valley"
+    assert t.loc["analy", "area_2022"] == "" and "2 Area meets in 2022" in review[0]["reason"]
+    assert set(schools.area_vs_list(t.reset_index())["school_key"]) >= {"analy"}   # no 2026 participation
+
+
+def test_confirmed_aliases(canon):
+    canon = pd.concat([canon, schools._canon_frame(["Archie Williams", "San Francisco University"], [None, None], False)])
+    sp = pd.DataFrame([spell("Sir Francis Drake"), spell("University-SF (Nc)"), spell("West County")])
+    matched, review = schools.match_spellings(sp, canon)
+    assert dict(zip(matched["raw"], matched["method"])) == {"Sir Francis Drake": "confirmed", "University-SF (Nc)": "confirmed"}
+    assert list(review["raw"]) == ["West County"]
+
+
+def test_athlete_link_needs_two_agreeing_athletes():
+    entries = pd.DataFrame({"season": 2026, "gender": "girls", "event_code": ["100", "200", "400"],
+                            "is_relay": False, "athlete_name": ["Quill, Ada", "Rook, Bea", "Rook, Bea"],
+                            "school_name": ["Urban-SF (Nc)", "Urban-SF (Nc)", "Urban-SF (Nc)"]})
+    perf = _perf([("2026-moc", "moc", None, 2026, "902", "Urban of San Francisco", "Ada Quill", "girls", "100"),
+                  ("2026-moc", "moc", None, 2026, "902", "Urban of San Francisco", "Bea Rook", "girls", "200")])
+    review = pd.DataFrame({"raw": ["Urban-SF (Nc)"]})
+    links = schools.athlete_links(review, entries, perf, {"902": "urban-of-san-francisco"})
+    assert links.to_dict("records") == [{"raw": "Urban-SF (Nc)", "school_key": "urban-of-san-francisco",
+                                         "method": "athlete (2 athletes)"}]
+    one = schools.athlete_links(review, entries[entries["event_code"] == "100"], perf, {"902": "urban-of-san-francisco"})
+    assert one.empty
 
 
 def test_printed_standards():

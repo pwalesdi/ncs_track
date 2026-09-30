@@ -13,13 +13,18 @@ The parts of the rules we are unsure of are switches on `Interpretation`, so eac
 can be replayed and scored against the MOC programs; the reading whose predictions match
 the real entries best is the one to believe. `compare` does the scoring.
 
-Not modelled (yet): scratches and their replacements ("non-qualifying finalists may be
-advanced into vacancies"), 4x800 (separate system), league -> Area.
+Scratches: with `scratch_replacement` on, a predicted qualifier missing from the program
+and an unpredicted entrant from the same Area who was the next finalist in line are
+paired and tagged "probable_scratch_replacement" instead of counting as two mismatches.
+
+Not modelled: 4x800 (separate system), league -> Area.
 """
 
 from __future__ import annotations
 
 import itertools
+import re
+import unicodedata
 from dataclasses import asdict, dataclass, field
 from typing import Callable
 
@@ -27,7 +32,6 @@ import pandas as pd
 
 from .events import EVENTS
 from .marks import parse_mark, sort_key
-from .names import name_key
 from .rules import mark_of
 
 AREAS = ("tri-valley", "bay-shore", "redwood-empire", "class-a")
@@ -53,6 +57,8 @@ class Interpretation:
     fill_ties_include: bool = True
     # Wind-aided marks count for at-large (D6: documents are silent).
     wind_aided_at_large: bool = True
+    # Pair "predicted but not entered" with "entered, next finalist in line, same Area".
+    scratch_replacement: bool = False
 
     def describe(self) -> str:
         d = asdict(self)
@@ -71,6 +77,10 @@ def interpretation_grid(**axes) -> list[Interpretation]:
 
 # Default sweep: the two questions Patrick asked to test.
 DEFAULT_GRID = dict(class_a_at_large_outside_top=[3, 6], fill_before_at_large=[True, False])
+# Every switch (64 readings).
+FULL_GRID = dict(class_a_at_large_outside_top=[3, 6], fill_before_at_large=[True, False],
+                 fill_source=["moc_guide", "nbl_flyer"], fill_ties_include=[True, False],
+                 wind_aided_at_large=[True, False], scratch_replacement=[False, True])
 
 
 # ---------------------------------------------------------------------------
@@ -181,29 +191,66 @@ def predict(results: pd.DataFrame, rules: dict, interp: Interpretation = Interpr
 # ---------------------------------------------------------------------------
 # Compare with MOC programs
 # ---------------------------------------------------------------------------
+def _name_tokens(name: str) -> list[str]:
+    """Order-free name tokens: "Last, First" and "First Last" give the same result."""
+    t = unicodedata.normalize("NFKD", name)
+    t = "".join(ch for ch in t if not unicodedata.combining(ch)).lower().replace("'", "").replace("’", "")
+    t = re.sub(r"\([^)]*\)|\b(jr|sr|ii|iii|iv)\b\.?", " ", t)
+    return sorted(re.findall(r"[a-z0-9]+", t))
+
+
 def _identity(name: str | None, school_key: str | None, is_relay: bool) -> str:
     if is_relay or not isinstance(name, str) or not name.strip():
         return f"relay|{school_key}"
-    return f"{name_key(name)}|{school_key}"
+    return f"{' '.join(_name_tokens(name))}|{school_key}"
 
 
-def _surname_school(identity: str) -> tuple[str, str]:
-    """("last", "school_key") from "last|first|school_key"."""
-    return identity.split("|", 1)[0], identity.rsplit("|", 1)[1]
+def _variant_of(a: str, b: str) -> bool:
+    """Same school, and the names share a token of 2+ letters (Tess/Tessa Quill)."""
+    (na, sa), (nb, sb) = a.rsplit("|", 1), b.rsplit("|", 1)
+    return sa == sb and bool({t for t in na.split() if len(t) >= 2} & set(nb.split()))
 
 
 @dataclass
 class Comparison:
-    rows: pd.DataFrame                  # one row per entrant with `outcome`
-    summary: pd.DataFrame               # counts per outcome (and per qualified_by)
+    rows: pd.DataFrame                  # one row per entrant with `outcome` and `reason`
+    summary: pd.DataFrame               # counts per outcome
     notes: list[str] = field(default_factory=list)
 
 
-OUTCOMES = ("match", "match_last_name_school", "predicted_not_entered", "entered_not_predicted")
+OUTCOMES = ("match", "match_name_variant", "probable_scratch_replacement",
+            "predicted_not_entered", "entered_not_predicted")
+ROW_COLUMNS = ["gender", "event_code", "outcome", "reason", "qualified_by", "athlete_name", "school_name",
+               "area", "place", "mark_raw", "meets_standard", "fill_rank", "program_name", "detail"]
+
+
+def _row(g, e, outcome, reason, *, qualified_by=None, name=None, school=None, area=None, place=None,
+         mark=None, meets=None, fill_rank=None, program_name=None, detail=None) -> dict:
+    return dict(zip(ROW_COLUMNS, (g, e, outcome, reason, qualified_by, name, school, area, place, mark,
+                                  meets, fill_rank, program_name, detail)))
+
+
+def _diagnose(identity: str, allperf: pd.DataFrame, gender: str, event: str, fill_n: int) -> tuple[str, str, pd.Series | None]:
+    """(reason code, detail, the athlete's Area performance or None) for an unpredicted entrant."""
+    hit = allperf[(allperf["gender"] == gender) & (allperf["event_code"] == event) & (allperf["identity"] == identity)]
+    if hit.empty:
+        return "not_in_area_final", "no matching athlete/team in this event's Area finals", None
+    h = hit.iloc[0]
+    where = f"{h['meet_area']} place {h['place'] if pd.notna(h['place']) else '-'}, {h['mark_raw']}"
+    if h["status"] != "OK":
+        return f"area_status_{h['status']}", where, h
+    if h["meets_standard"] and not h["at_large_eligible"]:
+        why = "wind-aided" if h.get("wind_aided") else f"place {h['place']} not eligible for at-large"
+        return "meets_standard_but_not_eligible", f"{where}; {why}", h
+    if h["fill_candidate"] and pd.notna(h["fill_rank"]) and h["fill_rank"] <= fill_n + 3:
+        return "just_outside_fill", f"{where}; below standard; fill rank {h['fill_rank']} of {fill_n} spots", h
+    return "below_standard_not_fill", f"{where}; below standard" + (
+        f"; fill rank {h['fill_rank']}" if pd.notna(h["fill_rank"]) else "; not in fill pool"), h
 
 
 def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
-            school_key: Callable[[str], str | None], school_area: Callable[[str], str | None]) -> Comparison:
+            school_key: Callable[[str], str | None], school_area: Callable[[str], str | None],
+            interp: Interpretation = Interpretation()) -> Comparison:
     """Compare predicted qualifiers with MOC program entries for the same season.
 
     Only entrants from Areas present in `evaluated` are compared: an MOC entrant from an
@@ -215,11 +262,13 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
     if areas != set(AREAS):
         notes.append(f"fill pool incomplete: results only for {sorted(areas)}; fill predictions are provisional")
     events = set(main_events(rules))
+    fill_n, _ = _fill_rule(rules, interp)
 
-    pred = evaluated[evaluated["qualified_by"].notna()].copy()
-    pred["school_key"] = pred["school_name_raw"].map(school_key)
-    pred["identity"] = [_identity(n, s, r) for n, s, r in
-                        zip(pred["athlete_name_raw"], pred["school_key"], pred["is_relay"])]
+    allperf = evaluated.copy()
+    allperf["school_key"] = allperf["school_name_raw"].map(school_key)
+    allperf["identity"] = [_identity(n, s, r) for n, s, r in
+                           zip(allperf["athlete_name_raw"], allperf["school_key"], allperf["is_relay"])]
+    pred = allperf[allperf["qualified_by"].notna()]
 
     ent = entries[~entries["is_adaptive"].astype(bool) & entries["event_modifier"].isna()].copy()
     ent = ent[[(g, e) in events for g, e in zip(ent["gender"], ent["event_code"])]]
@@ -230,60 +279,45 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
     not_comparable = ent[~ent["area"].isin(areas)]
     ent = ent[ent["area"].isin(areas)]
 
-    # Diagnostic lookup: every evaluated performance (qualified or not) by identity.
-    allperf = evaluated.copy()
-    allperf["school_key"] = allperf["school_name_raw"].map(school_key)
-    allperf["identity"] = [_identity(n, s, r) for n, s, r in
-                           zip(allperf["athlete_name_raw"], allperf["school_key"], allperf["is_relay"])]
-
     rows = []
-    for (g, e), p in pred.groupby(["gender", "event_code"]):
+    for g, e in sorted(events):
+        p = pred[(pred["gender"] == g) & (pred["event_code"] == e)]
         en = ent[(ent["gender"] == g) & (ent["event_code"] == e)]
-        p_ids, e_ids = set(p["identity"]), set(en["identity"])
-        exact = p_ids & e_ids
-        # Same school and surname, different first-name spelling: reported, not merged.
-        loose_e = {i: _surname_school(i) for i in e_ids - exact if not i.startswith("relay|")}
+        exact = set(p["identity"]) & set(en["identity"])
         pairs = {}
-        for pi in sorted(p_ids - exact):
-            if pi.startswith("relay|"):
-                continue
-            hits = [ei for ei, ek in loose_e.items() if ek == _surname_school(pi) and ei not in pairs.values()]
-            if len(hits) == 1:
+        e_left = [i for i in en["identity"] if i not in exact and not i.startswith("relay|")]
+        for pi in sorted(set(p["identity"]) - exact):
+            hits = [ei for ei in e_left if _variant_of(pi, ei) and ei not in pairs.values()]
+            if len(hits) == 1 and not pi.startswith("relay|"):
                 pairs[pi] = hits[0]
+        prog_name = dict(zip(en["identity"], en["athlete_name"]))
+        pne, enp = [], []
         for _, r in p.iterrows():
             i = r["identity"]
-            outcome = ("match" if i in exact else "match_last_name_school" if i in pairs
-                       else "predicted_not_entered")
-            rows.append({"gender": g, "event_code": e, "outcome": outcome, "qualified_by": r["qualified_by"],
-                         "athlete_name": r["athlete_name_raw"], "school_name": r["school_name_raw"],
-                         "area": r["meet_area"], "place": r["place"], "mark_raw": r["mark_raw"],
-                         "meets_standard": r["meets_standard"], "fill_rank": r["fill_rank"],
-                         "program_name": (en.loc[en["identity"] == pairs[i], "athlete_name"].iloc[0]
-                                          if i in pairs else None),
-                         "diagnosis": None})
-        matched_e = exact | set(pairs.values())
-        for _, r in en[~en["identity"].isin(matched_e)].iterrows():
-            rows.append({"gender": g, "event_code": e, "outcome": "entered_not_predicted",
-                         "qualified_by": None, "athlete_name": r["athlete_name"],
-                         "school_name": r["school_name"], "area": r["area"], "place": None,
-                         "mark_raw": r["seed_mark_raw"], "meets_standard": None, "fill_rank": None,
-                         "program_name": r["athlete_name"],
-                         "diagnosis": _diagnose(r, allperf, g, e)})
-    # Events with entries but no predictions at all.
-    for (g, e), en in ent.groupby(["gender", "event_code"]):
-        if ((pred["gender"] == g) & (pred["event_code"] == e)).any():
-            continue
-        for _, r in en.iterrows():
-            rows.append({"gender": g, "event_code": e, "outcome": "entered_not_predicted",
-                         "qualified_by": None, "athlete_name": r["athlete_name"], "school_name": r["school_name"],
-                         "area": r["area"], "place": None, "mark_raw": r["seed_mark_raw"],
-                         "meets_standard": None, "fill_rank": None, "program_name": r["athlete_name"],
-                         "diagnosis": _diagnose(r, allperf, g, e)})
+            base = dict(qualified_by=r["qualified_by"], name=r["athlete_name_raw"], school=r["school_name_raw"],
+                        area=r["meet_area"], place=r["place"], mark=r["mark_raw"], meets=r["meets_standard"],
+                        fill_rank=r["fill_rank"])
+            if i in exact:
+                rows.append(_row(g, e, "match", "match", program_name=prog_name[i], **base))
+            elif i in pairs:
+                rows.append(_row(g, e, "match_name_variant", "name spelled differently",
+                                 program_name=prog_name[pairs[i]], **base))
+            else:
+                pne.append(_row(g, e, "predicted_not_entered", f"predicted_{r['qualified_by']}_not_in_program",
+                                detail="qualified under this reading but not in the MOC program", **base))
+        for _, r in en[~en["identity"].isin(exact | set(pairs.values()))].iterrows():
+            reason, detail, h = _diagnose(r["identity"], allperf, g, e, fill_n)
+            enp.append(_row(g, e, "entered_not_predicted", reason, name=r["athlete_name"], school=r["school_name"],
+                            area=r["area"], place=None if h is None else h["place"], mark=r["seed_mark_raw"],
+                            meets=None if h is None else h["meets_standard"],
+                            fill_rank=None if h is None else h["fill_rank"], program_name=r["athlete_name"],
+                            detail=detail))
+        if interp.scratch_replacement:
+            _pair_scratches(pne, enp, allperf[(allperf["gender"] == g) & (allperf["event_code"] == e)])
+        rows += pne + enp
 
-    out = pd.DataFrame(rows, columns=["gender", "event_code", "outcome", "qualified_by", "athlete_name",
-                                      "school_name", "area", "place", "mark_raw", "meets_standard",
-                                      "fill_rank", "program_name", "diagnosis"])
-    summary = out.groupby(["outcome"]).size().reindex(OUTCOMES, fill_value=0).rename("n").reset_index()
+    out = pd.DataFrame(rows, columns=ROW_COLUMNS)
+    summary = out.groupby("outcome").size().reindex(OUTCOMES, fill_value=0).rename("n").reset_index()
     summary = pd.concat([summary, pd.DataFrame([
         {"outcome": "not_comparable_area_missing", "n": int(not_comparable["area"].notna().sum())},
         {"outcome": "not_comparable_area_unknown", "n": int(not_comparable["area"].isna().sum())},
@@ -291,28 +325,47 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
     return Comparison(out, summary, notes)
 
 
-def _diagnose(entry: pd.Series, allperf: pd.DataFrame, gender: str, event: str) -> str:
-    hit = allperf[(allperf["gender"] == gender) & (allperf["event_code"] == event)
-                  & (allperf["identity"] == entry["identity"])]
-    if hit.empty:
-        return "not found in Area finals for this event (name/school mismatch, or entered another way)"
-    h = hit.iloc[0]
-    bits = [f"Area place {h['place']}", f"mark {h['mark_raw']}",
-            "meets standard" if h["meets_standard"] else "below standard"]
-    if not h["at_large_eligible"] and not h["auto"]:
-        bits.append("not at-large eligible by place under this reading")
-    if h["fill_candidate"]:
-        bits.append(f"fill rank {h['fill_rank']}")
-    return "; ".join(bits)
+def _pair_scratches(pne: list[dict], enp: list[dict], event_perf: pd.DataFrame) -> None:
+    """Tag (predicted-not-entered, entered-not-predicted) pairs from one Area where the
+    entrant was among the next finalists in line after that Area's qualifiers."""
+    for area in {r["area"] for r in pne}:
+        missing = sorted((r for r in pne if r["area"] == area and r["outcome"] == "predicted_not_entered"),
+                         key=lambda r: r["place"] if pd.notna(r["place"]) else 1e9)
+        line = event_perf[(event_perf["meet_area"] == area) & event_perf["qualified_by"].isna()
+                          & (event_perf["status"] == "OK") & event_perf["place"].notna()].sort_values("place")
+        next_places = list(line["place"].iloc[:len(missing)])
+        subs = [r for r in enp if r["area"] == area and r["outcome"] == "entered_not_predicted"
+                and pd.notna(r["place"]) and r["place"] in next_places]
+        for m, sub in zip(missing, sorted(subs, key=lambda r: r["place"])):
+            for r, other in ((m, sub), (sub, m)):
+                r["outcome"] = "probable_scratch_replacement"
+                r["reason"] = "probable_scratch_replacement"
+                r["detail"] = f"paired with {other['athlete_name'] or other['school_name']} ({area} place {other['place']})"
 
 
 def score(comp: Comparison) -> dict:
     s = dict(zip(comp.summary["outcome"], comp.summary["n"]))
-    matched = s["match"] + s["match_last_name_school"]
-    predicted = matched + s["predicted_not_entered"]
-    entered = matched + s["entered_not_predicted"]
-    return {**s, "precision": matched / predicted if predicted else None,
+    matched = s["match"] + s["match_name_variant"]
+    scratch_pairs = s["probable_scratch_replacement"] // 2
+    predicted = matched + s["predicted_not_entered"] + scratch_pairs
+    entered = matched + s["entered_not_predicted"] + scratch_pairs
+    mismatches = s["predicted_not_entered"] + s["entered_not_predicted"]
+    return {**s, "mismatches": mismatches,
+            "match_rate": matched / (matched + mismatches + 2 * scratch_pairs) if matched + mismatches else None,
+            "precision": matched / predicted if predicted else None,
             "recall": matched / entered if entered else None}
+
+
+def rates(rows: pd.DataFrame, by: str) -> pd.DataFrame:
+    """Match rate per group: matched / (matched + predicted-not-entered + entered-not-predicted)."""
+    t = rows.assign(ok=rows["outcome"].isin(["match", "match_name_variant"]),
+                    pne=rows["outcome"] == "predicted_not_entered",
+                    enp=rows["outcome"] == "entered_not_predicted",
+                    scr=rows["outcome"] == "probable_scratch_replacement")
+    g = t.groupby(by)[["ok", "pne", "enp", "scr"]].sum().astype(int)
+    g["match_rate"] = (g["ok"] / (g["ok"] + g["pne"] + g["enp"] + g["scr"])).round(3)
+    return g.rename(columns={"ok": "matched", "pne": "predicted_not_entered", "enp": "entered_not_predicted",
+                             "scr": "scratch_pairs_rows"})
 
 
 def sweep(results: pd.DataFrame, rules: dict, entries: pd.DataFrame,
@@ -320,8 +373,32 @@ def sweep(results: pd.DataFrame, rules: dict, entries: pd.DataFrame,
     """Score each interpretation; the one that best reproduces real entries ranks first."""
     rows = []
     for interp in interps:
-        comp = compare(evaluate(results, rules, interp), entries, rules, **compare_kw)
-        rows.append({"interpretation": interp.name, **score(comp)})
+        ev = evaluate(results, rules, interp)
+        comp = compare(ev, entries, rules, interp=interp, **compare_kw)
+        pred = ev[ev["qualified_by"].notna()]
+        rows.append({"interpretation": interp.name, **asdict(interp), **score(comp),
+                     "predicted_set": frozenset(zip(pred["performance_id"], pred["qualified_by"]))})
     df = pd.DataFrame(rows)
-    df["mismatches"] = df["predicted_not_entered"] + df["entered_not_predicted"]
     return df.sort_values(["mismatches", "interpretation"]).reset_index(drop=True)
+
+
+def switch_effects(table: pd.DataFrame, axes: dict) -> pd.DataFrame:
+    """For each switch: across pairs of readings that differ only in that switch, how often
+    the predicted list changes and how the mismatch count moves."""
+    out = []
+    for k, values in axes.items():
+        others = [a for a in axes if a != k]
+        changed = n = 0
+        deltas = []
+        for _, grp in table.groupby(others):
+            if len(grp) != len(values):
+                continue
+            n += 1
+            sets = grp.set_index(k)["predicted_set"]
+            mism = grp.set_index(k)["mismatches"]
+            changed += int(len(set(sets)) > 1)
+            deltas.append(int(mism[values[1]] - mism[values[0]]))
+        out.append({"switch": k, "values": f"{values[0]} -> {values[1]}", "pairs": n,
+                    "predicted_list_changes_in": changed,
+                    "mismatch_delta_min": min(deltas), "mismatch_delta_max": max(deltas)})
+    return pd.DataFrame(out)

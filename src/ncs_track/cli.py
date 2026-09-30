@@ -171,6 +171,35 @@ def cmd_replay(args) -> int:
     return 0
 
 
+def cmd_analysis(args) -> int:
+    from . import analysis, replay
+    perf = pd.read_csv(paths.PROCESSED / "performances.csv", dtype={"school_id": str, "athlete_id": str},
+                       low_memory=False)
+    qs, los = [], []
+    for season in args.season:
+        results, entries, rules, label, kw, legs = replay_inputs(season)
+        q, lo, comp = analysis.build_season(season, results, entries, rules, kw, legs, perf)
+        qs.append(q)
+        los.append(lo)
+        s = replay.score(comp)
+        print(f"{season}: {len(q)} athlete-event rows; RULES match {s['rules_match_rate']:.3f}, RAW {s['raw_match_rate']:.3f}")
+    q = pd.concat(qs, ignore_index=True)
+    paths.OUTPUTS.mkdir(parents=True, exist_ok=True)
+    q.to_csv(paths.OUTPUTS / "qualifiers.csv", index=False)
+    out = paths.SUMMARY
+    out.mkdir(parents=True, exist_ok=True)
+    analysis.field_makeup(q).to_csv(out / "field_makeup.csv", index=False)
+    analysis.at_large_share(q).to_csv(out / "at_large_share.csv", index=False)
+    analysis.moc_performance(q).to_csv(out / "moc_performance.csv", index=False)
+    su = analysis.spot_utilization(q)
+    su.to_csv(out / "spot_utilization.csv", index=False)
+    analysis.spot_utilization_by_area(su).to_csv(out / "spot_utilization_by_area.csv", index=False)
+    analysis.spot_utilization_flags(su).to_csv(out / "spot_utilization_flags.csv", index=False)
+    pd.concat(los, ignore_index=True).to_csv(out / "left_out.csv", index=False)
+    print(f"wrote outputs/qualifiers.csv (git-ignored) and {out.relative_to(paths.ROOT)}/*.csv")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="ncs_track")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -192,6 +221,9 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--season", type=int, nargs="+", required=True)
     rp.add_argument("--reading", help="JSON of rule switches to use instead of sweeping them")
     rp.set_defaults(func=cmd_replay)
+    an = sub.add_parser("analysis", help="build outputs/qualifiers.csv and data/summary/ tables")
+    an.add_argument("--season", type=int, nargs="+", required=True)
+    an.set_defaults(func=cmd_analysis)
     args = ap.parse_args(argv)
     return args.func(args)
 

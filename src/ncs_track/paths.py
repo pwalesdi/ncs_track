@@ -23,6 +23,7 @@ ROW_OVERRIDES = REFERENCE / "row_overrides.csv"
 PROCESSED = DATA / "processed"
 REVIEW = DATA / "review"
 OUTPUTS = ROOT / "outputs"
+SUMMARY = DATA / "summary"
 
 
 def rules_path(season: int) -> Path:

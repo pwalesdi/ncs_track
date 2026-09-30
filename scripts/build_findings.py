@@ -19,7 +19,13 @@ DOC = f"""# What the data shows: MOC qualification by Area, 2022–2026 (finding
 *For coaches and the committee. Built from the tables in `data/summary/`; every column is defined in
 `docs/analysis_tables.md`. Every number carries its unit, e.g. "25 of 284 entries finished top 8 (9%)".*
 
-> **What changed in this update (2026-09-30, second update)**
+> **What changed in this update (2026-09-30, third update)**
+> - **§6, spot use rebuilt on guaranteed spots only.** Five segments (competed, refilled,
+>   chose another event, didn't enter, unfilled); "Other unused" is gone. At-large standard
+>   qualifiers are reported separately. Unfilled stays provisional, with the three open
+>   questions listed in §6.
+>
+> **Earlier (second update)**
 > - **Wording.** "At-large" now means only athletes who met the at-large standard. The 3 fill
 >   spots are "next best mark", and the two together are "next best mark + at-large
 >   standard". Every number now states its unit. "Entries" means athlete-events: one
@@ -219,35 +225,40 @@ have finished that high at the MOC. This is a comparison, not a prediction.
 
 ## 6. Spot use
 
-**The segments.**
-- **Competed:** the Area's qualifier competed at the MOC.
-- **Refilled:** the Area's qualifier withdrew before the entry deadline, and the next
-  finalist from that Area took the spot.
-- **Unfilled (provisional, under verification):** a guaranteed spot nobody used. The
-  qualifier didn't compete, nobody replaced them, and the event's MOC field (athletes who
-  competed in the first round) ended below 24.
-- **Other unused:** a qualifier didn't use the spot, but no gap followed. Either the field
-  still had 24, or the spot came from the at-large standard, which has no fixed number.
+**Guaranteed spots only** (automatic + next best mark; 24 per event). Each spot falls in
+exactly one segment:
+- **Competed:** the qualifier ran the event at the MOC.
+- **Refilled:** the qualifier withdrew before the deadline and the next finalist from that
+  Area took the spot.
+- **Chose another event:** the qualifier competed at the MOC, but in other events.
+- **Didn't enter:** the qualifier was not at the MOC at all.
+- **Unfilled (provisional, under verification):** nobody used the spot and the event field
+  ended up short (below 24 athletes or teams competing).
 
-**Why the first count was too high.** It counted every unused spot that wasn't refilled.
-- **It counted spots that didn't shorten the field.** For example, over five seasons
-  Tri-Valley's boys 800 showed 8 unused, unreplaced spots. All 8 of those athletes ran other MOC
-  events instead: the 1600, the 4x800, or four other events. 2 were at-large qualifiers,
-  whose spots have no fixed number. The MOC boys 800 field had at least 24 entries every
-  season, and fell below 24 competitors only in 2025.
-- **The corrected count** keeps 2 unfilled spots there, and 121 of 3,890 guaranteed spots
-  over all Areas and five seasons.
+**Guaranteed spots used** = (competed + refilled) ÷ guaranteed spots. At-large standard
+qualifiers have no fixed number of spots, so they are reported separately and are in
+neither the segments nor the %.
 
 **What the data shows.**
-- **Competed:** 85–96% of spots earned were used by the Area's own qualifier, by Area and
-  season.
-- **Unfilled:** 1–6% of guaranteed spots per Area and season (provisional).
+- **Used:** 3,661 of 3,890 guaranteed spots (94%) over five seasons: 3,515 competed and 146
+  refilled. By Area and season, 89–98% of guaranteed spots were used.
+- **Not used:** 70 qualifiers chose another event, 38 didn't enter, and 121 spots were
+  unfilled (provisional; 1–6% of guaranteed spots per Area and season).
+- **At-large standard qualifiers:** 134 over five seasons; 116 competed, 17 chose another
+  event, 1 didn't enter.
 - **No-shows:** 1–6% of entries.
-- **Double qualifiers:** most qualifiers who didn't enter an event ran a different MOC
-  event.
 - **Flag list.** 4 Area × event combinations had unfilled spots in 3 or more of the 5
   seasons, each with 4–5 unfilled spots in total. Counting any unused spot gives 51
   combinations.
+
+**Why "unfilled" is still provisional.** A spot-by-spot check (decision #28) found three
+open questions:
+- **Unfilled spots ≠ empty places.** The 121 unfilled spots sit in events whose fields
+  fell a total of 86 places short of 24; in 23 events at-large qualifiers took some of the
+  lanes.
+- **Refills further down the line aren't credited.** In 11 cases a lower finalist from the
+  same Area ran the event, but wasn't next in line, so the spot above them counts as unfilled.
+- **Refilled, then no-show.** 7 replacements didn't compete; those spots count as refilled.
 
 {T.use()}
 
@@ -261,8 +272,7 @@ have finished that high at the MOC. This is a comparison, not a prediction.
   different wind, weather, heats and competition.
 - **Statistical tests.** The §4 p-values are pooled over five seasons and all events. They
   support a consistent direction, not a precise gap, and say nothing about causes.
-- **Unfilled spots are provisional.** They depend on how the MOC field is counted: athletes
-  who competed in the first round.
+- **Unfilled spots are provisional.** See §6 for the three open questions.
 - **Rules before 2026 are partly assumed.**
   - Allocation numbers for 2022–2025 are assumed to equal 2026's.
   - Each season's at-large standards come from its printed results, except 2023, where

@@ -35,6 +35,7 @@ import itertools
 import re
 import unicodedata
 from dataclasses import asdict, dataclass, field
+from difflib import SequenceMatcher
 from typing import Callable
 
 import pandas as pd
@@ -323,7 +324,7 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
                 rows.append(_row(g, e, "match_name_variant", "name spelled differently",
                                  program_name=prog_name[pairs[i]], **base))
             else:
-                choice = "chose_other_events" if (g, i) in declared_ids else "did_not_declare"
+                choice = "chose_other_events" if _in_program(g, i, declared_ids) else "did_not_declare"
                 limited = interp.entry_limit and r["athlete_id"] in over_limit
                 pne.append(_row(g, e, "predicted_not_entered", f"predicted_{r['qualified_by']}_not_in_program",
                                 choice_tag=choice, explained_by="entry_limit_assumed" if limited else choice,
@@ -369,6 +370,20 @@ def _declared_anywhere(entries: pd.DataFrame, school_key: Callable[[str], str | 
                 if name:
                     out.add((r.gender, _identity(name, key, False)))
     return out
+
+
+SPELLING_RATIO = 0.9       # "jonas renwick" vs "jonas renwik" = 0.96; different first names fall well below
+
+
+def _in_program(gender: str, identity: str, declared_ids: set) -> bool:
+    """Listed anywhere in the program: exact identity, or the same school and gender with a
+    near-identical name (one-letter spelling differences between Athletic.net and the program)."""
+    if (gender, identity) in declared_ids:
+        return True
+    name, school = identity.rsplit("|", 1)
+    return any(g == gender and d.rsplit("|", 1)[1] == school
+               and SequenceMatcher(None, name, d.rsplit("|", 1)[0]).ratio() >= SPELLING_RATIO
+               for g, d in declared_ids if not d.startswith("relay|"))
 
 
 def _over_entry_limit(pred: pd.DataFrame, legs: pd.DataFrame | None, limit: int) -> set:

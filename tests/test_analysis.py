@@ -200,3 +200,34 @@ def test_core_place_curve_aggregates_and_suppresses():
             & (c["area"] == "tri-valley") & (c["area_place"] == "5-6")].iloc[0]
     assert big["entries"] == 8 and big["top8_count"] == 8          # TV 5th/6th, 2 events x 2 seasons x 2 places
     assert set(c["area_place"]) == {str(p) for p in range(1, 13)} | {"5-6", "7-8"}
+
+
+def test_moc_field_ignores_a_small_stray_round():
+    # A 3-athlete "Prelims" block (a jump-off) must not stand in for a 23-athlete final.
+    moc = pd.DataFrame({"gender": "boys", "event_code": "HJ", "round": ["prelim"] * 3 + ["final"] * 26,
+                        "status": ["OK"] * 3 + ["OK"] * 23 + ["DNS"] * 3})
+    assert analysis.moc_fields(moc) == {("boys", "HJ"): 23}
+
+
+def test_spot_use_segments_sum_to_guaranteed_spots():
+    q = q_rows()
+    q.loc[1, "vacancy_refilled_by_area"] = None            # TV automatic no-show, not refilled
+    extra = q.iloc[[0, 0, 4]].copy()
+    extra["competed"] = 0
+    extra["in_declared_field"] = 0
+    extra["competed_other_moc_event"] = [1, 0, 1]           # auto: ran another event; auto: ran nothing
+    q = pd.concat([q, extra], ignore_index=True)
+    short = analysis.mark_unfilled(q, _moc(23))
+    full = analysis.mark_unfilled(q, _moc(24))
+    assert [x if isinstance(x, str) else None for x in short["spot_use"]] == ["competed", "unfilled", "refilled", None, "competed",
+                                          "unfilled", "unfilled", "chose_another_event"]
+    assert [x if isinstance(x, str) else None for x in full["spot_use"]] == ["competed", "did_not_enter", "refilled", None, "competed",
+                                         "chose_another_event", "did_not_enter", "chose_another_event"]
+    su = analysis.spot_utilization(full).set_index("area")
+    tv, bs = su.loc["tri-valley"], su.loc["bay-shore"]
+    segs = [tv[f"g_{k}"] for k in analysis.SPOT_USE]
+    assert segs == [1, 1, 0, 1, 2] and sum(segs) == tv["guaranteed_spots"] == 5
+    assert (tv["guaranteed_used"], tv["guaranteed_used_rate"]) == (2, 0.4)
+    assert (bs["at_large_spots"], bs["al_competed"], bs["al_chose_another_event"], bs["guaranteed_spots"]) == (2, 1, 1, 0)
+    roll = analysis.spot_utilization_by_area(su.reset_index()).set_index("area")
+    assert roll.loc["tri-valley", "guaranteed_used_rate"] == 0.4

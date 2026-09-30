@@ -3,7 +3,13 @@
 *For coaches and the committee. Built from the tables in `data/summary/`; every column is defined in
 `docs/analysis_tables.md`. Every number carries its unit, e.g. "25 of 284 entries finished top 8 (9%)".*
 
-> **What changed in this update (2026-09-30, second update)**
+> **What changed in this update (2026-09-30, third update)**
+> - **§6, spot use rebuilt on guaranteed spots only.** Five segments (competed, refilled,
+>   chose another event, didn't enter, unfilled); "Other unused" is gone. At-large standard
+>   qualifiers are reported separately. Unfilled stays provisional, with the three open
+>   questions listed in §6.
+>
+> **Earlier (second update)**
 > - **Wording.** "At-large" now means only athletes who met the at-large standard. The 3 fill
 >   spots are "next best mark", and the two together are "next best mark + at-large
 >   standard". Every number now states its unit. "Entries" means athlete-events: one
@@ -418,58 +424,63 @@ have finished that high at the MOC. This is a comparison, not a prediction.
 
 ## 6. Spot use
 
-**The segments.**
-- **Competed:** the Area's qualifier competed at the MOC.
-- **Refilled:** the Area's qualifier withdrew before the entry deadline, and the next
-  finalist from that Area took the spot.
-- **Unfilled (provisional, under verification):** a guaranteed spot nobody used. The
-  qualifier didn't compete, nobody replaced them, and the event's MOC field (athletes who
-  competed in the first round) ended below 24.
-- **Other unused:** a qualifier didn't use the spot, but no gap followed. Either the field
-  still had 24, or the spot came from the at-large standard, which has no fixed number.
+**Guaranteed spots only** (automatic + next best mark; 24 per event). Each spot falls in
+exactly one segment:
+- **Competed:** the qualifier ran the event at the MOC.
+- **Refilled:** the qualifier withdrew before the deadline and the next finalist from that
+  Area took the spot.
+- **Chose another event:** the qualifier competed at the MOC, but in other events.
+- **Didn't enter:** the qualifier was not at the MOC at all.
+- **Unfilled (provisional, under verification):** nobody used the spot and the event field
+  ended up short (below 24 athletes or teams competing).
 
-**Why the first count was too high.** It counted every unused spot that wasn't refilled.
-- **It counted spots that didn't shorten the field.** For example, over five seasons
-  Tri-Valley's boys 800 showed 8 unused, unreplaced spots. All 8 of those athletes ran other MOC
-  events instead: the 1600, the 4x800, or four other events. 2 were at-large qualifiers,
-  whose spots have no fixed number. The MOC boys 800 field had at least 24 entries every
-  season, and fell below 24 competitors only in 2025.
-- **The corrected count** keeps 2 unfilled spots there, and 121 of 3,890 guaranteed spots
-  over all Areas and five seasons.
+**Guaranteed spots used** = (competed + refilled) ÷ guaranteed spots. At-large standard
+qualifiers have no fixed number of spots, so they are reported separately and are in
+neither the segments nor the %.
 
 **What the data shows.**
-- **Competed:** 85–96% of spots earned were used by the Area's own qualifier, by Area and
-  season.
-- **Unfilled:** 1–6% of guaranteed spots per Area and season (provisional).
+- **Used:** 3,661 of 3,890 guaranteed spots (94%) over five seasons: 3,515 competed and 146
+  refilled. By Area and season, 89–98% of guaranteed spots were used.
+- **Not used:** 70 qualifiers chose another event, 38 didn't enter, and 121 spots were
+  unfilled (provisional; 1–6% of guaranteed spots per Area and season).
+- **At-large standard qualifiers:** 134 over five seasons; 116 competed, 17 chose another
+  event, 1 didn't enter.
 - **No-shows:** 1–6% of entries.
-- **Double qualifiers:** most qualifiers who didn't enter an event ran a different MOC
-  event.
 - **Flag list.** 4 Area × event combinations had unfilled spots in 3 or more of the 5
   seasons, each with 4–5 unfilled spots in total. Counting any unused spot gives 51
   combinations.
 
-| Season | Area | Spots earned | Competed | Refilled | Unfilled (provisional) | Other unused | No-shows | Not entered, but ran another MOC event |
-|---|---|---|---|---|---|---|---|---|
-| 2022 | Bay Shore | 200 spots | 184 of 200 spots used (92%) | 10 spots | 3 of 198 guaranteed spots (2%) | 3 spots | 6 of 190 entries (3%) | 9 of 10 athletes (90%) |
-| 2022 | Class A | 98 spots | 85 of 98 spots used (87%) | 8 spots | 2 of 98 guaranteed spots (2%) | 3 spots | 1 of 86 entries (1%) | 7 of 11 athletes (64%) |
-| 2022 | Redwood Empire | 212 spots | 180 of 212 spots used (85%) | 11 spots | 13 of 212 guaranteed spots (6%) | 8 spots | 3 of 183 entries (2%) | 19 of 26 athletes (73%) |
-| 2022 | Tri-Valley | 270 spots | 250 of 270 spots used (93%) | 5 spots | 11 of 268 guaranteed spots (4%) | 4 spots | 8 of 258 entries (3%) | 7 of 11 athletes (64%) |
-| 2023 | Bay Shore | 209 spots | 183 of 209 spots used (88%) | 7 spots | 11 of 207 guaranteed spots (5%) | 8 spots | 10 of 193 entries (5%) | 11 of 14 athletes (79%) |
-| 2023 | Class A | 101 spots | 86 of 101 spots used (85%) | 8 spots | 5 of 100 guaranteed spots (5%) | 2 spots | 5 of 91 entries (5%) | 6 of 9 athletes (67%) |
-| 2023 | Redwood Empire | 217 spots | 199 of 217 spots used (92%) | 5 spots | 10 of 216 guaranteed spots (5%) | 3 spots | 10 of 209 entries (5%) | 5 of 8 athletes (62%) |
-| 2023 | Tri-Valley | 280 spots | 249 of 280 spots used (89%) | 9 spots | 5 of 263 guaranteed spots (2%) | 17 spots | 3 of 252 entries (1%) | 21 of 28 athletes (75%) |
-| 2024 | Bay Shore | 210 spots | 188 of 210 spots used (90%) | 5 spots | 12 of 207 guaranteed spots (6%) | 5 spots | 13 of 201 entries (6%) | 5 of 8 athletes (62%) |
-| 2024 | Class A | 108 spots | 93 of 108 spots used (86%) | 7 spots | 2 of 103 guaranteed spots (2%) | 6 spots | 1 of 94 entries (1%) | 7 of 12 athletes (58%) |
-| 2024 | Redwood Empire | 203 spots | 185 of 203 spots used (91%) | 10 spots | 4 of 201 guaranteed spots (2%) | 4 spots | 4 of 189 entries (2%) | 7 of 13 athletes (54%) |
-| 2024 | Tri-Valley | 292 spots | 269 of 292 spots used (92%) | 4 spots | 7 of 266 guaranteed spots (3%) | 12 spots | 3 of 272 entries (1%) | 16 of 19 athletes (84%) |
-| 2025 | Bay Shore | 197 spots | 181 of 197 spots used (92%) | 10 spots | 1 of 196 guaranteed spots (1%) | 5 spots | 4 of 185 entries (2%) | 11 of 11 athletes (100%) |
-| 2025 | Class A | 105 spots | 89 of 105 spots used (85%) | 5 spots | 5 of 102 guaranteed spots (5%) | 6 spots | 6 of 95 entries (6%) | 6 of 9 athletes (67%) |
-| 2025 | Redwood Empire | 216 spots | 195 of 216 spots used (90%) | 12 spots | 5 of 209 guaranteed spots (2%) | 4 spots | 4 of 199 entries (2%) | 9 of 14 athletes (64%) |
-| 2025 | Tri-Valley | 288 spots | 267 of 288 spots used (93%) | 6 spots | 4 of 269 guaranteed spots (1%) | 11 spots | 3 of 270 entries (1%) | 17 of 18 athletes (94%) |
-| 2026 | Bay Shore | 207 spots | 198 of 207 spots used (96%) | 3 spots | 4 of 204 guaranteed spots (2%) | 2 spots | 4 of 202 entries (2%) | 5 of 5 athletes (100%) |
-| 2026 | Class A | 101 spots | 87 of 101 spots used (86%) | 5 spots | 6 of 98 guaranteed spots (6%) | 3 spots | 6 of 93 entries (6%) | 3 of 7 athletes (43%) |
-| 2026 | Redwood Empire | 216 spots | 190 of 216 spots used (88%) | 9 spots | 6 of 209 guaranteed spots (3%) | 11 spots | 3 of 193 entries (2%) | 16 of 22 athletes (73%) |
-| 2026 | Tri-Valley | 294 spots | 273 of 294 spots used (93%) | 7 spots | 5 of 264 guaranteed spots (2%) | 9 spots | 4 of 277 entries (1%) | 14 of 15 athletes (93%) |
+**Why "unfilled" is still provisional.** A spot-by-spot check (decision #28) found three
+open questions:
+- **Unfilled spots ≠ empty places.** The 121 unfilled spots sit in events whose fields
+  fell a total of 86 places short of 24; in 23 events at-large qualifiers took some of the
+  lanes.
+- **Refills further down the line aren't credited.** In 11 cases a lower finalist from the
+  same Area ran the event, but wasn't next in line, so the spot above them counts as unfilled.
+- **Refilled, then no-show.** 7 replacements didn't compete; those spots count as refilled.
+
+| Season | Area | Guaranteed spots | Competed | Refilled | Chose another event | Didn't enter | Unfilled (provisional) | Guaranteed spots used | At-large standard (separate) | No-shows |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2022 | Bay Shore | 198 spots | 182 | 10 | 0 | 3 | 3 | 192 of 198 guaranteed spots used (97%) | 2 qualifiers: 2 competed, 0 chose another event, 0 didn't enter | 6 of 190 entries (3%) |
+| 2022 | Class A | 98 spots | 85 | 8 | 3 | 0 | 2 | 93 of 98 guaranteed spots used (95%) | none | 1 of 86 entries (1%) |
+| 2022 | Redwood Empire | 212 spots | 180 | 11 | 5 | 3 | 13 | 191 of 212 guaranteed spots used (90%) | none | 3 of 183 entries (2%) |
+| 2022 | Tri-Valley | 268 spots | 248 | 5 | 2 | 2 | 11 | 253 of 268 guaranteed spots used (94%) | 2 qualifiers: 2 competed, 0 chose another event, 0 didn't enter | 8 of 258 entries (3%) |
+| 2023 | Bay Shore | 207 spots | 181 | 7 | 6 | 2 | 11 | 188 of 207 guaranteed spots used (91%) | 2 qualifiers: 2 competed, 0 chose another event, 0 didn't enter | 10 of 193 entries (5%) |
+| 2023 | Class A | 100 spots | 85 | 8 | 0 | 2 | 5 | 93 of 100 guaranteed spots used (93%) | 1 qualifiers: 1 competed, 0 chose another event, 0 didn't enter | 5 of 91 entries (5%) |
+| 2023 | Redwood Empire | 216 spots | 198 | 5 | 3 | 0 | 10 | 203 of 216 guaranteed spots used (94%) | 1 qualifiers: 1 competed, 0 chose another event, 0 didn't enter | 10 of 209 entries (5%) |
+| 2023 | Tri-Valley | 263 spots | 235 | 9 | 11 | 3 | 5 | 244 of 263 guaranteed spots used (93%) | 17 qualifiers: 14 competed, 3 chose another event, 0 didn't enter | 3 of 252 entries (1%) |
+| 2024 | Bay Shore | 207 spots | 186 | 5 | 1 | 3 | 12 | 191 of 207 guaranteed spots used (92%) | 3 qualifiers: 2 competed, 1 chose another event, 0 didn't enter | 13 of 201 entries (6%) |
+| 2024 | Class A | 103 spots | 89 | 7 | 3 | 2 | 2 | 96 of 103 guaranteed spots used (93%) | 5 qualifiers: 4 competed, 1 chose another event, 0 didn't enter | 1 of 94 entries (1%) |
+| 2024 | Redwood Empire | 201 spots | 183 | 10 | 2 | 2 | 4 | 193 of 201 guaranteed spots used (96%) | 2 qualifiers: 2 competed, 0 chose another event, 0 didn't enter | 4 of 189 entries (2%) |
+| 2024 | Tri-Valley | 266 spots | 248 | 4 | 6 | 1 | 7 | 252 of 266 guaranteed spots used (95%) | 26 qualifiers: 21 competed, 5 chose another event, 0 didn't enter | 3 of 272 entries (1%) |
+| 2025 | Bay Shore | 196 spots | 180 | 10 | 3 | 2 | 1 | 190 of 196 guaranteed spots used (97%) | 1 qualifiers: 1 competed, 0 chose another event, 0 didn't enter | 4 of 185 entries (2%) |
+| 2025 | Class A | 102 spots | 86 | 5 | 3 | 3 | 5 | 91 of 102 guaranteed spots used (89%) | 3 qualifiers: 3 competed, 0 chose another event, 0 didn't enter | 6 of 95 entries (6%) |
+| 2025 | Redwood Empire | 209 spots | 190 | 12 | 0 | 2 | 5 | 202 of 209 guaranteed spots used (97%) | 7 qualifiers: 5 competed, 2 chose another event, 0 didn't enter | 4 of 199 entries (2%) |
+| 2025 | Tri-Valley | 269 spots | 248 | 6 | 9 | 2 | 4 | 254 of 269 guaranteed spots used (94%) | 19 qualifiers: 19 competed, 0 chose another event, 0 didn't enter | 3 of 270 entries (1%) |
+| 2026 | Bay Shore | 204 spots | 196 | 3 | 1 | 0 | 4 | 199 of 204 guaranteed spots used (98%) | 3 qualifiers: 2 competed, 1 chose another event, 0 didn't enter | 4 of 202 entries (2%) |
+| 2026 | Class A | 98 spots | 85 | 5 | 2 | 0 | 6 | 90 of 98 guaranteed spots used (92%) | 3 qualifiers: 2 competed, 0 chose another event, 1 didn't enter | 6 of 93 entries (6%) |
+| 2026 | Redwood Empire | 209 spots | 184 | 9 | 7 | 3 | 6 | 193 of 209 guaranteed spots used (92%) | 7 qualifiers: 6 competed, 1 chose another event, 0 didn't enter | 3 of 193 entries (2%) |
+| 2026 | Tri-Valley | 264 spots | 246 | 7 | 3 | 3 | 5 | 253 of 264 guaranteed spots used (96%) | 30 qualifiers: 27 competed, 3 chose another event, 0 didn't enter | 4 of 277 entries (1%) |
 
 **Area × event with unfilled spots in 3 or more of the 5 seasons: 4 combinations**
 
@@ -546,8 +557,7 @@ have finished that high at the MOC. This is a comparison, not a prediction.
   different wind, weather, heats and competition.
 - **Statistical tests.** The §4 p-values are pooled over five seasons and all events. They
   support a consistent direction, not a precise gap, and say nothing about causes.
-- **Unfilled spots are provisional.** They depend on how the MOC field is counted: athletes
-  who competed in the first round.
+- **Unfilled spots are provisional.** See §6 for the three open questions.
 - **Rules before 2026 are partly assumed.**
   - Allocation numbers for 2022–2025 are assumed to equal 2026's.
   - Each season's at-large standards come from its printed results, except 2023, where

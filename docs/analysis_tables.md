@@ -77,7 +77,9 @@ fields together.
 | scored | 1 if `moc_final_place` ≤ 6 |
 | choice_tag | For a qualified athlete not in the program: `chose_other_events` (listed elsewhere in the program, incl. the 4x800 and relay rosters) or `did_not_declare` |
 | replacement_for_area, vacancy_refilled_by_area | The Area whose vacancy a replacement filled / the Area of the athlete who refilled a vacancy |
-| competed_other_moc_event | For a qualified athlete not in the program (individuals only): 1 if they competed in any other MOC event that season (individual, relay leg or 4x800; any status but DNS/SCR) |
+| competed_other_moc_event | For every qualified individual who didn't compete in this event (in the program or not): 1 if they competed in any other MOC event that season (individual, relay leg or 4x800; any status but DNS/SCR), else 0. Blank for relays, competitors and rows without an Athletic.net ID |
+| moc_field, unfilled_spot | The event's MOC field (largest competed count over its rounds, decision #25) and whether this spot is unfilled |
+| spot_use | For qualified spots: `competed`, `refilled`, `unfilled`, `chose_another_event` or `did_not_enter` (decision #26; first match wins in that order) |
 | moc_overall_place | Overall MOC place in the event (see note) |
 | state_qualified | `pending` until the CIF State meet data arrives |
 
@@ -134,9 +136,12 @@ Per season × gender × event × area, over the spots the rules gave that Area:
 | refilled_by_area | Which Areas the replacements came from, `area:count` |
 | replacements_from_this_area | This Area's athletes who entered as replacements, for any Area |
 | guaranteed_spots | Of `spots_earned`, the automatic and next-best-mark spots (the fixed 24 per event) |
-| unfilled_spots | **Provisional, under verification.** A guaranteed spot nobody used: its qualifier didn't compete, the spot wasn't refilled, and the event's MOC field (athletes or teams who competed in the first round, i.e. not DNS/SCR) ended below 24 |
+| unfilled_spots | **Provisional, under verification.** A guaranteed spot nobody used: its qualifier didn't compete, the spot wasn't refilled, and the event's MOC field (athletes or teams who competed; the largest count over the event's rounds, i.e. not DNS/SCR) ended below 24 |
 | unfilled_rate | `unfilled_spots / guaranteed_spots` |
-| other_unused | Unused, not refilled, and not unfilled: the field still had 24, or the spot came from the at-large standard (no fixed number). `competed + vacancies_refilled + unfilled_spots + other_unused = spots_earned` |
+| other_unused | Old donut segment, kept for comparison: unused, not refilled, and not unfilled (full-field guaranteed spots plus at-large spots). |
+| g_competed, g_refilled, g_chose_another_event, g_did_not_enter, g_unfilled | Guaranteed spots by `spot_use`. They sum to `guaranteed_spots`; `g_unfilled = unfilled_spots`. |
+| guaranteed_used, guaranteed_used_rate | `g_competed + g_refilled`, and that ÷ `guaranteed_spots` ("Guaranteed spots used" on the dashboard) |
+| at_large_spots, al_competed, al_refilled, al_chose_another_event, al_did_not_enter | At-large standard spots by `spot_use`, reported apart from guaranteed spots |
 | unused_not_refilled | The first version of this metric ("empty lanes"): `unused_total − vacancies_refilled`, never below 0. Kept for comparison; it over-counts (see `docs/findings_v1.md` §6). |
 | no_show_rate | `no_show / declared` |
 | not_declared_individual | Not-declared spots held by individuals (relay teams excluded) |

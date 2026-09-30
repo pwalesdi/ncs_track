@@ -93,13 +93,37 @@ def test_4_performance_class_a_automatic(tmp_path):
 
 def test_5_spot_use_every_area_every_season(tmp_path):
     r = summary("spot_utilization_by_area.csv").set_index(["season", "area"])
+    segs = ["competed", "refilled", "chose_another_event", "did_not_enter", "unfilled"]
     for season in (2022, 2023, 2024, 2025, 2026):
         u = js(f'spotUse(D, {{season:"{season}", gender:"all", event:"all"}})', tmp_path)
         for a in AREAS:
-            row = r.loc[(season, a)]
-            assert (u[a]["spots_earned"], u[a]["competed"], u[a]["vacancies_refilled"], u[a]["unfilled_spots"], u[a]["other_unused"]) == \
-                (row["spots_earned"], row["competed"], row["vacancies_refilled"], row["unfilled_spots"], row["other_unused"])
-            assert u[a]["competed"] + u[a]["vacancies_refilled"] + u[a]["unfilled_spots"] + u[a]["other_unused"] == u[a]["spots_earned"]
+            row, x = r.loc[(season, a)], u[a]
+            assert [x["g"][k] for k in segs] == [row[f"g_{k}"] for k in segs]
+            assert sum(x["g"][k] for k in segs) == x["guaranteed_spots"] == row["guaranteed_spots"]
+            assert x["g"]["unfilled"] == row["unfilled_spots"]
+            assert x["used"] == row["guaranteed_used"]
+            assert sum(x["al"][k] for k in segs) == x["at_large_spots"] == row["at_large_spots"]
+
+
+def test_5b_captions(tmp_path):
+    x = {"guaranteed_spots": 6, "at_large_spots": 4,
+         "g": {"competed": 5, "refilled": 0, "chose_another_event": 1, "did_not_enter": 0, "unfilled": 0},
+         "al": {"competed": 2, "refilled": 0, "chose_another_event": 2, "did_not_enter": 0, "unfilled": 0}}
+    assert js(f"[useCaption({json.dumps(x)}), atLargeLine({json.dumps(x)})]", tmp_path) == [
+        "6 of 6 guaranteed spots: 5 competed · 1 chose another event",
+        "Plus 4 at-large standard qualifiers: 2 competed, 2 chose another event."]
+
+
+def test_5c_unfilled_table(tmp_path):
+    t = js('unfilledTable(D, {gender:"all", event:"all"})', tmp_path)
+    su = summary("spot_utilization.csv")
+    assert t["total"] == su["unfilled_spots"].sum()
+    for a in AREAS:
+        x = su[su["area"] == a]
+        assert t["areas"][a]["total"] == x["unfilled_spots"].sum()
+        for season, n in x.groupby("season")["unfilled_spots"].sum().items():
+            assert t["areas"][a]["seasons"][str(season)] == n
+        assert sum(e["total"] for e in t["areas"][a]["events"].values()) == t["areas"][a]["total"]
 
 
 def test_6_left_out(tmp_path):
@@ -145,7 +169,7 @@ def test_9_flags_and_filters(tmp_path):
     su = summary("spot_utilization.csv")
     y = su[(su["season"] == 2026) & (su["gender"] == "boys") & su["event_code"].isin(["SP", "DT"])]
     for a in ("tri-valley", "class-a"):
-        assert u[a]["spots_earned"] == y.loc[y["area"] == a, "spots_earned"].sum()
+        assert u[a]["guaranteed_spots"] == y.loc[y["area"] == a, "guaranteed_spots"].sum()
 
 
 def test_10_units_and_ordinals(tmp_path):

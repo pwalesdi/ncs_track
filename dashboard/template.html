@@ -11,6 +11,8 @@ __CHARTJS__</script>
   :root {
     --page: #f4f5f7; --card: #ffffff; --text: #111418; --muted: #4a5058; --line: #d9dce1; --soft: #eef0f3;
     --tv: #0072B2; --bs: #009E73; --re: #D55E00; --ca: #B5528C; --other: #c9cdd3; --unfilled: #5b6068;
+    /* Spot-use segments: the same five colors in every donut, so one legend fits all. */
+    --u-competed: #1d4e79; --u-refilled: #86b0d8; --u-chose: #d7dade; --u-none: #8e939a; --u-unfilled: #c9a227;
     --link: #005b8f;
   }
   * { box-sizing: border-box; }
@@ -98,6 +100,7 @@ __CHARTJS__</script>
   .dgrid td { text-align: center; }
   .dgrid .chart { height: 110px; width: 110px; margin: 0 auto; }
   .dgrid td span { font-size: .72rem; color: var(--muted); }
+  .donut p.al, .dgrid td span.al { font-style: italic; }
 
   /* Tables */
   details { margin-top: 10px; }
@@ -179,13 +182,25 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-use" role="tabpanel">
     <h2>Spot use <span class="badge">Unfilled: provisional — under verification</span></h2>
-    <p class="how"><b>Competed</b> = the Area's qualifier competed at the MOC.
-      <b>Refilled</b> = the Area's qualifier withdrew before the entry deadline, and the next finalist from that Area
-      took the spot. <b>Unfilled</b> = a guaranteed spot nobody used, and the event field ended up short.
-      <b>Other unused</b> = a qualifier didn't use the spot, but no gap followed (the field still had 24, or the
-      spot came from the at-large standard, which has no fixed number).</p>
+    <p class="how">What happened to each <b>guaranteed spot</b> (automatic + next best mark; 24 per event).
+      Each spot is counted once.</p>
+    <ul class="how" id="use-defs">
+      <li><b>Competed</b>: the qualifier ran the event at the MOC.</li>
+      <li><b>Refilled</b>: the qualifier withdrew before the deadline and the next finalist from that Area took the spot.</li>
+      <li><b>Chose another event</b>: the qualifier competed at the MOC, but in other events.</li>
+      <li><b>Didn't enter</b>: the qualifier was not at the MOC at all.</li>
+      <li><b>Unfilled</b>: nobody used the spot and the event field ended up short.</li>
+    </ul>
+    <p class="how">Centre: <b>Guaranteed spots used</b> = (competed + refilled) ÷ guaranteed spots. At-large standard
+      qualifiers have no fixed number of spots, so they are listed on a separate line under each donut and are not
+      in the donut or the %.</p>
     <div class="legend" id="lg-use"></div>
     <div id="use-body"></div>
+    <div class="panel">
+      <h3 style="margin:0 0 4px;font-size:1.05rem">Unfilled guaranteed spots, 2022–2026</h3>
+      <p class="note">Follows the gender and event filters; the season filter doesn't apply.</p>
+      <div id="unf-table"></div>
+    </div>
     <div class="panel">
       <h3 style="margin:0 0 4px;font-size:1.05rem">Unfilled spots in 3 or more of the 5 seasons</h3>
       <p class="note">Area × event. Follows the gender and event filters; the season filter doesn't apply.</p>
@@ -289,15 +304,54 @@ function performance(D, f, season) {
   });
   return out;
 }
+// Spot-use segments, in drawing order: [key, label]. Guaranteed spots: g_<key>; at-large: al_<key>.
+var USE_SEGMENTS = [["competed", "competed"], ["refilled", "refilled"], ["chose_another_event", "chose another event"],
+                    ["did_not_enter", "didn't enter"], ["unfilled", "unfilled"]];
 function spotUse(D, f, season) {
   var rows = D.spot_utilization.filter(function (r) { return keep(r, f, season); });
   var out = {};
   AREAS.forEach(function (a) {
     var ra = rows.filter(function (r) { return r.area === a; });
     var o = {};
-    ["spots_earned", "guaranteed_spots", "competed", "vacancies_refilled", "unfilled_spots", "other_unused",
-     "declared", "no_show"].forEach(function (k) { o[k] = sum(ra, k); });
+    ["guaranteed_spots", "at_large_spots", "unfilled_spots", "declared", "no_show"].forEach(function (k) { o[k] = sum(ra, k); });
+    o.g = {}; o.al = {};
+    USE_SEGMENTS.forEach(function (s) {
+      o.g[s[0]] = sum(ra, "g_" + s[0]);
+      o.al[s[0]] = s[0] === "unfilled" ? 0 : sum(ra, "al_" + s[0]);
+    });
+    o.used = o.g.competed + o.g.refilled;
     out[a] = o;
+  });
+  return out;
+}
+// "6 of 6 guaranteed spots: 5 competed · 1 chose another event" (every non-zero segment; they sum to the total)
+function useCaption(x) {
+  if (!x.guaranteed_spots) return "No guaranteed spots";
+  var parts = USE_SEGMENTS.filter(function (s) { return x.g[s[0]]; }).map(function (s) { return x.g[s[0]] + " " + s[1]; });
+  return x.guaranteed_spots + " of " + x.guaranteed_spots + " guaranteed spots: " + parts.join(" · ");
+}
+function atLargeLine(x) {
+  var n = x.at_large_spots;
+  if (!n) return "No at-large standard qualifiers.";
+  var parts = USE_SEGMENTS.filter(function (s) { return x.al[s[0]]; }).map(function (s) { return x.al[s[0]] + " " + s[1]; });
+  return "Plus " + n + " at-large standard qualifier" + (n === 1 ? "" : "s") + ": " + parts.join(", ") + ".";
+}
+// Unfilled guaranteed spots per Area x season (+ total), and per Area x event x season.
+function unfilledTable(D, f) {
+  var rows = D.spot_utilization.filter(function (r) { return keep(r, f, "all"); });
+  var out = {total: 0, seasons: {}, areas: {}};
+  D.seasons.forEach(function (s) { out.seasons[s] = 0; });
+  AREAS.forEach(function (a) {
+    var o = {total: 0, seasons: {}, events: {}};
+    D.seasons.forEach(function (s) { o.seasons[s] = 0; });
+    rows.filter(function (r) { return r.area === a && r.unfilled_spots; }).forEach(function (r) {
+      var e = String(r.event_code), k = r.gender + " " + e;
+      o.seasons[r.season] += r.unfilled_spots; o.total += r.unfilled_spots;
+      out.seasons[r.season] += r.unfilled_spots; out.total += r.unfilled_spots;
+      if (!o.events[k]) { o.events[k] = {gender: r.gender, event: e, total: 0, seasons: {}}; D.seasons.forEach(function (s) { o.events[k].seasons[s] = 0; }); }
+      o.events[k].seasons[r.season] += r.unfilled_spots; o.events[k].total += r.unfilled_spots;
+    });
+    out.areas[a] = o;
   });
   return out;
 }
@@ -327,7 +381,7 @@ function headline(D) {
   var sh = spotShare(D, {field: "qualified", season: "all", gender: "all", event: "all"});
   var u = spotUse(D, {season: "all", gender: "all", event: "all"});
   var unf = 0, gs = 0;
-  AREAS.forEach(function (a) { unf += u[a].unfilled_spots; gs += u[a].guaranteed_spots; });
+  AREAS.forEach(function (a) { unf += u[a].g.unfilled; gs += u[a].guaranteed_spots; });
   return {
     finish: {"tri-valley": {band: "7-8", cell: c["tri-valley"]["7-8"]}, "bay-shore": {band: "5-6", cell: c["bay-shore"]["5-6"]},
              "redwood-empire": {band: "5-6", cell: c["redwood-empire"]["5-6"]}, "class-a": {band: "3", cell: c["class-a"]["3"]}},
@@ -391,8 +445,10 @@ function flags(D, f) {
       if (!o || o.big === undefined || chart.config.type !== "doughnut") return;
       var a = chart.chartArea, ctx = chart.ctx, cx = (a.left + a.right) / 2, cy = (a.top + a.bottom) / 2;
       ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = TEXT;
-      ctx.font = "750 " + (o.size || 20) + "px " + Chart.defaults.font.family; ctx.fillText(o.big, cx, cy - (o.small ? 7 : 0));
-      if (o.small) { ctx.font = "11px " + Chart.defaults.font.family; ctx.fillStyle = MUTED; ctx.fillText(o.small, cx, cy + 12); }
+      ctx.font = "750 " + (o.size || 20) + "px " + Chart.defaults.font.family; var lines = o.small ? String(o.small).split("\n") : [];
+      ctx.fillText(o.big, cx, cy - 7 * lines.length);
+      ctx.font = "11px " + Chart.defaults.font.family; ctx.fillStyle = MUTED;
+      lines.forEach(function (t, i) { ctx.fillText(t, cx, cy + 5 + 13 * (i + 1) - 6 * (lines.length - 1)); });
       ctx.restore();
     }
   });
@@ -493,7 +549,8 @@ function flags(D, f) {
       " next-best-mark + at-large spots (all qualifiers)</p></div>" +
       '<div class="card" id="card-unfilled" data-k="' + h.unfilled.k + '" data-n="' + h.unfilled.n + '"><div class="big">' + h.unfilled.k +
       '</div><p class="cap">guaranteed spots unfilled over five seasons <span class="badge">Provisional</span></p><p class="cnt">' + h.unfilled.k + " of " + h.unfilled.n +
-      " guaranteed spots (" + pctNum(h.unfilled.k, h.unfilled.n) + "%): the qualifier didn't compete, nobody replaced them, and the event field ended below 24.</p></div>";
+      " guaranteed spots (" + pctNum(h.unfilled.k, h.unfilled.n) + "%): the qualifier didn't compete, nobody replaced them, and the event field ended below 24.</p>" +
+      unfilledHtml(unfilledTable(D, {gender: "all", event: "all"}), false) + "</div>";
   }
 
   // ---------- Area place vs MOC finish ----------
@@ -657,21 +714,42 @@ function flags(D, f) {
   }
 
   // ---------- Spot use ----------
-  function donut(id, x, color, big) {
+  var USE_COLOR = {competed: v("--u-competed"), refilled: v("--u-refilled"), chose_another_event: v("--u-chose"),
+                   did_not_enter: v("--u-none"), unfilled: v("--u-unfilled")};
+  var USE_LABEL = {competed: "Competed", refilled: "Refilled", chose_another_event: "Chose another event",
+                   did_not_enter: "Didn't enter", unfilled: "Unfilled"};
+  function donut(id, x, big) {
     charts[id] = new Chart(el(id), {
       type: "doughnut",
-      data: {labels: ["Competed", "Refilled", "Unfilled", "Other unused"],
-             datasets: [{label: "Spot use", data: [x.competed, x.vacancies_refilled, x.unfilled_spots, x.other_unused], borderColor: "#fff", borderWidth: big ? 2 : 1,
-                         backgroundColor: [color, tint(color, .35), UNFILLED, OTHER]}]},
+      data: {labels: USE_SEGMENTS.map(function (s) { return USE_LABEL[s[0]]; }),
+             datasets: [{label: "Guaranteed spots", data: USE_SEGMENTS.map(function (s) { return x.g[s[0]]; }), borderColor: "#fff", borderWidth: big ? 2 : 1,
+                         backgroundColor: USE_SEGMENTS.map(function (s) { return USE_COLOR[s[0]]; })}]},
       options: {responsive: true, maintainAspectRatio: false, animation: false, cutout: "62%",
                 plugins: {legend: {display: false},
-                          centerText: {big: x.spots_earned ? pctNum(x.competed, x.spots_earned) + "%" : "–", small: big ? "competed" : "", size: big ? 22 : 14},
-                          tooltip: {callbacks: {label: function (c) { return c.label + ": " + c.raw + " of " + x.spots_earned + " spots"; }}}}}
+                          centerText: {big: x.guaranteed_spots ? pctNum(x.used, x.guaranteed_spots) + "%" : "–", small: big ? "guaranteed\nspots used" : "", size: big ? 22 : 14},
+                          tooltip: {callbacks: {label: function (c) { return c.label + ": " + c.raw + " of " + x.guaranteed_spots + " guaranteed spots"; }}}}}
     });
   }
-  function useLine(x) { return x.competed + " competed · " + x.vacancies_refilled + " refilled · " + x.unfilled_spots + " unfilled · " + x.other_unused + " other unused (of " + x.spots_earned + " spots)"; }
+  function unfilledHtml(t, withEvents) {
+    var cols = D.seasons.map(String);
+    var head = ["Area"].concat(cols, ["2022–2026"]);
+    var rows = AREAS.map(function (a) { var o = t.areas[a]; return [AREA_NAME[a]].concat(cols.map(function (s) { return o.seasons[s]; }), [o.total + " spots"]); });
+    rows.push(["<b>All Areas</b>"].concat(cols.map(function (s) { return "<b>" + t.seasons[s] + "</b>"; }), ["<b>" + t.total + " spots</b>"]));
+    var html = numTable(head, rows);
+    if (withEvents) {
+      var er = [];
+      AREAS.forEach(function (a) {
+        Object.keys(t.areas[a].events).sort().forEach(function (k) {
+          var e = t.areas[a].events[k];
+          er.push([AREA_NAME[a] + " · " + e.gender + " " + e.event].concat(cols.map(function (s) { return e.seasons[s] || ""; }), [e.total + " spots"]));
+        });
+      });
+      html += "<details><summary>Show by event</summary>" + (er.length ? numTable(["Area · event"].concat(cols, ["2022–2026"]), er) : '<p class="note">No unfilled spots.</p>') + "</details>";
+    }
+    return html;
+  }
   function renderUse() {
-    legend("lg-use", [["Competed (solid)", TEXT], ["Refilled (light)", tint(TEXT, .35)], ["Unfilled (dark grey)", UNFILLED], ["Other unused (light grey)", OTHER]]);
+    legend("lg-use", USE_SEGMENTS.map(function (s) { return [USE_LABEL[s[0]], USE_COLOR[s[0]]]; }));
     var body = el("use-body");
     if (state.season === "side") {
       var cols = D.seasons.map(String);
@@ -679,19 +757,23 @@ function flags(D, f) {
         "</tr></thead><tbody>" + AREAS.map(function (a) {
           return '<tr><th class="area" style="--c:' + COLOR[a] + '">' + AREA_NAME[a] + "</th>" + cols.map(function (s) {
             var x = spotUse(D, state, s)[a];
-            return '<td><div class="chart"><canvas id="du-' + a + "-" + s + '"></canvas></div><span>' + x.competed + " competed · " + x.vacancies_refilled + " refilled · " + x.unfilled_spots + " unfilled</span></td>";
+            return '<td><div class="chart"><canvas id="du-' + a + "-" + s + '"></canvas></div><span class="cap" data-total="' + x.guaranteed_spots + '" data-parts="' +
+              USE_SEGMENTS.map(function (g) { return x.g[g[0]]; }).join(",") + '">' + useCaption(x) + '</span><span class="al">' + atLargeLine(x) + "</span></td>";
           }).join("") + "</tr>";
-        }).join("") + '</tbody></table></div><p class="note">Centre: share of the spots earned that were used by the Area\'s own qualifier.</p></div>';
-      AREAS.forEach(function (a) { cols.forEach(function (s) { donut("du-" + a + "-" + s, spotUse(D, state, s)[a], COLOR[a], false); }); });
+        }).join("") + '</tbody></table></div><p class="note">Centre: guaranteed spots used, (competed + refilled) ÷ guaranteed spots.</p></div>';
+      AREAS.forEach(function (a) { cols.forEach(function (s) { donut("du-" + a + "-" + s, spotUse(D, state, s)[a], false); }); });
     } else {
       var u = spotUse(D, state);
       body.innerHTML = '<div class="panel"><p class="note">' + seasonLabel(state.season) + '</p><div class="donuts">' + AREAS.map(function (a) {
-        return '<div class="donut"><h3>' + AREA_NAME[a] + '</h3><div class="chart"><canvas id="du-' + a + '"></canvas></div><p>' + useLine(u[a]) + "</p></div>";
-      }).join("") + "</div>" + details(numTable(["Area", "Spots earned", "Competed", "Refilled", "Unfilled (of guaranteed spots)", "Other unused", "No-shows (of actual entries)"],
-        AREAS.map(function (a) { var x = u[a]; return [AREA_NAME[a], x.spots_earned + " spots", x.competed, x.vacancies_refilled,
-          spotsTxt(x.unfilled_spots, x.guaranteed_spots, "guaranteed spots"), x.other_unused, x.no_show + " of " + x.declared + " entries"]; }))) + "</div>";
-      AREAS.forEach(function (a) { donut("du-" + a, u[a], COLOR[a], true); });
+        var x = u[a];
+        return '<div class="donut"><h3>' + AREA_NAME[a] + '</h3><div class="chart"><canvas id="du-' + a + '"></canvas></div><p class="cap" data-total="' + x.guaranteed_spots +
+          '" data-parts="' + USE_SEGMENTS.map(function (g) { return x.g[g[0]]; }).join(",") + '">' + useCaption(x) + '</p><p class="al">' + atLargeLine(x) + "</p></div>";
+      }).join("") + "</div>" + details(numTable(["Area", "Guaranteed spots", "Competed", "Refilled", "Chose another event", "Didn't enter", "Unfilled", "Guaranteed spots used", "At-large standard qualifiers"],
+        AREAS.map(function (a) { var x = u[a]; return [AREA_NAME[a], x.guaranteed_spots + " spots", x.g.competed, x.g.refilled, x.g.chose_another_event, x.g.did_not_enter, x.g.unfilled,
+          spotsTxt(x.used, x.guaranteed_spots, "guaranteed spots"), x.at_large_spots ? x.al.competed + " of " + x.at_large_spots + " competed" : "none"]; }))) + "</div>";
+      AREAS.forEach(function (a) { donut("du-" + a, u[a], true); });
     }
+    el("unf-table").innerHTML = unfilledHtml(unfilledTable(D, state), true);
     el("t-flags").innerHTML = "<thead><tr><th>Area</th><th>Gender</th><th>Event</th><th class=n>Seasons with unfilled spots</th><th class=n>Unfilled spots, 5 seasons</th></tr></thead><tbody>" +
       flags(D, state).map(function (r) { return "<tr><td>" + AREA_NAME[r.area] + "</td><td>" + r.gender + "</td><td>" + r.event_code + "</td><td class=n>" + r.seasons_flagged +
         " (" + r.seasons.split("|").join(", ") + ")</td><td class=n>" + r.total_all_seasons + " spots</td></tr>"; }).join("") + "</tbody>";

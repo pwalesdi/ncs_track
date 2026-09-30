@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from ncs_track import paths
-from ncs_track.replay import (DEFAULT_GRID, Interpretation, compare, evaluate, interpretation_grid,
+from ncs_track.replay import (DEFAULT_GRID, Interpretation, _in_program, compare, evaluate, interpretation_grid,
                               predict, rates, score, sweep, switch_effects)
 from ncs_track.rules import load_rules
 
@@ -265,3 +265,12 @@ def test_rates_and_switch_effects(rules):
     comp = compare(evaluate(results(), rules), ent, rules, school_key=key, school_area=area)
     r = rates(comp.rows, "area")
     assert (r["raw_match_rate"] == 1.0).all() and set(r.index) == set(AREA_CODE.values())
+
+
+def test_in_program_accepts_one_letter_spellings_only():
+    declared = {("boys", "jonas renwick|foothill"), ("boys", "relay|foothill"), ("girls", "mara renwik|foothill")}
+    assert _in_program("boys", "jonas renwick|foothill", declared)
+    assert _in_program("boys", "jonas renwik|foothill", declared)          # program spells it without the c
+    assert not _in_program("boys", "jonas renwik|granada", declared)       # other school
+    assert not _in_program("boys", "renwick tobias|foothill", declared)    # sibling, same school
+    assert not _in_program("boys", "mara renwik|foothill", declared)       # other gender

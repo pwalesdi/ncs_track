@@ -146,17 +146,18 @@ def leftout() -> str:
 
 
 def use() -> str:
-    n = pd.read_csv(S / "no_shows_unfilled_by_area.csv")
     r = pd.read_csv(S / "spot_utilization_by_area.csv")
     rows = []
-    for x in n.merge(r[["season", "area", "competed", "other_unused", "not_declared_individual",
-                        "not_declared_competed_other_event"]], on=["season", "area"]).itertuples():
-        rows.append([x.season, AREA_NAME[x.area], f"{x.spots_earned} spots", rate(x.competed, x.spots_earned, "spots used"),
-                     f"{x.vacancies_refilled} spots", rate(x.unfilled_spots, x.guaranteed_spots, "guaranteed spots"),
-                     f"{x.other_unused} spots", rate(x.no_show, x.declared, "entries"),
-                     rate(x.not_declared_competed_other_event, x.not_declared_individual, "athletes")])
-    main = table(rows, ["Season", "Area", "Spots earned", "Competed", "Refilled", "Unfilled (provisional)",
-                        "Other unused", "No-shows", "Not entered, but ran another MOC event"])
+    for x in r.itertuples():
+        al = (f"{x.at_large_spots} qualifiers: {x.al_competed} competed, {x.al_chose_another_event} chose another event, "
+              f"{x.al_did_not_enter} didn't enter" if x.at_large_spots else "none")
+        rows.append([x.season, AREA_NAME[x.area], f"{x.guaranteed_spots} spots", x.g_competed, x.g_refilled,
+                     x.g_chose_another_event, x.g_did_not_enter, x.g_unfilled,
+                     rate(x.guaranteed_used, x.guaranteed_spots, "guaranteed spots used"), al,
+                     rate(x.no_show, x.declared, "entries")])
+    main = table(rows, ["Season", "Area", "Guaranteed spots", "Competed", "Refilled", "Chose another event",
+                        "Didn't enter", "Unfilled (provisional)", "Guaranteed spots used", "At-large standard (separate)",
+                        "No-shows"])
     fl = []
     for name, f, unit in (("unfilled spots", "spot_utilization_flags_unfilled.csv", "unfilled spots"),
                           ("any unused spot", "spot_utilization_flags_unused.csv", "unused spots")):

@@ -31,6 +31,7 @@ NO_PRELIM_EVENTS = {"3200", "HJ", "PV"}                # one final round at the 
 NOT_COMPETED = {"DNS", "SCR"}
 MOC_FIELD = 24                                         # 6 + 6 + 6 + 3 automatic + 3 next best mark
 GUARANTEED_TYPES = ("automatic", "next_best_mark")     # the fixed spots; at-large standard has no cap
+SPOT_USE = ("competed", "refilled", "unfilled", "chose_another_event", "did_not_enter")   # spot_use segments
 AREAS = replay.AREAS
 KEY = ["season", "gender", "event_code"]
 
@@ -136,6 +137,9 @@ def qualifiers(season: int, comp: replay.Comparison, evaluated: pd.DataFrame, mo
         rows = moc_by_id.get((r.gender, r.event_code, aid)) if isinstance(aid, str) else None
         if rows is None:
             rows = moc_by_ident.get((r.gender, r.event_code, r.identity), moc.iloc[0:0])
+        outcome = (_moc_outcome(rows, r.event_code) if declared else
+                   {"competed": 0, "moc_status": "not_declared", "moc_final_place": None, "top_finish": 0,
+                    "reached_final_round": 0, "scored": 0})
         out.append({
             "season": season, "gender": r.gender, "event_code": r.event_code,
             "athlete_name": r.athlete_name if isinstance(r.athlete_name, str) else None,
@@ -145,12 +149,12 @@ def qualifiers(season: int, comp: replay.Comparison, evaluated: pd.DataFrame, mo
             "area_place": area_row.place if area_row is not None else None,
             "area_mark": area_row.mark_raw if area_row is not None else None,
             "in_qualified_field": int(qualified), "in_declared_field": int(declared),
-            **(_moc_outcome(rows, r.event_code) if declared else
-               {"competed": 0, "moc_status": "not_declared", "moc_final_place": None, "top_finish": 0,
-                "reached_final_round": 0, "scored": 0}),
+            **outcome,
             "choice_tag": r.choice_tag, "replacement_for_area": r.fills_vacancy_of_area,
             "vacancy_refilled_by_area": r.vacancy_filled_by_area,
-            "competed_other_moc_event": (None if declared or r.identity.startswith("relay|") or not isinstance(aid, str)
+            # every qualifier who didn't compete in this event, whether or not they were in its program
+            "competed_other_moc_event": (None if outcome["competed"] or r.identity.startswith("relay|")
+                                         or not isinstance(aid, str)
                                          else int(bool(competed_in.get(aid, set()) - {r.event_code}))),
             "moc_overall_place": overall.get((r.gender, r.event_code,
                                               r.identity if r.identity.startswith("relay|") else aid)) if declared else None,
@@ -246,9 +250,20 @@ def spot_utilization(q: pd.DataFrame) -> pd.DataFrame:
                      "not_declared_individual": int(nd["competed_other_moc_event"].notna().sum()),
                      "not_declared_competed_other_event": int((nd["competed_other_moc_event"] == 1).sum()),
                      "refilled_by_area": "|".join(f"{k}:{v}" for k, v in refilled.value_counts().sort_index().items()),
-                     "replacements_from_this_area": len(into)})
+                     "replacements_from_this_area": len(into),
+                     **_segments(x)})
     t = pd.DataFrame(rows)
     return _derived(t)
+
+
+def _segments(x: pd.DataFrame) -> dict:
+    """Spot-use segment counts: guaranteed spots (g_*) and at-large standard spots (al_*)."""
+    use = x["spot_use"] if "spot_use" in x else pd.Series(index=x.index, dtype=object)
+    g = use[x["qualifier_type"].isin(GUARANTEED_TYPES)].value_counts()
+    al = use[x["qualifier_type"] == "at_large_standard"].value_counts()
+    return {**{f"g_{k}": int(g.get(k, 0)) for k in SPOT_USE},
+            **{f"al_{k}": int(al.get(k, 0)) for k in SPOT_USE if k != "unfilled"},
+            "at_large_spots": int((x["qualifier_type"] == "at_large_standard").sum())}
 
 
 def _derived(t: pd.DataFrame) -> pd.DataFrame:
@@ -258,6 +273,8 @@ def _derived(t: pd.DataFrame) -> pd.DataFrame:
     t["unused_not_refilled"] = (t["unused_total"] - t["vacancies_refilled"]).clip(lower=0)
     t["other_unused"] = (t["unused_total"] - t["vacancies_refilled"] - t["unfilled_spots"]).clip(lower=0)
     t["unfilled_rate"] = (t["unfilled_spots"] / t["guaranteed_spots"]).where(t["guaranteed_spots"] > 0).round(4)
+    t["guaranteed_used"] = t["g_competed"] + t["g_refilled"]
+    t["guaranteed_used_rate"] = (t["guaranteed_used"] / t["guaranteed_spots"]).where(t["guaranteed_spots"] > 0).round(4)
     t["no_show_rate"] = (t["no_show"] / t["declared"]).where(t["declared"] > 0).round(4)
     t["double_qualifier_share"] = (t["not_declared_competed_other_event"] / t["not_declared_individual"]).where(
         t["not_declared_individual"] > 0).round(4)
@@ -266,7 +283,8 @@ def _derived(t: pd.DataFrame) -> pd.DataFrame:
 
 ADDITIVE = ["spots_earned", "declared", "competed", "no_show", "not_declared", "not_declared_chose_other_events",
             "not_declared_did_not_declare", "vacancies_refilled", "guaranteed_spots", "unfilled_spots",
-            "not_declared_individual", "not_declared_competed_other_event", "replacements_from_this_area"]
+            "not_declared_individual", "not_declared_competed_other_event", "replacements_from_this_area",
+            *[f"g_{k}" for k in SPOT_USE], *[f"al_{k}" for k in SPOT_USE if k != "unfilled"], "at_large_spots"]
 
 
 def spot_utilization_by_area(t: pd.DataFrame) -> pd.DataFrame:
@@ -532,12 +550,34 @@ def left_out(season: int, evaluated: pd.DataFrame, q: pd.DataFrame, cutoffs: pd.
 # Build
 # ---------------------------------------------------------------------------
 def moc_fields(moc: pd.DataFrame) -> dict:
-    """(gender, event) -> athletes/teams who competed in the event's first MOC round."""
+    """(gender, event) -> athletes/teams who competed in the event at the MOC: the largest
+    competed count over its rounds (the first round, except where the results carry a stray
+    small 'Prelims' block, e.g. a high-jump jump-off; decision #25)."""
     out = {}
     for (g, e), x in moc.groupby(["gender", "event_code"]):
-        first = x[x["round"] == ("prelim" if (x["round"] == "prelim").any() else "final")]
-        out[(g, str(e))] = int((~first["status"].isin(NOT_COMPETED)).sum())
+        c = x[~x["status"].isin(NOT_COMPETED)].groupby("round").size()
+        out[(g, str(e))] = int(c.max()) if len(c) else 0
     return out
+
+
+def spot_use(r) -> str | None:
+    """One segment per qualified spot, in this order of precedence: competed in the event;
+    refilled (same-Area replacement); unfilled (guaranteed spot, field below 24); chose
+    another event (competed at the MOC in other events only); didn't enter (competed in no
+    MOC event: not in the program, or in it but didn't start). Relays can't choose another
+    event. Individuals without an Athletic.net ID fall back to the program-based choice tag."""
+    if r["in_qualified_field"] != 1:
+        return None
+    if r["competed"] == 1:
+        return "competed"
+    if isinstance(r["vacancy_refilled_by_area"], str):
+        return "refilled"
+    if r["unfilled_spot"]:
+        return "unfilled"
+    other = r["competed_other_moc_event"]
+    if pd.isna(other):
+        other = (not r["is_relay"]) and r["choice_tag"] == "chose_other_events"
+    return "chose_another_event" if other else "did_not_enter"
 
 
 def mark_unfilled(q: pd.DataFrame, moc: pd.DataFrame) -> pd.DataFrame:
@@ -549,6 +589,7 @@ def mark_unfilled(q: pd.DataFrame, moc: pd.DataFrame) -> pd.DataFrame:
     q["unfilled_spot"] = ((q["in_qualified_field"] == 1) & q["qualifier_type"].isin(GUARANTEED_TYPES)
                           & (q["competed"] == 0) & q["vacancy_refilled_by_area"].isna()
                           & (q["moc_field"].fillna(MOC_FIELD) < MOC_FIELD))
+    q["spot_use"] = q.apply(spot_use, axis=1)
     return q
 
 

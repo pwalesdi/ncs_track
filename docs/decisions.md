@@ -221,3 +221,41 @@ Newest at the bottom.
       Area's typical MOC finish for a place band (Tri-Valley 7th–8th, Bay Shore and
       Redwood Empire 5th–6th, Class A 3rd), Tri-Valley's next-best-mark + at-large spots,
       and unfilled spots (provisional).
+25. **MOC field = the largest competed count over the event's rounds** (2026-09-30).
+    Before, the field was the first round's count. 2023 boys high jump carries 3 stray
+    "Prelims" rows in Athletic.net (a jump-off), so its field read as 3 instead of 23. No
+    unfilled count changes (23 is still below 24); the recorded field does.
+26. **Spot use is rebuilt on guaranteed spots only** (2026-09-30). Every qualified spot
+    gets one segment (`spot_use` in qualifiers.csv), first match wins:
+    1. **Competed** in the event at the MOC.
+    2. **Refilled**: a same-Area replacement took the spot (decision on the replay overlay).
+    3. **Unfilled**: guaranteed spot, not refilled, event field below 24 (#23, #25).
+    4. **Chose another event**: competed at the MOC, but only in other events (Athletic.net
+       MOC results and relay legs, incl. the 4x800).
+    5. **Didn't enter**: competed in no MOC event. This includes 18 qualifiers who were in
+       the program for the event but didn't start and ran nothing else. Relay teams that
+       didn't run are "didn't enter" (a team can't choose another event).
+    - Donut and centre % cover guaranteed spots only: "Guaranteed spots used" =
+      (competed + refilled) ÷ guaranteed spots. At-large standard qualifiers are reported on
+      a separate line (competed / chose another event / didn't enter) and are in neither.
+    - Replaces "Other unused", which mixed at-large spots with full-field guaranteed spots.
+27. **Choice tag: near-identical spellings count as "in the program"** (2026-09-30). The
+    choice tag used an exact name match, so an athlete spelled one letter differently in
+    the program (Athletic.net vs. Diablo Timing) was tagged `did_not_declare` even while
+    running another event. Now: same school and gender, name similarity ≥ 0.9 (difflib).
+    Stricter than the event matcher's shared-token rule, so siblings at one school don't
+    match. Changed 2 tags (2024 and 2025 boys 800), both athletes who competed elsewhere.
+28. **"Unfilled" stays provisional** (2026-09-30). The spot-by-spot check
+    (scripts/checks/verify_spot_use.py) found the segments are applied as defined, but the
+    definition itself leaves three open questions for the committee to settle:
+    - **Unfilled spots ≠ empty lanes.** 121 unfilled guaranteed spots sit in events whose
+      fields fell a total of 86 places short of 24. In 23 events more spots are unfilled
+      than the field was short, because at-large qualifiers (who come on top) filled lanes.
+    - **Refills further down the line aren't credited.** A replacement counts only if they
+      are the very next finalist(s) in line. In 11 cases a lower finalist from the same
+      Area ran the event while the spot above them counts as unfilled (e.g. 2nd and 3rd did
+      not run, 7th and 8th did).
+    - **Refilled, then no-show.** 7 replacements didn't compete; the spot still counts as
+      refilled.
+    None of these is changed here: changing the refill pairing would change the replay's
+    RULES match rate, and capping unfilled at the shortfall is a definition choice.

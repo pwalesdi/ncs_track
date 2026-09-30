@@ -11,6 +11,8 @@ pooled:
   - no "undefined" or "NaN" in the page text or in any chart label, tooltip text or centre text
   - the Overview cards show the numbers pandas computes from data/summary/
   - below 700 px the filters are behind the "Filters" button
+  - Spot use: every donut caption's counts sum to its total, and the legend swatches are the
+    colors the donuts draw
 Screenshots: outputs/tabs/{width}_{tab}.png (default view) and {width}_{tab}_{mode}.png.
 Exit 1 on any failure.
 """
@@ -48,11 +50,31 @@ STATE_JS = """() => {
     ((p.valueLabels || {}).totals || []).forEach(s => strings.push(String(s)));
     if (p.centerText && p.centerText.big !== undefined) strings.push(String(p.centerText.big));
   });
+  const captions = [...panel.querySelectorAll('[data-parts]')].map(e => {
+    const total = Number(e.dataset.total), parts = e.dataset.parts.split(',').map(Number);
+    const m = e.textContent.split(': ')[1] || '';
+    const shown = m ? m.split(' · ').map(t => parseInt(t, 10)) : [];
+    return {total, partsSum: parts.reduce((a, b) => a + b, 0), shownSum: shown.reduce((a, b) => a + b, 0),
+            text: e.textContent};
+  });
+  const badCaptions = captions.filter(c => c.partsSum !== c.total || (c.total > 0 && c.shownSum !== c.total));
+  const swatch = [...panel.querySelectorAll('#lg-use span')].map(e => e.style.getPropertyValue('--c').trim().toLowerCase());
+  const norm = c => { const x = document.createElement('i'); x.style.color = c; document.body.appendChild(x);
+                      const r = getComputedStyle(x).color; x.remove(); return r; };
+  const legendMismatch = [];
+  if (swatch.length) {
+    panel.querySelectorAll('canvas').forEach(c => {
+      const ch = Chart.getChart(c); if (!ch || ch.config.type !== 'doughnut') return;
+      const drawn = ch.data.datasets[0].backgroundColor.map(norm), want = swatch.map(norm);
+      if (JSON.stringify(drawn) !== JSON.stringify(want)) legendMismatch.push(c.id);
+    });
+  }
   const text = document.body.innerText;
   const badText = /\\bundefined\\b|\\bNaN\\b/.test(text);
   const badLabels = strings.filter(s => /\\bundefined\\b|\\bNaN\\b/.test(s));
   return {scrollWidth: doc.scrollWidth, clientWidth: doc.clientWidth, charts, badText, badLabels: badLabels.slice(0, 5),
-          nCharts: canvases.length};
+          nCharts: canvases.length, nCaptions: captions.length, badCaptions: badCaptions.slice(0, 3),
+          legendMismatch};
 }"""
 
 CARDS_JS = """() => {
@@ -78,6 +100,10 @@ def check(page, label: str) -> tuple[list[str], dict]:
         problems.append(f"{label}: 'undefined' or 'NaN' in page text")
     if s["badLabels"]:
         problems.append(f"{label}: 'undefined' or 'NaN' in chart labels: {s['badLabels']}")
+    if s["badCaptions"]:
+        problems.append(f"{label}: donut captions don't sum to their totals: {s['badCaptions']}")
+    if s["legendMismatch"]:
+        problems.append(f"{label}: legend colors differ from the drawn donut colors: {s['legendMismatch']}")
     return problems, s
 
 
@@ -138,6 +164,8 @@ def run() -> dict:
                 pr, s = check(page, f"{width}px {tab}")
                 problems += pr
                 charts_seen[tab] = s["nCharts"]
+                if tab == "use":
+                    charts_seen["use_captions_checked"] = s["nCaptions"]
                 page.screenshot(path=str(SHOTS / f"{width}_{tab}.png"), full_page=True)
             for mode, value in MODES.items():
                 set_season(page, width, value)
@@ -146,6 +174,8 @@ def run() -> dict:
                     pr, s = check(page, f"{width}px {tab} {mode}")
                     problems += pr
                     charts_seen[f"{tab}_{mode}"] = s["nCharts"]
+                    if tab == "use":
+                        charts_seen[f"use_{mode}_captions_checked"] = s["nCaptions"]
                     page.screenshot(path=str(SHOTS / f"{width}_{tab}_{mode}.png"), full_page=True)
             set_season(page, width, "side")
             results[width] = {"problems": problems + errors, "blocked_network_requests": requests, "charts": charts_seen}

@@ -14,6 +14,7 @@ from datetime import date
 import pandas as pd
 
 from ncs_track import paths
+from ncs_track.analysis import SPOT_USE
 
 S = paths.SUMMARY
 DASH = paths.ROOT / "dashboard"
@@ -44,13 +45,16 @@ DEFINITIONS = [
     ("Typical MOC finish (median place)", "The middle MOC place of the entries in a group. Finalists keep their "
                                           "final place; everyone else with a valid MOC mark is ranked after the "
                                           "finalists by their best mark. Groups under 5 entries are not shown."),
-    ("Refilled", "The Area's qualifier withdrew before the entry deadline, and the next finalist from that Area took "
-                 "the spot."),
-    ("Unfilled spot (provisional)", "A guaranteed spot nobody used: the qualifier didn't compete, nobody replaced "
-                                    "them, and the event's MOC field (athletes who competed in the first round) "
-                                    "ended below 24. Under verification."),
-    ("Other unused", "A qualifier didn't use the spot but no gap followed: the field still had 24, or the spot came "
-                     "from the at-large standard."),
+    ("Spot use: Competed", "The qualifier ran the event at the MOC."),
+    ("Spot use: Refilled", "The qualifier withdrew before the deadline and the next finalist from that Area took the spot."),
+    ("Spot use: Chose another event", "The qualifier competed at the MOC, but in other events."),
+    ("Spot use: Didn't enter", "The qualifier was not at the MOC at all (competed in no MOC event; includes a few "
+                               "who were in the program but didn't start). Relay teams that didn't run count here."),
+    ("Spot use: Unfilled (provisional)", "Nobody used the spot and the event field ended up short: a guaranteed spot "
+                                         "whose qualifier didn't compete, nobody replaced them, and the event's MOC "
+                                         "field ended below 24. Under verification."),
+    ("Guaranteed spots used", "(Competed + refilled) ÷ guaranteed spots. At-large standard qualifiers are listed "
+                              "separately and are not part of this %."),
     ("Left out", "The 3 best non-qualifiers per Area and event, by Area mark, compared with the 8th-best valid MOC "
                  "mark (9th for LJ/TJ/SP/DT) across all MOC rounds, one mark per athlete."),
     ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
@@ -67,8 +71,11 @@ CAVEATS = [
     "Rules before 2026 are partly assumed: allocations for 2022–2025 assumed from 2026; 2023 at-large standards "
     "assumed from 2026 (none printed).",
     "Unresolved school names (e.g. 'West County', 2022) appear as Unknown and are not compared.",
-    "Unfilled spots are provisional (under verification): they depend on how the MOC field is counted (athletes "
-    "who competed in the first round).",
+    "Unfilled spots are provisional (under verification). Three open questions: (1) in 23 events more guaranteed "
+    "spots count as unfilled than the field was short of 24, because at-large qualifiers filled lanes (121 unfilled "
+    "spots vs. 86 empty places); (2) 11 unfilled spots were taken by a lower finalist from the same Area, who isn't "
+    "credited as a replacement because they weren't next in line; (3) 7 replacements didn't compete, and their "
+    "spots still count as refilled.",
     "Privacy: MOC-place figures are published only for groups of 5 or more entries; single events are not shown "
     "on the Area place vs. MOC finish tab.",
     "State results are pending; state qualification is not shown.",
@@ -101,9 +108,9 @@ def build() -> dict:
         "at_large_share": records(al, ["season", "gender", "event_code", "field", "spot_type", "area", "count"]),
         "moc_performance": records(mp, ["season", "gender", "event_code", "area", "qualifier_type", "competed",
                                         "top_finish", "scored"]),
-        "spot_utilization": records(su, ["season", "gender", "event_code", "area", "spots_earned", "guaranteed_spots",
-                                         "declared", "competed", "no_show", "vacancies_refilled", "unfilled_spots",
-                                         "other_unused"]),
+        "spot_utilization": records(su, ["season", "gender", "event_code", "area", "guaranteed_spots", "at_large_spots",
+                                         "declared", "no_show", "unfilled_spots",
+                                         *[f"g_{k}" for k in SPOT_USE], *[f"al_{k}" for k in SPOT_USE if k != "unfilled"]]),
         "left_out": records(lo, ["season", "gender", "event_code", "area", "hits", "total"]),
         "place_curve": records(pd.read_csv(S / "core_place_curve.csv", dtype={"season": str, "area_place": str,
                                                                                "top8_count": "Int64"}),

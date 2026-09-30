@@ -16,6 +16,7 @@ SIGNATURES = [
     b'"core_places":[{', b'"core_place_counts":[{',                         # data arrays in dashboards
     b"season,gender,event_code,area,rank_among_non_qualifiers,area_place,area_mark",  # left_out.csv
     b"season,gender,event_code,area,qualifier_type,rollup,competed,top_finish",       # unsuppressed moc_performance.csv
+    b'"moc_performance":[{"season":2022,"gender":',                                   # its per-event rows in dashboards
 ]
 REMOVED_PATHS = ["data/summary/core_places.csv", "data/summary/core_place_counts.csv", "data/summary/left_out.csv"]
 

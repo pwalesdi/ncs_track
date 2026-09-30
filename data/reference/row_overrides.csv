@@ -1,0 +1,8 @@
+meet_key,source_row,gender,event_raw,place_raw,mark_raw,action,reason
+2022-area-redwood-empire,21,M,100 Meters,1,17.14a,out_of_scope,misfiled adaptive result: listed as Varsity place 1 with a 17-second 100 m (decided 2026-09-29)
+2022-area-redwood-empire,22,M,100 Meters,X,17.27a,out_of_scope,misfiled adaptive result: second athlete of the same race (already exhibition)
+2022-area-redwood-empire,312,M,Long Jump,1,10-10.00,out_of_scope,misfiled adaptive result: listed as Varsity place 1 with a ~10-ft long jump (decided 2026-09-29)
+2022-area-redwood-empire,313,M,Long Jump,X,9-09.00,out_of_scope,misfiled adaptive result: second athlete of the same flight (already exhibition)
+2022-area-redwood-empire,361,F,100 Meters,1,17.85a,out_of_scope,misfiled adaptive result: listed as Varsity place 1 with a 17-second 100 m (decided 2026-09-29)
+2022-area-redwood-empire,362,F,100 Meters,X,18.09a,out_of_scope,misfiled adaptive result: second athlete of the same race (already exhibition)
+2022-area-redwood-empire,640,F,Long Jump,1,10-06.00,out_of_scope,misfiled adaptive result: listed as Varsity place 1 with a ~10-ft long jump (decided 2026-09-29)

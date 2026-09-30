@@ -41,6 +41,7 @@ def perf(area, place, mark, *, event="100", gender="girls", status="OK", wind_ai
         "wind_aided": wind_aided, "is_relay": relay,
         "athlete_name_raw": None if relay else (name or f"{area}{place}, Runner"),
         "school_name_raw": school or f"{area} School {place}",
+        "athlete_id": None if relay else f"id-{name or f'{area}{place}'}",
     }
 
 
@@ -172,7 +173,7 @@ def test_compare_outcomes(rules):
     assert tv9["reason"] == "below_standard_not_fill"
     assert "tri-valley place 9" in tv9["detail"] and "fill rank 8" in tv9["detail"]
     s = score(comp)
-    assert s["match"] == 24 and s["not_comparable_area_unknown"] == 1
+    assert s["match"] == 24 and s["match_name_variant"] == 1 and s["not_comparable_area_unknown"] == 1
     assert comp.notes == []                                   # all four Areas present
 
 
@@ -195,8 +196,8 @@ def test_sweep_ranks_the_reading_that_reproduces_entries(rules):
     table = sweep(results(), rules, ent, grid, school_key=key, school_area=area)
     best = table.iloc[0]
     assert best["interpretation"] == "class_a_at_large_outside_top=6;fill_before_at_large=False"
-    assert best["mismatches"] == 0 and best["precision"] == 1.0 and best["recall"] == 1.0
-    assert (table["mismatches"].iloc[1:] > 0).all()
+    assert best["raw_mismatches"] == 0 and best["precision"] == 1.0 and best["recall"] == 1.0
+    assert (table["raw_mismatches"].iloc[1:] > 0).all()
 
 
 def test_name_order_does_not_matter(rules):
@@ -204,22 +205,53 @@ def test_name_order_does_not_matter(rules):
     pred = ev[ev["qualified_by"].notna()]
     ent = entries_from(pred)
     ent["athlete_name"] = [" ".join(reversed(n.split(", "))) for n in ent["athlete_name"]]   # "Runner TV1"
-    assert score(compare(ev, ent, rules, school_key=key, school_area=area))["mismatches"] == 0
+    assert score(compare(ev, ent, rules, school_key=key, school_area=area))["raw_mismatches"] == 0
 
 
-def test_scratch_replacement_pairs_next_in_line(rules):
+def test_replacement_same_area_pairs_next_in_line(rules):
     ev = evaluate(results(), rules)
     pred = ev[ev["qualified_by"].notna()]
     ent = entries_from(pred, drop={"TV3"}, add=[("TV9, Runner", "TV School 9", "12.50")])
-    off = compare(ev, ent, rules, school_key=key, school_area=area)
-    assert score(off)["mismatches"] == 2
-    on = compare(ev, ent, rules, school_key=key, school_area=area, interp=Interpretation(scratch_replacement=True))
+    off = score(compare(ev, ent, rules, school_key=key, school_area=area))
+    assert off["raw_mismatches"] == 2 and off["rules_mismatches"] == 1   # TV3: athlete choice; TV9: unexplained
+    on = compare(ev, ent, rules, school_key=key, school_area=area, interp=Interpretation(replacement="same_area"))
     s = score(on)
-    assert s["mismatches"] == 0 and s["probable_scratch_replacement"] == 2
-    # TV10 is not next in line (TV9 is), so it is not paired.
+    assert s["raw_mismatches"] == 2 and s["rules_mismatches"] == 0 and s["explained_by_replacement"] == 1
+    tv3 = on.rows[on.rows["athlete_name"] == "TV3, Runner"].iloc[0]
+    assert tv3["choice_tag"] == "did_not_declare" and tv3["vacancy_filled_by_area"] == "tri-valley"
+    # TV10 is not next in line (TV9 is), so it stays unexplained.
     ent2 = entries_from(pred, drop={"TV3"}, add=[("TV10, Runner", "TV School 10", "12.60")])
-    on2 = compare(ev, ent2, rules, school_key=key, school_area=area, interp=Interpretation(scratch_replacement=True))
-    assert score(on2)["mismatches"] == 2
+    on2 = compare(ev, ent2, rules, school_key=key, school_area=area, interp=Interpretation(replacement="same_area"))
+    assert score(on2)["rules_mismatches"] == 1
+
+
+def test_replacement_fill_line_takes_next_mark_any_area(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    # A Tri-Valley auto spot is vacated; the next fill mark after TV7/BS7/TV8 is RE7 or
+    # CA4 (both 12.44), but they are at-large already, so the line continues: BS8 12.46.
+    ent = entries_from(pred, drop={"TV3"}, add=[("BS8, Runner", "BS School 8", "12.46")])
+    same = score(compare(ev, ent, rules, school_key=key, school_area=area, interp=Interpretation(replacement="same_area")))
+    line = compare(ev, ent, rules, school_key=key, school_area=area, interp=Interpretation(replacement="fill_line"))
+    assert same["rules_mismatches"] == 1 and score(line)["rules_mismatches"] == 0
+    bs8 = line.rows[line.rows["athlete_name"] == "BS8, Runner"].iloc[0]
+    assert bs8["explained_by"] == "replacement_fill_line" and bs8["fills_vacancy_of_area"] == "tri-valley"
+
+
+def test_choice_tags_and_entry_limit(rules):
+    ev = evaluate(results(), rules)
+    pred = ev[ev["qualified_by"].notna()]
+    ent = entries_from(pred, drop={"TV1"})
+    other = ent.iloc[[0]].assign(event_code="200", athlete_name="TV2, Runner", school_name="TV School 2")
+    ent = pd.concat([ent[ent["athlete_name"] != "TV2, Runner"], other])       # TV2 entered the 200 instead
+    comp = compare(ev, ent, rules, school_key=key, school_area=area)
+    pne = comp.rows[comp.rows["outcome"] == "predicted_not_entered"]
+    tags = pne.set_index("athlete_name")["choice_tag"]
+    assert tags["TV1, Runner"] == "did_not_declare" and tags["TV2, Runner"] == "chose_other_events"
+    ev2 = ev.assign(athlete_id=ev["athlete_name_raw"])
+    many = pd.concat([ev2.assign(event_code=c) for c in ("100", "200", "400", "800", "1600")])
+    lim = compare(many, ent, rules, school_key=key, school_area=area, interp=Interpretation(entry_limit=4))
+    assert (lim.rows.loc[lim.rows["athlete_name"] == "TV1, Runner", "explained_by"] == "entry_limit_assumed").all()
 
 
 def test_rates_and_switch_effects(rules):
@@ -232,4 +264,4 @@ def test_rates_and_switch_effects(rules):
     assert eff.loc["wind_aided_at_large", "predicted_list_changes_in"] == 0     # no wind-aided marks
     comp = compare(evaluate(results(), rules), ent, rules, school_key=key, school_area=area)
     r = rates(comp.rows, "area")
-    assert (r["match_rate"] == 1.0).all() and set(r.index) == set(AREA_CODE.values())
+    assert (r["raw_match_rate"] == 1.0).all() and set(r.index) == set(AREA_CODE.values())

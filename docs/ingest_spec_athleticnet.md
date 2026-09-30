@@ -180,6 +180,7 @@ One row per athlete (or relay team) per round, per event, per meet.
 | V14 | table | warning | Every finalist appears in that event's prelims, when prelims exist |
 | V15 | table | info | Per-meet row counts: total, out of scope, adaptive, modifier blocks, wind-aided |
 | V17 | table | warning | An in-scope Area event with more than 1.5× the meet's median rows per event (a very large field, e.g. 2025 Class A 400 m: confirm it's real) |
+| V18 | read | info | Row overrides from `data/reference/row_overrides.csv` applied (e.g. misfiled adaptive results set out of scope); an override that no longer matches its row stops ingest |
 | V16 | read | error | Every `meet_name` value names the filename's meet (e.g. "Meet of Champions" for `moc`, "Bayshore"/"Bay Shore" for `bay-shore`), and any year in it equals the filename season |
 
 ## 6. How to run

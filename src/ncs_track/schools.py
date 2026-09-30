@@ -56,7 +56,8 @@ GENERIC = {"college", "preparatory", "prep", "high", "school", "hs", "academy"}
 
 ATHLETICNET_SEASONS = (2022, 2023, 2024, 2025, 2026)
 AREA_SOURCE = ("area_2022..area_2026: area from meet participation (Athletic.net Area meets); "
-               "area_2019: blank (no Athletic.net data)")
+               "Branson / Lower Lake, which competed at two Area meets in a season: Class A / Redwood Empire "
+               "(Patrick, 2026-09-29); area_2019: blank (no Athletic.net data)")
 
 # Renames/aliases confirmed by Patrick 2026-09-29. Keys are norm(clean_raw(spelling)).
 CONFIRMED_ALIASES = {
@@ -65,7 +66,11 @@ CONFIRMED_ALIASES = {
     "university sf": "san-francisco-university",
     "sf university": "san-francisco-university",
     "san francisco university": "san-francisco-university",
+    "california c": "california-crosspoint",      # truncated; confirmed 2026-09-29
 }
+
+# Schools that competed at two Area meets in one season: the area Patrick assigned.
+AREA_OVERRIDES = {"branson": "class-a", "lower-lake": "redwood-empire"}
 
 # Notes for the review queue only; never used to match. Unconfirmed.
 RENAME_HINTS = {
@@ -377,7 +382,9 @@ def alias_table(canon: pd.DataFrame, matched: pd.DataFrame, id_map: dict[str, st
         col = []
         for k in out["school_key"]:
             areas = p.get(k, [])
-            if len(areas) > 1:
+            if len(areas) > 1 and k in AREA_OVERRIDES and AREA_OVERRIDES[k] in areas:
+                areas = [AREA_OVERRIDES[k]]
+            elif len(areas) > 1:
                 review.append({"raw": dict(zip(out["school_key"], out["canonical_name"]))[k],
                                "reason": f"competed at {len(areas)} Area meets in {season}: {areas}",
                                "candidates": "", "hint": "", "sources": "athleticnet", "meet_keys": "",

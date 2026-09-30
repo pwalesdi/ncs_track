@@ -29,7 +29,9 @@ pytest
 
 ## Data
 
-**The raw results are not in this repository.** 
+**The raw results are not in this repository.** They list high-school athletes, most of
+them minors, by name, grade and Athletic.net ID. These paths are git-ignored and exist
+only on a machine that has rebuilt them:
 
 - `data/raw/athleticnet/`: Athletic.net results, one CSV per meet
 - `data/raw/hytek/`: Hy-Tek result pages from Diablo Timing

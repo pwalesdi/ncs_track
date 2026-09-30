@@ -232,6 +232,31 @@ def normalize(raw: pd.DataFrame, meet: pd.Series, source_file: str, rules: dict)
     return perf, legs, issues
 
 
+def load_overrides(path: Path = paths.ROW_OVERRIDES) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame(columns=["meet_key", "source_row", "gender", "event_raw", "place_raw", "mark_raw",
+                                     "action", "reason"])
+    return pd.read_csv(path, dtype=str, keep_default_na=False)
+
+
+def apply_overrides(perf: pd.DataFrame, raw: pd.DataFrame, overrides: pd.DataFrame, meet_key: str) -> list[Issue]:
+    """Row-level decisions from data/reference/row_overrides.csv (e.g. misfiled adaptive
+    results). Each override names the row it expects; a mismatch stops ingest rather than
+    touching the wrong row."""
+    issues = []
+    for o in overrides[overrides["meet_key"] == meet_key].itertuples():
+        i = int(o.source_row) - 1
+        got = raw.iloc[i] if 0 <= i < len(raw) else None
+        if got is None or (got["gender"], got["event_raw"], got["place"], got["mark_raw"]) != \
+                (o.gender, o.event_raw, o.place_raw, o.mark_raw):
+            raise IngestError(f"{meet_key} row {o.source_row}: override does not match the file ({o.reason})")
+        if o.action != "out_of_scope":
+            raise IngestError(f"unknown override action {o.action!r}")
+        perf.loc[perf["source_row"] == int(o.source_row), ["in_scope", "event_modifier"]] = [False, "misfiled_adaptive"]
+        issues.append(Issue("V18", "info", meet_key, f"row {o.source_row}: {o.reason}", f"{meet_key}#{o.source_row}"))
+    return issues
+
+
 def ingest_file(path: Path, meets: pd.DataFrame, rules: dict) -> tuple[pd.DataFrame, pd.DataFrame, list[Issue]]:
     season, meet_slug_, meet_id = parse_filename(path)
     meet = lookup_meet(meets, season, meet_id, meet_slug_)
@@ -244,4 +269,5 @@ def ingest_file(path: Path, meets: pd.DataFrame, rules: dict) -> tuple[pd.DataFr
         issues.append(Issue("V02", "error", meet["meet_key"],
                             f"meet_id column {sorted(ids_in_file)} != filename {meet_id}"))
     perf, legs, more = normalize(raw, meet, path.name, rules)
+    more += apply_overrides(perf, raw, load_overrides(), meet["meet_key"])
     return perf, legs, issues + more

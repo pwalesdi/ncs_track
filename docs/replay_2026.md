@@ -6,6 +6,49 @@ results for all four Area meets, `rules/2026.yaml`, and the 2026 MOC programs
 this page has aggregates only. The rules were not adjusted to fit; the mismatches are the
 finding.
 
+## Update 2026-09-29 (round 2): overlays, RAW and RULES rates
+
+**New overlays.** These never change predictions:
+- **Replacement:** off; next finalist in line in the **same Area**; or the next marks
+  in the **fill line** across all Areas.
+- **Athlete choice:** a missing qualifier is tagged "chose other events" if listed anywhere
+  else in the program, including the 4x800 and relay rosters. Otherwise it is tagged "did
+  not declare".
+- **Entry limit:** 4 events including relays. This is **assumed** (NFHS, unverified).
+
+"California C" is now merged into California Crosspoint.
+
+**Two match rates.**
+- **RAW** counts every difference.
+- **RULES** counts only differences that neither athlete choice nor replacement explains.
+
+| Best reading (same rules as below) | RAW | RULES |
+|---|---|---|
+| Matched | 765 | 765 |
+| Mismatches | 92 | 15 (same-Area replacement) |
+| Match rate | 89.3% | 98.1% |
+
+**Replacement setting.** Same Area leaves 15 rules mismatches, fill line 22, off 39.
+
+**Athlete choice.** Of the 53 predicted qualifiers missing from the program, 40 are listed
+elsewhere in it and 13 are not in it at all.
+
+**Entry limit.** It explains nothing in 2026: no athlete is predicted to qualify in more
+than 4 events. The programs don't contradict the assumed limit: nobody *competed* in more
+than 4 events at any MOC, 2022–2026. One 2024 athlete appears in 5 program lines through a
+relay roster that includes alternates, but did not compete at all.
+
+**The 15 leftover rules mismatches.** All are entered athletes who weren't predicted.
+- **9 were just outside the fill spots.** These include three boys long jumpers tied at
+  fill rank 4 (one each from Tri-Valley, Redwood Empire and Class A). All three entered,
+  for one vacancy.
+- **6 were further down.**
+
+**Rules match rate by Area:** Bay Shore 99.0%, Tri-Valley 98.9%, Class A 96.9%, Redwood
+Empire 96.5%.
+
+The section below is the first run, before these changes.
+
 ## Best reading
 
 All 32 combinations of the five rule switches were scored, with scratch pairing off.

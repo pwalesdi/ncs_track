@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import replace
+import json
+from dataclasses import asdict, replace
 import sys
 from pathlib import Path
 
@@ -109,44 +110,64 @@ def cmd_school_aliases(args) -> int:
     return 0
 
 
-def cmd_replay(args) -> int:
-    from . import replay
-    season = args.season
-    perf = pd.read_csv(paths.PROCESSED / "performances.csv", dtype={"school_id": str}, low_memory=False)
+def replay_inputs(season: int):
+    """(results, entries, rules, label, compare kwargs, legs) for one season."""
+    perf = pd.read_csv(paths.PROCESSED / "performances.csv", dtype={"school_id": str, "athlete_id": str},
+                       low_memory=False)
     results = perf[(perf["season"] == season) & (perf["level"] == "area")]
     entries = pd.read_csv(paths.PROCESSED / "moc_entries.csv")
     entries = entries[entries["season"] == season]
+    legs = pd.read_csv(paths.PROCESSED / "relay_legs.csv", dtype=str)
     rules, label = load_rules_for(season)
     spell = pd.read_csv(paths.SCHOOL_SPELLINGS, dtype=str, keep_default_na=False)
     aliases = pd.read_csv(paths.SCHOOL_ALIASES, dtype=str, keep_default_na=False)
     key_of = dict(zip(spell["raw"], spell["school_key"]))
     area_of = dict(zip(aliases["school_key"], aliases[f"area_{season}"].replace("", None)))
     kw = dict(school_key=key_of.get, school_area=lambda raw: area_of.get(key_of.get(raw)))
-    grid = replay.interpretation_grid(**replay.FULL_GRID)
-    table = replay.sweep(results, rules, entries, grid, **kw)
-    # Scratch pairing removes mismatches by construction, so it can't compete with rule
-    # readings: pick the best reading with it off, then apply it as an overlay.
-    best_name = table[~table["scratch_replacement"]].iloc[0]["interpretation"]
-    best = next(i for i in grid if i.name == best_name)
-    overlay = replace(best, name=best.name.replace("scratch_replacement=False", "scratch_replacement=True"),
-                      scratch_replacement=True)
-    ev = replay.evaluate(results, rules, best)
-    comp_plain = replay.compare(ev, entries, rules, interp=best, **kw)
-    comp = replay.compare(ev, entries, rules, interp=overlay, **kw)
-    out = paths.OUTPUTS / f"replay_{season}"
-    out.mkdir(parents=True, exist_ok=True)
-    table.drop(columns="predicted_set").to_csv(out / "sweep.csv", index=False)
-    comp_plain.rows.to_csv(out / "best_rows.csv", index=False)
-    comp.rows.to_csv(out / "best_rows_with_scratch_pairs.csv", index=False)
-    replay.rates(comp_plain.rows, "area").to_csv(out / "rates_by_area.csv")
-    replay.rates(comp_plain.rows, ["gender", "event_code"]).to_csv(out / "rates_by_event.csv")
-    replay.rates(comp.rows, "area").to_csv(out / "rates_by_area_with_scratch_pairs.csv")
-    replay.switch_effects(table, replay.FULL_GRID).to_csv(out / "switch_effects.csv", index=False)
-    print(f"{season} replay ({label}); {len(grid)} readings; best rule reading: {best.name}")
-    print(pd.DataFrame({"reading": replay.score(comp_plain), "+ scratch pairs": replay.score(comp)}).to_string())
-    for n in comp.notes:
-        print("note:", n)
-    print(f"wrote {out.relative_to(paths.ROOT)}/ (git-ignored: contains athlete names)")
+    return results, entries, rules, label, kw, legs
+
+
+def cmd_replay(args) -> int:
+    from . import replay
+    out_all = []
+    for season in args.season:
+        results, entries, rules, label, kw, legs = replay_inputs(season)
+        if args.reading:
+            base = replay.Interpretation(**json.loads(args.reading))
+            grid = [replace(base, replacement=r, entry_limit=l, name=f"given;replacement={r};entry_limit={l}")
+                    for r in replay.OVERLAY_AXES["replacement"] for l in replay.OVERLAY_AXES["entry_limit"]]
+            grid = [replace(grid[0], replacement="off", entry_limit=0, name="given;replacement=off;entry_limit=0")] + grid[1:]
+        else:
+            grid = replay.interpretation_grid(**replay.FULL_GRID)
+        table = replay.sweep(results, rules, entries, grid, legs=legs, **kw)
+        rule, over = replay.best_reading(table, grid)
+        ev = replay.evaluate(results, rules, rule)
+        comp_raw = replay.compare(ev, entries, rules, interp=rule, legs=legs, **kw)
+        comp = replay.compare(ev, entries, rules, interp=over, legs=legs, **kw)
+        out = paths.OUTPUTS / f"replay_{season}"
+        out.mkdir(parents=True, exist_ok=True)
+        table.drop(columns="predicted_set").to_csv(out / "sweep.csv", index=False)
+        ev.to_csv(out / "evaluated.csv", index=False)
+        comp.rows.to_csv(out / "best_rows.csv", index=False)
+        replay.rates(comp.rows, "area").to_csv(out / "rates_by_area.csv")
+        replay.rates(comp.rows, ["gender", "event_code"]).to_csv(out / "rates_by_event.csv")
+        if not args.reading:
+            eff = pd.concat([
+                replay.switch_effects(table[(table["replacement"] == "off") & (table["entry_limit"] == 0)],
+                                      replay.RULE_AXES, "raw_mismatches"),
+                replay.switch_effects(table, replay.OVERLAY_AXES, "rules_mismatches", replay.FULL_GRID)])
+            eff.to_csv(out / "switch_effects.csv", index=False)
+        (out / "best_reading.json").write_text(json.dumps({"rule": asdict(rule), "overlay": asdict(over)}, indent=1))
+        sc = {"rules only": replay.score(comp_raw), "with overlays": replay.score(comp)}
+        print(f"{season} ({label}); {len(grid)} readings\n  rule reading: {rule.name}\n  overlays: "
+              f"replacement={over.replacement}, entry_limit={over.entry_limit}")
+        print(pd.DataFrame(sc).loc[["matched", "raw_mismatches", "raw_match_rate", "rules_mismatches",
+                                     "rules_match_rate", "explained_by_choice", "explained_by_entry_limit",
+                                     "explained_by_replacement", "not_comparable_area_unknown"]].to_string())
+        for n in comp.notes:
+            print("note:", n)
+        out_all.append({"season": season, **replay.score(comp)})
+    pd.DataFrame(out_all).to_csv(paths.OUTPUTS / "replay_seasons.csv", index=False)
     return 0
 
 
@@ -168,7 +189,8 @@ def main(argv: list[str] | None = None) -> int:
     a = sub.add_parser("school-aliases", help="build data/reference/school_aliases.csv + review queue")
     a.set_defaults(func=cmd_school_aliases)
     rp = sub.add_parser("replay", help="replay Area -> MOC qualification and sweep rule readings")
-    rp.add_argument("--season", type=int, required=True)
+    rp.add_argument("--season", type=int, nargs="+", required=True)
+    rp.add_argument("--reading", help="JSON of rule switches to use instead of sweeping them")
     rp.set_defaults(func=cmd_replay)
     args = ap.parse_args(argv)
     return args.func(args)

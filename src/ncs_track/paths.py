@@ -18,6 +18,7 @@ SCHOOL_SPELLINGS = REFERENCE / "school_alias_spellings.csv"
 AREA_LISTS = REFERENCE / "ncs_source_of_truth_lists.csv"
 RULES = REFERENCE / "rules"
 ENTRIES = REFERENCE / "entries"
+ROW_OVERRIDES = REFERENCE / "row_overrides.csv"
 
 PROCESSED = DATA / "processed"
 REVIEW = DATA / "review"

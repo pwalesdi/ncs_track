@@ -1,5 +1,4 @@
 raw,reason,candidates,hint,sources,meet_keys,seen_at_areas,school_key_decision,notes
-California C,truncated to a one-letter tail; prefix too weak to match,,,hytek|moc_program,2026-moc,,,
 El Molino,no canonical school fits,,possibly merged into Analy / West County (unconfirmed),hytek,2019-moc,,,
 John F. Kenn,ambiguous (prefix): 2 candidates,John F. Kennedy (Fremont)|John F. Kennedy (Richmond),,hytek,2019-moc|2024-area-bay-shore,bay-shore,,
 Kennedy (Fre.),no canonical school fits,,,hytek,2024-area-bay-shore,bay-shore,,
@@ -16,5 +15,3 @@ Urban,no canonical school fits,,,hytek,2019-moc,,,
 West County,no canonical school fits,,possible rename of Analy (unconfirmed); athlete link: athlete (6 athletes) -> analy in Athletic.net,hytek|moc_program,2022-moc,,,
 West County (Nc),no canonical school fits,,possible rename of Analy (unconfirmed),hytek,2022-moc,,,
 school_id 0 / blank (2024-area-class-a),5 rows with no Athletic.net school,,,athleticnet,2024-area-class-a,,,
-Branson,"competed at 2 Area meets in 2022: ['class-a', 'redwood-empire']",,,athleticnet,,class-a|redwood-empire,,
-Lower Lake,"competed at 2 Area meets in 2023: ['class-a', 'redwood-empire']",,,athleticnet,,class-a|redwood-empire,,

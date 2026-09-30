@@ -13,9 +13,18 @@ The parts of the rules we are unsure of are switches on `Interpretation`, so eac
 can be replayed and scored against the MOC programs; the reading whose predictions match
 the real entries best is the one to believe. `compare` does the scoring.
 
-Scratches: with `scratch_replacement` on, a predicted qualifier missing from the program
-and an unpredicted entrant from the same Area who was the next finalist in line are
-paired and tagged "probable_scratch_replacement" instead of counting as two mismatches.
+Overlays (they never change predictions, only explain mismatches):
+- replacement: "same_area" pairs a predicted qualifier missing from the program with an
+  unpredicted entrant who was the next finalist in line in the same Area; "fill_line"
+  fills the event's vacancies with the next marks in the fill pool, section-wide.
+- athlete choice: every predicted qualifier missing from the program is tagged
+  "chose_other_events" (listed elsewhere in the program: another event, the 4x800 or a
+  relay roster) or "did_not_declare" (not in the program at all).
+- entry_limit (assumed, NFHS 4 events incl. relays, unverified): a missing qualifier who
+  qualified in more events than the limit is tagged "entry_limit_assumed".
+
+Two match rates: RAW counts every difference; RULES counts only differences no overlay
+explains.
 
 Not modelled: 4x800 (separate system), league -> Area.
 """
@@ -57,8 +66,10 @@ class Interpretation:
     fill_ties_include: bool = True
     # Wind-aided marks count for at-large (D6: documents are silent).
     wind_aided_at_large: bool = True
-    # Pair "predicted but not entered" with "entered, next finalist in line, same Area".
-    scratch_replacement: bool = False
+    # Overlay: how vacancies were refilled. "off" | "same_area" | "fill_line".
+    replacement: str = "off"
+    # Overlay: max events per athlete incl. relays (0 = off). 4 is ASSUMED, not verified.
+    entry_limit: int = 0
 
     def describe(self) -> str:
         d = asdict(self)
@@ -77,10 +88,12 @@ def interpretation_grid(**axes) -> list[Interpretation]:
 
 # Default sweep: the two questions Patrick asked to test.
 DEFAULT_GRID = dict(class_a_at_large_outside_top=[3, 6], fill_before_at_large=[True, False])
-# Every switch (64 readings).
-FULL_GRID = dict(class_a_at_large_outside_top=[3, 6], fill_before_at_large=[True, False],
+# Rule switches change predictions; overlay switches only explain mismatches.
+RULE_AXES = dict(class_a_at_large_outside_top=[3, 6], fill_before_at_large=[True, False],
                  fill_source=["moc_guide", "nbl_flyer"], fill_ties_include=[True, False],
-                 wind_aided_at_large=[True, False], scratch_replacement=[False, True])
+                 wind_aided_at_large=[True, False])
+OVERLAY_AXES = dict(replacement=["off", "same_area", "fill_line"], entry_limit=[0, 4])
+FULL_GRID = {**RULE_AXES, **OVERLAY_AXES}
 
 
 # ---------------------------------------------------------------------------
@@ -107,7 +120,7 @@ def main_events(rules: dict) -> list[tuple[str, str]]:
 # Replay
 # ---------------------------------------------------------------------------
 EVAL_COLUMNS = [
-    "season", "gender", "event_code", "meet_key", "meet_area", "place", "status", "mark_raw",
+    "season", "gender", "event_code", "meet_key", "meet_area", "place", "status", "mark_raw", "athlete_id",
     "mark_value", "wind_aided", "athlete_name_raw", "school_name_raw", "is_relay",
     "performance_id", "standard_value", "meets_standard", "auto", "at_large_eligible",
     "fill_candidate", "fill_rank", "qualified_by", "interpretation",
@@ -213,21 +226,23 @@ def _variant_of(a: str, b: str) -> bool:
 
 @dataclass
 class Comparison:
-    rows: pd.DataFrame                  # one row per entrant with `outcome` and `reason`
+    rows: pd.DataFrame                  # one row per entrant with `outcome`, `reason`, `explained_by`
     summary: pd.DataFrame               # counts per outcome
     notes: list[str] = field(default_factory=list)
 
 
-OUTCOMES = ("match", "match_name_variant", "probable_scratch_replacement",
-            "predicted_not_entered", "entered_not_predicted")
-ROW_COLUMNS = ["gender", "event_code", "outcome", "reason", "qualified_by", "athlete_name", "school_name",
-               "area", "place", "mark_raw", "meets_standard", "fill_rank", "program_name", "detail"]
+OUTCOMES = ("match", "match_name_variant", "predicted_not_entered", "entered_not_predicted")
+ROW_COLUMNS = ["gender", "event_code", "outcome", "reason", "explained_by", "choice_tag", "qualified_by",
+               "athlete_name", "school_name", "area", "place", "mark_raw", "meets_standard", "fill_rank",
+               "program_name", "detail", "vacancy_filled_by_area", "fills_vacancy_of_area",
+               "athlete_id", "identity"]
+QUALIFIED_BY_ORDER = {"auto": 0, "at_large": 1, "fill": 2}
 
 
-def _row(g, e, outcome, reason, *, qualified_by=None, name=None, school=None, area=None, place=None,
-         mark=None, meets=None, fill_rank=None, program_name=None, detail=None) -> dict:
-    return dict(zip(ROW_COLUMNS, (g, e, outcome, reason, qualified_by, name, school, area, place, mark,
-                                  meets, fill_rank, program_name, detail)))
+def _row(g, e, outcome, reason, **kw) -> dict:
+    r = dict.fromkeys(ROW_COLUMNS)
+    r.update(gender=g, event_code=e, outcome=outcome, reason=reason, **kw)
+    return r
 
 
 def _diagnose(identity: str, allperf: pd.DataFrame, gender: str, event: str, fill_n: int) -> tuple[str, str, pd.Series | None]:
@@ -250,12 +265,14 @@ def _diagnose(identity: str, allperf: pd.DataFrame, gender: str, event: str, fil
 
 def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
             school_key: Callable[[str], str | None], school_area: Callable[[str], str | None],
-            interp: Interpretation = Interpretation()) -> Comparison:
+            interp: Interpretation = Interpretation(), legs: pd.DataFrame | None = None) -> Comparison:
     """Compare predicted qualifiers with MOC program entries for the same season.
 
     Only entrants from Areas present in `evaluated` are compared: an MOC entrant from an
     Area whose results we don't have can't be predicted, so they are counted separately
-    (`not_comparable`), as are entrants whose school has no known area.
+    (`not_comparable`), as are entrants whose school has no known area. An unpredicted
+    entrant's area is the Area meet their result came from (their school's area only if
+    they have no Area result). `legs` (relay_legs) lets the entry limit count relays.
     """
     notes = []
     areas = set(evaluated["meet_area"].dropna().unique())
@@ -278,6 +295,8 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
                        zip(ent["athlete_name"], ent["school_key"], ent["is_relay"])]
     not_comparable = ent[~ent["area"].isin(areas)]
     ent = ent[ent["area"].isin(areas)]
+    declared_ids = _declared_anywhere(entries, school_key)
+    over_limit = _over_entry_limit(pred, legs, interp.entry_limit)
 
     rows = []
     for g, e in sorted(events):
@@ -294,26 +313,37 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
         pne, enp = [], []
         for _, r in p.iterrows():
             i = r["identity"]
-            base = dict(qualified_by=r["qualified_by"], name=r["athlete_name_raw"], school=r["school_name_raw"],
-                        area=r["meet_area"], place=r["place"], mark=r["mark_raw"], meets=r["meets_standard"],
-                        fill_rank=r["fill_rank"])
+            base = dict(qualified_by=r["qualified_by"], athlete_name=r["athlete_name_raw"],
+                        school_name=r["school_name_raw"], area=r["meet_area"], place=r["place"],
+                        mark_raw=r["mark_raw"], meets_standard=r["meets_standard"], fill_rank=r["fill_rank"],
+                        athlete_id=r["athlete_id"], identity=i)
             if i in exact:
                 rows.append(_row(g, e, "match", "match", program_name=prog_name[i], **base))
             elif i in pairs:
                 rows.append(_row(g, e, "match_name_variant", "name spelled differently",
                                  program_name=prog_name[pairs[i]], **base))
             else:
+                choice = "chose_other_events" if (g, i) in declared_ids else "did_not_declare"
+                limited = interp.entry_limit and r["athlete_id"] in over_limit
                 pne.append(_row(g, e, "predicted_not_entered", f"predicted_{r['qualified_by']}_not_in_program",
+                                choice_tag=choice, explained_by="entry_limit_assumed" if limited else choice,
                                 detail="qualified under this reading but not in the MOC program", **base))
         for _, r in en[~en["identity"].isin(exact | set(pairs.values()))].iterrows():
             reason, detail, h = _diagnose(r["identity"], allperf, g, e, fill_n)
-            enp.append(_row(g, e, "entered_not_predicted", reason, name=r["athlete_name"], school=r["school_name"],
-                            area=r["area"], place=None if h is None else h["place"], mark=r["seed_mark_raw"],
-                            meets=None if h is None else h["meets_standard"],
+            enp.append(_row(g, e, "entered_not_predicted", reason, athlete_name=r["athlete_name"],
+                            school_name=r["school_name"], area=r["area"] if h is None else h["meet_area"],
+                            place=None if h is None else h["place"], mark_raw=r["seed_mark_raw"],
+                            meets_standard=None if h is None else h["meets_standard"],
                             fill_rank=None if h is None else h["fill_rank"], program_name=r["athlete_name"],
+                            athlete_id=None if h is None else h["athlete_id"], identity=r["identity"],
                             detail=detail))
-        if interp.scratch_replacement:
-            _pair_scratches(pne, enp, allperf[(allperf["gender"] == g) & (allperf["event_code"] == e)])
+        event_perf = allperf[(allperf["gender"] == g) & (allperf["event_code"] == e)]
+        if interp.replacement == "same_area":
+            _pair_same_area(pne, enp, event_perf)
+        elif interp.replacement == "fill_line":
+            _pair_fill_line(pne, enp, event_perf, interp.fill_ties_include)
+        elif interp.replacement != "off":
+            raise ValueError(f"unknown replacement mode {interp.replacement!r}")
         rows += pne + enp
 
     out = pd.DataFrame(rows, columns=ROW_COLUMNS)
@@ -325,69 +355,151 @@ def compare(evaluated: pd.DataFrame, entries: pd.DataFrame, rules: dict, *,
     return Comparison(out, summary, notes)
 
 
-def _pair_scratches(pne: list[dict], enp: list[dict], event_perf: pd.DataFrame) -> None:
-    """Tag (predicted-not-entered, entered-not-predicted) pairs from one Area where the
-    entrant was among the next finalists in line after that Area's qualifiers."""
+def _declared_anywhere(entries: pd.DataFrame, school_key: Callable[[str], str | None]) -> set:
+    """(gender, identity) of everyone listed anywhere in the program: every individual
+    event including the 4x800, and every relay roster (legs and alternates)."""
+    ent = entries[~entries["is_adaptive"].astype(bool)]
+    out = set()
+    for r in ent.itertuples():
+        key = school_key(r.school_name)
+        out.add((r.gender, _identity(r.athlete_name, key, r.is_relay)))
+        if r.is_relay and isinstance(r.relay_legs, str):
+            for leg in r.relay_legs.split(";"):
+                name = re.sub(r"\s+\d{1,2}$", "", leg.strip())
+                if name:
+                    out.add((r.gender, _identity(name, key, False)))
+    return out
+
+
+def _over_entry_limit(pred: pd.DataFrame, legs: pd.DataFrame | None, limit: int) -> set:
+    """Athlete IDs predicted to qualify in more than `limit` events (relays via Area legs)."""
+    if not limit:
+        return set()
+    ind = pred[~pred["is_relay"].astype(bool) & pred["athlete_id"].notna()][["athlete_id", "gender", "event_code"]]
+    parts = [ind]
+    if legs is not None and len(legs):
+        rel = pred[pred["is_relay"].astype(bool)][["performance_id", "gender", "event_code"]]
+        parts.append(legs.merge(rel, on="performance_id")[["athlete_id", "gender", "event_code"]].dropna())
+    counts = pd.concat(parts).drop_duplicates().groupby("athlete_id").size()
+    return set(counts[counts > limit].index)
+
+
+def _mark_pair(vacancy: dict, sub: dict, how: str) -> None:
+    vacancy["vacancy_filled_by_area"] = sub["area"]
+    sub["fills_vacancy_of_area"] = vacancy["area"]
+    sub["explained_by"] = f"replacement_{how}"
+    vacancy["detail"] = f"{vacancy['detail']}; vacancy refilled ({how}) by {sub['area']} place {sub['place']}"
+    sub["detail"] = f"{sub['detail']}; replacement ({how}) for {vacancy['area']} vacancy"
+
+
+def _pair_same_area(pne: list[dict], enp: list[dict], event_perf: pd.DataFrame) -> None:
+    """Pair each Area's vacancies with that Area's next finalists in line."""
     for area in {r["area"] for r in pne}:
-        missing = sorted((r for r in pne if r["area"] == area and r["outcome"] == "predicted_not_entered"),
-                         key=lambda r: r["place"] if pd.notna(r["place"]) else 1e9)
+        vac = sorted((r for r in pne if r["area"] == area),
+                     key=lambda r: r["place"] if pd.notna(r["place"]) else 1e9)
         line = event_perf[(event_perf["meet_area"] == area) & event_perf["qualified_by"].isna()
                           & (event_perf["status"] == "OK") & event_perf["place"].notna()].sort_values("place")
-        next_places = list(line["place"].iloc[:len(missing)])
-        subs = [r for r in enp if r["area"] == area and r["outcome"] == "entered_not_predicted"
-                and pd.notna(r["place"]) and r["place"] in next_places]
-        for m, sub in zip(missing, sorted(subs, key=lambda r: r["place"])):
-            for r, other in ((m, sub), (sub, m)):
-                r["outcome"] = "probable_scratch_replacement"
-                r["reason"] = "probable_scratch_replacement"
-                r["detail"] = f"paired with {other['athlete_name'] or other['school_name']} ({area} place {other['place']})"
+        next_places = set(line["place"].iloc[:len(vac)])
+        subs = sorted((r for r in enp if r["area"] == area and r["explained_by"] is None
+                       and pd.notna(r["place"]) and r["place"] in next_places), key=lambda r: r["place"])
+        for v, sub in zip(vac, subs):
+            _mark_pair(v, sub, "same_area")
+
+
+def _pair_fill_line(pne: list[dict], enp: list[dict], event_perf: pd.DataFrame, ties: bool) -> None:
+    """Fill the event's vacancies with the next marks in the fill pool, any Area.
+    Which vacancy each replacement is paired with is a convention (vacancies by auto /
+    at-large / fill, then place; replacements by fill rank)."""
+    if not pne:
+        return
+    cands = event_perf[event_perf["fill_candidate"] & event_perf["qualified_by"].isna()
+                       & (event_perf["status"] == "OK")].sort_values("fill_rank")
+    if cands.empty:
+        return
+    n = len(pne)
+    cutoff = cands["fill_rank"].iloc[min(n, len(cands)) - 1]
+    line = cands[cands["fill_rank"] <= cutoff] if ties else cands.iloc[:n]
+    ids = set(line["identity"])
+    subs = sorted((r for r in enp if r["explained_by"] is None and r["identity"] in ids),
+                  key=lambda r: r["fill_rank"] if pd.notna(r["fill_rank"]) else 1e9)
+    vac = sorted(pne, key=lambda r: (QUALIFIED_BY_ORDER.get(r["qualified_by"], 9),
+                                     r["place"] if pd.notna(r["place"]) else 1e9))
+    for v, sub in zip(vac, subs):
+        _mark_pair(v, sub, "fill_line")
 
 
 def score(comp: Comparison) -> dict:
+    """RAW: every difference counts. RULES: only differences no overlay explains."""
+    rows = comp.rows
+    matched = int(rows["outcome"].isin(["match", "match_name_variant"]).sum())
+    pne = int((rows["outcome"] == "predicted_not_entered").sum())
+    enp = int((rows["outcome"] == "entered_not_predicted").sum())
+    unexplained = rows[rows["outcome"].isin(["predicted_not_entered", "entered_not_predicted"])
+                       & rows["explained_by"].isna()]
     s = dict(zip(comp.summary["outcome"], comp.summary["n"]))
-    matched = s["match"] + s["match_name_variant"]
-    scratch_pairs = s["probable_scratch_replacement"] // 2
-    predicted = matched + s["predicted_not_entered"] + scratch_pairs
-    entered = matched + s["entered_not_predicted"] + scratch_pairs
-    mismatches = s["predicted_not_entered"] + s["entered_not_predicted"]
-    return {**s, "mismatches": mismatches,
-            "match_rate": matched / (matched + mismatches + 2 * scratch_pairs) if matched + mismatches else None,
-            "precision": matched / predicted if predicted else None,
-            "recall": matched / entered if entered else None}
+    return {**s, "matched": matched, "raw_mismatches": pne + enp,
+            "raw_match_rate": matched / (matched + pne + enp) if matched + pne + enp else None,
+            "rules_mismatches": len(unexplained),
+            "rules_match_rate": matched / (matched + len(unexplained)) if matched + len(unexplained) else None,
+            "precision": matched / (matched + pne) if matched + pne else None,
+            "recall": matched / (matched + enp) if matched + enp else None,
+            "explained_by_choice": int(rows["explained_by"].isin(["chose_other_events", "did_not_declare"]).sum()),
+            "explained_by_entry_limit": int((rows["explained_by"] == "entry_limit_assumed").sum()),
+            "explained_by_replacement": int(rows["explained_by"].fillna("").str.startswith("replacement").sum())}
 
 
-def rates(rows: pd.DataFrame, by: str) -> pd.DataFrame:
-    """Match rate per group: matched / (matched + predicted-not-entered + entered-not-predicted)."""
+def rates(rows: pd.DataFrame, by) -> pd.DataFrame:
+    """RAW and RULES match rates per group."""
     t = rows.assign(ok=rows["outcome"].isin(["match", "match_name_variant"]),
                     pne=rows["outcome"] == "predicted_not_entered",
-                    enp=rows["outcome"] == "entered_not_predicted",
-                    scr=rows["outcome"] == "probable_scratch_replacement")
-    g = t.groupby(by)[["ok", "pne", "enp", "scr"]].sum().astype(int)
-    g["match_rate"] = (g["ok"] / (g["ok"] + g["pne"] + g["enp"] + g["scr"])).round(3)
+                    enp=rows["outcome"] == "entered_not_predicted")
+    t["unexplained"] = (t["pne"] | t["enp"]) & t["explained_by"].isna()
+    g = t.groupby(by)[["ok", "pne", "enp", "unexplained"]].sum().astype(int)
+    g["raw_match_rate"] = (g["ok"] / (g["ok"] + g["pne"] + g["enp"])).round(3)
+    g["rules_match_rate"] = (g["ok"] / (g["ok"] + g["unexplained"])).round(3)
     return g.rename(columns={"ok": "matched", "pne": "predicted_not_entered", "enp": "entered_not_predicted",
-                             "scr": "scratch_pairs_rows"})
+                             "unexplained": "rules_mismatches"})
 
 
-def sweep(results: pd.DataFrame, rules: dict, entries: pd.DataFrame,
-          interps: list[Interpretation], **compare_kw) -> pd.DataFrame:
-    """Score each interpretation; the one that best reproduces real entries ranks first."""
-    rows = []
+def sweep(results: pd.DataFrame, rules: dict, entries: pd.DataFrame, interps: list[Interpretation],
+          legs: pd.DataFrame | None = None, **compare_kw) -> pd.DataFrame:
+    """Score each interpretation. Predictions depend only on the rule switches, so each rule
+    reading is evaluated once and every overlay is applied to it."""
+    rows, cache = [], {}
+    rule_keys = list(RULE_AXES)
     for interp in interps:
-        ev = evaluate(results, rules, interp)
-        comp = compare(ev, entries, rules, interp=interp, **compare_kw)
-        pred = ev[ev["qualified_by"].notna()]
-        rows.append({"interpretation": interp.name, **asdict(interp), **score(comp),
-                     "predicted_set": frozenset(zip(pred["performance_id"], pred["qualified_by"]))})
+        rk = tuple(getattr(interp, k) for k in rule_keys)
+        if rk not in cache:
+            ev = evaluate(results, rules, interp)
+            pred = ev[ev["qualified_by"].notna()]
+            cache[rk] = (ev, frozenset(zip(pred["performance_id"], pred["qualified_by"])))
+        ev, pset = cache[rk]
+        comp = compare(ev, entries, rules, interp=interp, legs=legs, **compare_kw)
+        rows.append({"interpretation": interp.name, **asdict(interp), **score(comp), "predicted_set": pset})
     df = pd.DataFrame(rows)
-    return df.sort_values(["mismatches", "interpretation"]).reset_index(drop=True)
+    return df.sort_values(["raw_mismatches", "rules_mismatches", "interpretation"]).reset_index(drop=True)
 
 
-def switch_effects(table: pd.DataFrame, axes: dict) -> pd.DataFrame:
-    """For each switch: across pairs of readings that differ only in that switch, how often
-    the predicted list changes and how the mismatch count moves."""
+def best_reading(table: pd.DataFrame, grid: list[Interpretation]) -> tuple[Interpretation, Interpretation]:
+    """(best rule reading with overlays off, same reading with its best overlays)."""
+    off = table[(table["replacement"] == "off") & (table["entry_limit"] == 0)].sort_values(["raw_mismatches", "interpretation"])
+    rule = next(i for i in grid if i.name == off.iloc[0]["interpretation"])
+    same = table
+    for k in RULE_AXES:
+        same = same[same[k] == getattr(rule, k)]
+    over = same.sort_values(["rules_mismatches", "interpretation"]).iloc[0]
+    return rule, next(i for i in grid if i.name == over["interpretation"])
+
+
+def switch_effects(table: pd.DataFrame, axes: dict, metric: str = "raw_mismatches",
+                   hold_fixed: dict | None = None) -> pd.DataFrame:
+    """For each switch in `axes`: across sets of readings that differ only in that switch
+    (every switch in `hold_fixed`, default `axes`, held fixed), how often the predicted list
+    changes and how `metric` moves from the first value to the last."""
     out = []
+    fixed = hold_fixed or axes
     for k, values in axes.items():
-        others = [a for a in axes if a != k]
+        others = [a for a in fixed if a != k]
         changed = n = 0
         deltas = []
         for _, grp in table.groupby(others):
@@ -395,10 +507,10 @@ def switch_effects(table: pd.DataFrame, axes: dict) -> pd.DataFrame:
                 continue
             n += 1
             sets = grp.set_index(k)["predicted_set"]
-            mism = grp.set_index(k)["mismatches"]
+            mism = grp.set_index(k)[metric]
             changed += int(len(set(sets)) > 1)
-            deltas.append(int(mism[values[1]] - mism[values[0]]))
-        out.append({"switch": k, "values": f"{values[0]} -> {values[1]}", "pairs": n,
+            deltas.append(int(mism[values[-1]] - mism[values[0]]))
+        out.append({"switch": k, "values": f"{values[0]} -> {values[-1]}", "metric": metric, "pairs": n,
                     "predicted_list_changes_in": changed,
-                    "mismatch_delta_min": min(deltas), "mismatch_delta_max": max(deltas)})
+                    "delta_min": min(deltas), "delta_max": max(deltas)})
     return pd.DataFrame(out)

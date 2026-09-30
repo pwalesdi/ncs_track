@@ -112,13 +112,18 @@ def test_core_comparison_groups():
     assert set(cc["season"]) == {"2026", "2026-2026 pooled"}
 
 
-def test_cutoff_uses_prelims_when_final_is_short():
+def test_cutoff_is_nth_best_mark_across_all_rounds():
+    # A slow 8th-place final (25.00) must not set the cutoff; athletes count once at their best mark.
     moc = pd.DataFrame({
         "season": 2026, "gender": "boys", "event_code": "200", "is_relay": False, "school_name_raw": "S",
-        "athlete_name_raw": [f"A{i}" for i in range(10)], "athlete_id": [str(i) for i in range(10)],
-        "round": ["final"] * 7 + ["prelim"] * 3, "status": ["OK"] * 6 + ["DNS"] + ["OK"] * 3,
-        "place": [1, 2, 3, 4, 5, 6, None, 9, 10, 11], "mark_raw": [f"{21 + i / 10:.2f}" for i in range(10)],
-        "mark_value": [21 + i / 10 for i in range(10)]})
+        "athlete_name_raw": [f"A{i}" for i in range(8)] + [f"A{i}" for i in range(8)] + ["P1", "P2", "P3"],
+        "athlete_id": [str(i) for i in range(8)] * 2 + ["p1", "p2", "p3"],
+        "round": ["final"] * 8 + ["prelim"] * 11, "status": "OK",
+        "place": list(range(1, 9)) + [None] * 11,
+        "mark_raw": [f"{21 + i / 10:.2f}" for i in range(7)] + ["25.00"]
+                    + [f"{21.05 + i / 10:.2f}" for i in range(7)] + ["21.75"] + ["21.72", "21.90", "22.40"],
+        "mark_value": [21 + i / 10 for i in range(7)] + [25.0]
+                      + [21.05 + i / 10 for i in range(7)] + [21.75] + [21.72, 21.90, 22.40]})
     cut = analysis.moc_cutoffs(moc).iloc[0]
-    # 6 valid final marks, then the best prelim-only marks: 8th overall = the 2nd prelim mark
-    assert cut["moc_cutoff_source"] == "final+prelim" and cut["moc_cutoff_mark"] == "21.80"
+    # best marks: 21.0..21.6 (7 athletes), 21.72, 21.75, ... -> 8th best = 21.72
+    assert cut["moc_cutoff_mark"] == "21.72" and cut["moc_cutoff_source"] == "best_mark_all_rounds"

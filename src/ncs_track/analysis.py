@@ -333,12 +333,9 @@ LEFT_OUT_CAVEAT = ("Area mark and MOC marks come from different meets (different
 
 
 def moc_cutoffs(moc: pd.DataFrame) -> pd.DataFrame:
-    """The mark at overall MOC place 8 (9 for LJ/TJ/SP/DT) per season x gender x event.
-
-    Overall order = the final's valid marks by place, then everyone else's best valid mark
-    (the order behind moc_overall_place). When the final has fewer valid marks than the
-    cutoff place (DNS/DQ in the final), the cutoff comes from the best non-finalist marks;
-    `moc_cutoff_source` says which."""
+    """The 8th-best (9th for LJ/TJ/SP/DT) valid MOC mark per season x gender x event,
+    across all rounds combined (prelims + finals). Each athlete or relay team counts once,
+    at their best valid mark, so one slow final can't set the cutoff."""
     ok = moc[(moc["status"] == "OK") & moc["mark_value"].notna()].copy()
     ok["key"] = [a if isinstance(a, str) and not r else f"{s}|{n}" for a, r, s, n in
                  zip(ok["athlete_id"], ok["is_relay"], ok["school_name_raw"], ok["athlete_name_raw"])]
@@ -346,16 +343,13 @@ def moc_cutoffs(moc: pd.DataFrame) -> pd.DataFrame:
     for (s, g, e), x in ok.groupby(KEY):
         n = top_cut(e)
         measure = EVENTS[e][0]
-        fin = x[(x["round"] == "final") & x["place"].notna()].sort_values("place")
-        rest = x[~x["key"].isin(set(fin["key"]))]
-        rest = rest.assign(k=rest["mark_value"] if measure == "time" else -rest["mark_value"])
-        rest = rest.sort_values("k").drop_duplicates("key")
-        order = pd.concat([fin[["mark_raw", "mark_value"]], rest[["mark_raw", "mark_value"]]])
-        hit = order.iloc[n - 1] if len(order) >= n else None
+        best = (x.assign(k=x["mark_value"] if measure == "time" else -x["mark_value"])
+                .sort_values("k").drop_duplicates("key"))
+        hit = best.iloc[n - 1] if len(best) >= n else None
         rows.append({"season": s, "gender": g, "event_code": e, "moc_cutoff_place": n,
                      "moc_cutoff_mark": hit["mark_raw"] if hit is not None else None,
                      "moc_cutoff_value": hit["mark_value"] if hit is not None else None,
-                     "moc_cutoff_source": None if hit is None else ("final" if len(fin) >= n else "final+prelim")})
+                     "moc_cutoff_source": None if hit is None else "best_mark_all_rounds"})
     return pd.DataFrame(rows)
 
 

@@ -92,7 +92,7 @@ def test_6_left_out_tri_valley(tmp_path):
     s = summary("left_out.csv")
     s = s[(s["season"] == 2026) & (s["area"] == "tri-valley") & s["moc_cutoff_mark"].notna()]
     assert (lo["hits"], lo["total"]) == (int(s["area_mark_would_have_been_top_finish"].fillna(False).astype(bool).sum()),
-                                         len(s)) == (3, 96)
+                                         len(s)) == (0, 96)   # 3 of 96 before the all-rounds cutoff
 
 
 def test_7_single_event_and_group_filters(tmp_path):

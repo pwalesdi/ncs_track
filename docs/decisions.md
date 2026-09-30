@@ -128,3 +128,12 @@ Newest at the bottom.
     when comparing with a real program.
 14. **`tests/` is now a Python package** (`tests/__init__.py`), so the engine test can
     reuse the replay test's fixture.
+
+
+## 2026-09-30: fixes after the overnight run
+
+15. **Left-out cutoff** (replaces decision 5): the 8th-best valid MOC mark (9th for
+    LJ/TJ/SP/DT) across all rounds combined. Each athlete or relay team counts once, at
+    their best valid mark in any round. Counting every round's mark separately would let
+    one athlete fill several of the top 8. One slow final (e.g. the 2026 boys 4x400, 8th
+    place 3:59.34) no longer sets the cutoff.

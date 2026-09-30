@@ -35,6 +35,8 @@ def main() -> int:
                 input="\n".join(objs).encode()).decode().split("\n")
     blobs = [l.split()[0] for l in batch if l.endswith(" blob")]
     for sha in blobs:
+        if objs[sha] == "scripts/checks/athlete_rows_history.py":      # its own signature strings
+            continue
         data = git("cat-file", "-p", sha)
         for sig in SIGNATURES:
             if sig in data:

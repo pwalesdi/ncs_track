@@ -23,7 +23,16 @@ from .marks import MarkParseError, parse_mark, parse_status
 from .names import grad_year, name_key
 from .schema import ATHLETICNET_COLUMNS, PERFORMANCES, RELAY_LEGS, conform
 
-FILENAME = re.compile(r"^athleticnet_(\d{4})_(\d+)\.csv$")
+FILENAME = re.compile(r"^(\d{4})_(moc|tri-valley|bay-shore|redwood-empire|class-a)_(\d+)\.csv$")
+
+# V16: the meet_name inside a file must name the meet its filename claims.
+MEET_NAME_PATTERNS = {
+    "moc": re.compile(r"meet of champions", re.I),
+    "tri-valley": re.compile(r"tri[- ]?valley", re.I),
+    "bay-shore": re.compile(r"bay ?shore", re.I),
+    "redwood-empire": re.compile(r"redwood empire", re.I),
+    "class-a": re.compile(r"\bclass a\b", re.I),
+}
 LEG_SEPARATORS = ("|", ";")
 
 
@@ -31,24 +40,46 @@ class IngestError(ValueError):
     pass
 
 
-def parse_filename(path: Path) -> tuple[int, str]:
+def parse_filename(path: Path) -> tuple[int, str, str]:
+    """(season, meet, meet_id) from "{season}_{meet}_{meet_id}.csv", e.g. 2026_moc_629241.csv."""
     m = FILENAME.match(path.name)
     if not m:
-        raise IngestError(f"{path.name}: expected athleticnet_{{season}}_{{meet_id}}.csv")
-    return int(m.group(1)), m.group(2)
+        raise IngestError(f"{path.name}: expected {{season}}_{{meet}}_{{meet_id}}.csv with meet in "
+                          f"{sorted(MEET_NAME_PATTERNS)}")
+    return int(m.group(1)), m.group(2), m.group(3)
+
+
+def meet_slug(meet_key: str) -> str:
+    """"2026-moc" -> "moc", "2026-area-tri-valley" -> "tri-valley"."""
+    rest = meet_key.split("-", 1)[1]
+    return rest.removeprefix("area-")
+
+
+def check_meet_name(names: set[str], meet: str, season: int, meet_key: str) -> list[Issue]:
+    """V16: every meet_name value names the filename's meet (and season, if it has a year)."""
+    out = []
+    for name in sorted(names):
+        if not MEET_NAME_PATTERNS[meet].search(name):
+            out.append(Issue("V16", "error", meet_key, f"meet_name {name!r} does not look like {meet}"))
+        years = re.findall(r"\b(20\d\d)\b", name)
+        if years and int(years[0]) != season:
+            out.append(Issue("V16", "error", meet_key, f"meet_name {name!r} has year {years[0]}, file season {season}"))
+    return out
 
 
 def load_meets(path: Path = paths.MEETS) -> pd.DataFrame:
     return pd.read_csv(path, dtype=str, keep_default_na=False)
 
 
-def lookup_meet(meets: pd.DataFrame, season: int, meet_id: str) -> pd.Series:
+def lookup_meet(meets: pd.DataFrame, season: int, meet_id: str, meet: str | None = None) -> pd.Series:
     hit = meets[(meets["athleticnet_meet_id"] == meet_id)]
     if len(hit) != 1:
         raise IngestError(f"meet_id {meet_id} matches {len(hit)} rows in meets.csv (need exactly 1)")
     row = hit.iloc[0]
     if int(row["season"]) != season:
         raise IngestError(f"meet_id {meet_id}: filename season {season} != meets.csv season {row['season']}")
+    if meet is not None and meet_slug(row["meet_key"]) != meet:
+        raise IngestError(f"meet_id {meet_id}: filename says {meet!r}, meets.csv says {row['meet_key']}")
     return row
 
 
@@ -192,9 +223,12 @@ def normalize(raw: pd.DataFrame, meet: pd.Series, source_file: str, rules: dict)
 
 
 def ingest_file(path: Path, meets: pd.DataFrame, rules: dict) -> tuple[pd.DataFrame, pd.DataFrame, list[Issue]]:
-    season, meet_id = parse_filename(path)
-    meet = lookup_meet(meets, season, meet_id)
+    season, meet_slug_, meet_id = parse_filename(path)
+    meet = lookup_meet(meets, season, meet_id, meet_slug_)
+    if meet.get("file_name") and meet["file_name"] != path.name:
+        raise IngestError(f"{path.name}: meets.csv file_name for {meet['meet_key']} is {meet['file_name']}")
     raw, issues = read_raw(path)
+    issues += check_meet_name(set(raw["meet_name"]) - {""}, meet_slug_, season, meet["meet_key"])
     ids_in_file = set(raw["meet_id"]) - {""}
     if ids_in_file != {meet_id}:
         issues.append(Issue("V02", "error", meet["meet_key"],

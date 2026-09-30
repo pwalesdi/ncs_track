@@ -43,5 +43,5 @@ def test_spec_documents_every_column_and_check():
     spec = SPEC.read_text()
     for col in (*ATHLETICNET_COLUMNS, *PERFORMANCES, *RELAY_LEGS):
         assert f"`{col}`" in spec, f"{col} missing from {SPEC.name}"
-    for n in range(1, 16):
+    for n in range(1, 17):
         assert re.search(rf"\bV{n:02d}\b", spec), f"V{n:02d} missing from spec"

@@ -8,8 +8,8 @@ from ncs_track.issues import errors
 from ncs_track.rules import load_rules
 
 FIX = Path(__file__).parent / "fixtures"
-MOC = FIX / "athleticnet_2024_520990.csv"
-TV = FIX / "athleticnet_2024_523900.csv"
+MOC = FIX / "2024_moc_520990.csv"
+TV = FIX / "2024_tri-valley_523900.csv"
 
 
 @pytest.fixture(scope="module")
@@ -141,7 +141,30 @@ def test_bad_filename(tmp_path, meets, rules):
 
 def test_season_mismatch(tmp_path, meets, rules):
     with pytest.raises(athleticnet.IngestError, match="season"):
-        _ingest_mutated(tmp_path, meets, rules, lambda d: d, name="athleticnet_2023_520990.csv")
+        _ingest_mutated(tmp_path, meets, rules, lambda d: d, name="2023_moc_520990.csv")
+
+
+def test_old_filename_rejected(tmp_path, meets, rules):
+    with pytest.raises(athleticnet.IngestError, match="expected"):
+        _ingest_mutated(tmp_path, meets, rules, lambda d: d, name="athleticnet_2024_520990.csv")
+
+
+def test_filename_meet_mismatch(tmp_path, meets, rules):
+    with pytest.raises(athleticnet.IngestError, match="filename says 'tri-valley'"):
+        _ingest_mutated(tmp_path, meets, rules, lambda d: d, name="2024_tri-valley_520990.csv")
+
+
+def test_meet_name_must_match_filename(tmp_path, meets, rules):
+    def m(d):
+        d["meet_name"] = "NCS Tri-Valley Area Championships"
+        return d
+    assert "V16" in _checks(_ingest_mutated(tmp_path, meets, rules, m))
+
+    def y(d):
+        d["meet_name"] = "2023 NCS Meet of Champions"
+        return d
+    msgs = [i.message for i in _ingest_mutated(tmp_path, meets, rules, y) if i.check == "V16"]
+    assert msgs and "year 2023" in msgs[0]
 
 
 def test_meet_id_column_mismatch(tmp_path, meets, rules):

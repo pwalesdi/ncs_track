@@ -22,10 +22,10 @@ document is missing any column or check ID defined in code.
 | Item | Requirement |
 |---|---|
 | Location | `data/raw/athleticnet/` (never edited; checksummed in `data/raw/MANIFEST.csv`) |
-| Name | `athleticnet_{season}_{meet_id}.csv`, e.g. `athleticnet_2024_520990.csv` |
+| Name | `{season}_{meet}_{meet_id}.csv`, `meet` ∈ `moc`, `tri-valley`, `bay-shore`, `redwood-empire`, `class-a`; e.g. `2026_moc_629241.csv`. Must equal the meet's `file_name` in `meets.csv`. |
 | Encoding | UTF-8, with or without a BOM |
 | Header | One header row containing all 21 columns below. Order doesn't matter. Extra columns raise a warning (V01) and are ignored. |
-| Meet match | `meet_id` must match exactly one row of `meets.csv`, and the filename season must equal that row's season. Otherwise ingest stops. |
+| Meet match | `meet_id` must match exactly one row of `meets.csv`; the filename season and meet must equal that row's season and meet; the filename must equal its `file_name`. Otherwise ingest stops. The `meet_name` values inside the file must name the same meet (V16). |
 
 ### 2.1 Raw columns
 
@@ -165,7 +165,7 @@ One row per athlete (or relay team) per round, per event, per meet.
 | ID | Stage | Severity | Check |
 |---|---|---|---|
 | V01 | read | error / warning | All 21 columns present (missing columns stop ingest); unexpected extra columns are a warning |
-| V02 | read | error | Filename matches `athleticnet_{season}_{meet_id}.csv`; meet_id is in `meets.csv` exactly once; season matches; the `meet_id` column equals the filename ID on every row |
+| V02 | read | error | Filename matches `{season}_{meet}_{meet_id}.csv` and `meets.csv` `file_name`; meet_id is in `meets.csv` exactly once; season and meet match; the `meet_id` column equals the filename ID on every row |
 | V03 | row | error | Gender, event and round each map to a canonical value |
 | V04 | row | error / warning | Mark parses; status is a known code; no numeric mark on a non-OK row; status column vs status word in mark disagree (warning) |
 | V05 | table | warning | Mark inside the loose plausibility range for the event |
@@ -179,6 +179,7 @@ One row per athlete (or relay team) per round, per event, per meet.
 | V13 | row | error / info | Wind parses (error); wind-aided counts reported (info) |
 | V14 | table | warning | Every finalist appears in that event's prelims, when prelims exist |
 | V15 | table | info | Per-meet row counts: total, out of scope, adaptive, modifier blocks, wind-aided |
+| V16 | read | error | Every `meet_name` value names the filename's meet (e.g. "Meet of Champions" for `moc`, "Bayshore"/"Bay Shore" for `bay-shore`), and any year in it equals the filename season |
 
 ## 6. How to run
 

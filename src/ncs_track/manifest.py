@@ -43,9 +43,18 @@ def _source(rel: Path) -> str:
     return "entries" if rel.parts[:3] == ("data", "reference", "entries") else rel.parent.name
 
 
-def _meet_key(p: Path) -> str:
-    name = p.name.split(".")[0]
-    return name if not name.startswith("athleticnet_") else ""
+def _athleticnet_keys(meets: Path = paths.MEETS) -> dict[str, str]:
+    """Athletic.net file name -> meet_key, from meets.csv `file_name`."""
+    if not meets.exists():
+        return {}
+    df = pd.read_csv(meets, dtype=str, keep_default_na=False)
+    return {f: k for f, k in zip(df.get("file_name", []), df["meet_key"]) if f}
+
+
+def _meet_key(p: Path, athleticnet_keys: dict[str, str] | None = None) -> str:
+    if p.parent.name == "athleticnet":
+        return (athleticnet_keys or {}).get(p.name, "")
+    return p.name.split(".")[0]
 
 
 def read(manifest: Path = paths.MANIFEST) -> pd.DataFrame:
@@ -57,11 +66,12 @@ def read(manifest: Path = paths.MANIFEST) -> pd.DataFrame:
 def build(root: Path = paths.ROOT, manifest: Path = paths.MANIFEST,
           dirs: tuple[str, ...] = DIRS) -> pd.DataFrame:
     old = read(manifest).set_index("path")
+    an_keys = _athleticnet_keys()
     rows = []
     for p in _files(root, dirs):
         rel = p.relative_to(root)
         key = rel.as_posix()
-        row = {"path": key, "source": _source(rel), "meet_key": _meet_key(p),
+        row = {"path": key, "source": _source(rel), "meet_key": _meet_key(p, an_keys),
                "bytes": str(p.stat().st_size), "sha256": sha256(p)}
         for col in PROVENANCE:
             row[col] = old.at[key, col] if key in old.index else ""

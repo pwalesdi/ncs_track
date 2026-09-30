@@ -1,6 +1,6 @@
 # Test fixtures
 
-`athleticnet_2024_520990.csv` (2024 MOC) and `athleticnet_2024_523900.csv` (2024 Tri-Valley)
+`2024_moc_520990.csv` (2024 MOC) and `2024_tri-valley_523900.csv` (2024 Tri-Valley)
 are **hand-built** in the agreed Athletic.net extraction layout. They are not real
 Athletic.net exports.
 

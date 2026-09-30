@@ -40,14 +40,14 @@ def cmd_rules_seasons(args) -> int:
 
 
 def cmd_ingest(args) -> int:
-    files = [Path(f) for f in args.files] or sorted(paths.RAW_ATHLETICNET.glob("athleticnet_*.csv"))
+    files = [Path(f) for f in args.files] or sorted(paths.RAW_ATHLETICNET.glob("*.csv"))
     if not files:
         print("no Athletic.net files found in data/raw/athleticnet/")
         return 1
     meets = athleticnet.load_meets()
     perfs, legs, issues = [], [], []
     for f in files:
-        season, _ = athleticnet.parse_filename(f)
+        season, _, _ = athleticnet.parse_filename(f)
         rules, label = load_rules_for(season)
         p, l, i = athleticnet.ingest_file(f, meets, rules)
         i += validate.run_all(p, l, rules)

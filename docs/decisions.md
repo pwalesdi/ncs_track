@@ -391,3 +391,14 @@ Newest at the bottom.
     column lists + row arrays and only at event level where they sum exactly (page 3.9 MB).
 39. **Place grid replaces the line charts.** Pooled when the season control is "side by side"
     or "pooled"; a year otherwise. Event filter maps to its event group, as before.
+40. **Compare tab definitions.** The seven Compare metrics are renamed and defined in the
+    user's words (scripts/build_dashboard.py `METRIC_DEFS`, one source for the popovers and the
+    Definitions tab). The definitions say "athletes"; every count is athlete-events, so each
+    unit says "athlete-events" and the tab carries the caption "one athlete in two events
+    counts twice". "Left home despite outrunning an automatic qualifier" keeps two picker
+    entries (Class A counted / not counted) sharing one definition. The metric picker is now a
+    row of buttons instead of a drop-down, because a drop-down option can't hold an info
+    button. Key-term popovers on the other tabs reuse the existing Definitions text. The
+    "lose a spot" example (2025 girls 1600, Bay Shore's 6th automatic qualifier, 5:31.23) was
+    checked against outputs/scenario_athletes.csv: she's out under 5-5-5-3, and the slowest
+    next-best-mark mark is 5:17.28.

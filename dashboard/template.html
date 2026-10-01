@@ -127,6 +127,34 @@ __CHARTJS__</script>
   table.num th { font-weight: 650; color: var(--muted); background: var(--soft); }
   table.num td.n, table.num th.n { text-align: right; }
   dl.defs dt { font-weight: 650; margin-top: 10px; }
+
+  /* Info buttons and the shared definition popover */
+  button.info { font: 700 .78rem/1 system-ui, sans-serif; color: var(--link); background: var(--card); border: 1.5px solid var(--link);
+                border-radius: 50%; width: 1.35rem; height: 1.35rem; padding: 0; margin: 0 2px 0 4px; cursor: pointer;
+                display: inline-flex; align-items: center; justify-content: center; vertical-align: .08em; flex: none; }
+  button.info:hover, button.info[aria-expanded="true"] { background: var(--link); color: #fff; }
+  button.info:focus-visible, .mchip button:focus-visible { outline: 3px solid #f2b705; outline-offset: 2px; }
+  @media (pointer: coarse) { button.info { width: 1.7rem; height: 1.7rem; font-size: .9rem; } }
+  #pop { position: fixed; z-index: 50; display: none; width: min(360px, calc(100vw - 32px)); background: var(--card); color: var(--text);
+         border: 1px solid #9aa1aa; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 12px 14px; font-size: .9rem;
+         line-height: 1.45; max-height: calc(100vh - 32px); overflow-y: auto; }
+  #pop.open { display: block; }
+  #pop h4 { margin: 0 0 6px; font-size: .98rem; padding-right: 22px; }
+  #pop p { margin: 6px 0 0; }
+  #pop .x { position: absolute; top: 6px; right: 6px; border: none; background: none; font-size: 1.2rem; line-height: 1; cursor: pointer;
+            color: var(--muted); padding: 4px 6px; }
+
+  /* Compare metric picker: one chip per metric, each with its info button */
+  .mpick { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
+  .mchip { display: inline-flex; align-items: center; border: 1px solid #b9bec6; border-radius: 8px; background: var(--card);
+           padding: 0 6px 0 0; max-width: 100%; }
+  .mchip .mbtn { font: inherit; font-size: .88rem; text-align: left; border: none; background: none; color: var(--text); cursor: pointer;
+                 padding: 6px 4px 6px 10px; border-radius: 8px 0 0 8px; min-width: 0; }
+  .mchip.on { background: var(--text); border-color: var(--text); }
+  .mchip.on .mbtn { color: #fff; }
+  .mchip.on button.info { border-color: #fff; }
+  .mwhat { background: var(--soft); border-left: 4px solid var(--link); border-radius: 6px; padding: 8px 12px; margin: 6px 0 4px; max-width: 90ch; }
+  .mwhat b { font-weight: 650; }
   dl.defs dd { margin: 0; color: var(--muted); max-width: 90ch; }
 </style>
 </head>
@@ -172,7 +200,7 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-curve" role="tabpanel">
     <h2>Area place vs. MOC finish</h2>
-    <p class="how">How often athletes who placed 1st, 2nd, 3rd… at their Area meet went on to make the MOC final.</p>
+    <p class="how">How often athletes who placed 1st, 2nd, 3rd… at their Area meet went on to make the MOC final<button class="info" data-term="final"></button>.</p>
     <p class="note" id="curve-note"></p>
     <div id="curve-body"></div>
   </section>
@@ -184,7 +212,7 @@ __CHARTJS__</script>
   </section>
 
   <section class="tabpanel" id="tab-spots" role="tabpanel">
-    <h2>Next best mark + at-large spots</h2>
+    <h2>Next best mark<button class="info" data-term="nbm"></button> + at-large<button class="info" data-term="atlarge"></button> spots</h2>
     <p class="how">Of all next-best-mark spots (the 3 fill spots per event) and at-large spots (met the at-large
       standard), the share each Area took.</p>
     <div id="spots-body"></div>
@@ -192,7 +220,7 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-perf" role="tabpanel">
     <h2>MOC performance</h2>
-    <p class="how"><b>Made the final</b> = finished top 9 in the long jump, triple jump, shot put or discus, or top 8 in every other event, relays included. (The 800 and 1600 finals seat 12; we count top 8.)</p>
+    <p class="how"><b>Made the final</b><button class="info" data-term="final"></button> = finished top 9 in the long jump, triple jump, shot put or discus, or top 8 in every other event, relays included. (The 800 and 1600 finals seat 12; we count top 8.)</p>
     <p class="how">Of entries that competed at the MOC, how many made the final, by Area and route. Entries are
       athlete-events: one athlete in two events counts twice.</p>
     <div id="perf-body"></div>
@@ -200,13 +228,13 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-use" role="tabpanel">
     <h2>Spot use</h2>
-    <p class="how">What happened to each Area's <b>guaranteed spots</b> in each event: its automatic spots (6; Class A
+    <p class="how">What happened to each Area's <b>guaranteed spots</b><button class="info" data-term="guaranteed"></button> in each event: its automatic spots (6; Class A
       3) plus the next-best-mark spots it won. Spots are assigned after declarations: when a finisher declines, the
       spot passes down to the next finisher from that Area. A decline before the deadline is not a no-show and is not
       counted against the Area. Field size plays no part.</p>
     <ul class="how" id="use-defs">
       <li><b>Competed</b>: the qualifier ran the event at the MOC.</li>
-      <li><b>No-show</b>: the qualifier was in the MOC program for the event but didn't compete in it (did not start,
+      <li><b>No-show</b><button class="info" data-term="noshow"></button>: the qualifier was in the MOC program for the event but didn't compete in it (did not start,
         or absent from its results), even if they competed in other events that day.</li>
       <li><b>Not used</b>: no entrant from that Area took the spot.</li>
     </ul>
@@ -215,7 +243,7 @@ __CHARTJS__</script>
     <div class="legend" id="lg-use"></div>
     <div id="use-body"></div>
     <div class="panel">
-      <h3 style="margin:0 0 4px;font-size:1.05rem">No-shows, 2022–2026</h3>
+      <h3 style="margin:0 0 4px;font-size:1.05rem">No-shows<button class="info" data-term="noshow"></button>, 2022–2026</h3>
       <p class="note">Every MOC entry (any route) that was in the program but didn't compete in the event, by the
         Area it came from. Follows the gender and event filters; the season filter doesn't apply.</p>
       <div id="ns-table"></div>
@@ -224,8 +252,8 @@ __CHARTJS__</script>
 
 
   <section class="tabpanel" id="tab-left" role="tabpanel">
-    <h2>Left out</h2>
-    <p class="how"><b>Left out</b> = finished in an Area final behind her Area's last automatic qualifier (so she was
+    <h2>Left out<button class="info" data-term="leftout"></button></h2>
+    <p class="how"><b>Left out</b><button class="info" data-term="leftout"></button> = finished in an Area final behind her Area's last automatic qualifier (so she was
       never offered a spot), and is not in the MOC field by any route. For each, we count the automatic qualifiers
       from <b>other</b> Areas whose Area-final marks were slower. Only automatic qualifiers are compared: by design,
       nobody left out has a better mark than a next-best-mark qualifier.</p>
@@ -234,12 +262,14 @@ __CHARTJS__</script>
 
   <section class="tabpanel" id="tab-compare" role="tabpanel">
     <h2>Compare scenarios</h2>
-    <p class="how">Each column replays every season with a different number of automatic spots per Area (Tri-Valley,
+    <p class="how">Each column replays every season with a different number of automatic spots<button class="info" data-term="automatic"></button> per Area (Tri-Valley,
       Bay Shore and Redwood Empire equal; Class A always 3). The field base stays 24: every removed automatic spot becomes a
-      next-best-mark spot. Real declines are kept; athletes never offered a spot are assumed to accept. The at-large standard
+      next-best-mark spot<button class="info" data-term="nbm"></button>. Real declines are kept; athletes never offered a spot are assumed to accept. The at-large standard
       is unchanged. Follows the gender and event filters; rows are seasons.</p>
-    <label class="note" style="display:block;margin:6px 0">Metric
-      <select id="metric" style="margin-left:6px"></select></label>
+    <p class="note" id="metric-label" style="margin:10px 0 0;font-weight:650">Metric</p>
+    <div class="mpick" id="metric" role="radiogroup" aria-labelledby="metric-label"></div>
+    <p class="mwhat" id="metric-what" aria-live="polite"></p>
+    <p class="note">Counts are athlete-events: one athlete in two events counts twice.</p>
     <div id="compare-body"></div>
   </section>
 
@@ -250,6 +280,8 @@ __CHARTJS__</script>
     <ul class="how" id="caveats"></ul>
   </section>
 </main>
+
+<div id="pop" role="dialog" aria-modal="false" aria-labelledby="pop-h"><button class="x" type="button" aria-label="Close definition">×</button><div id="pop-body"></div></div>
 
 <script id="data" type="application/json">__DATA__</script>
 
@@ -341,51 +373,42 @@ function scenLeft(D, f, season, scenario) {
   });
   return out;
 }
-var METRICS = [
-  ["flo_in", "Faster but left out (Class A qualifiers included)"],
-  ["flo_out", "Faster but left out (Class A qualifiers excluded)"],
-  ["added", "Added vs. actual, by Area"],
-  ["removed", "Removed vs. actual, by Area"],
-  ["removed_final", "Removed athletes who made the MOC final"],
-  ["gain", "Estimated gain (estimate — different meets)"],
-  ["merit", "Merit capture: 24 best Area marks per event"],
-  ["share", "Field share by Area"]];
 // One Compare cell: {value, big, unit, lines: [[area, text, value]]}.
 function compareCell(D, f, metric, scenario, season) {
   var fs = {season: season, gender: f.gender, event: f.event, scenario: scenario};
   var pick = function (rows) { return rows.filter(function (r) { return r.scenario === scenario; }); };
   if (metric === "flo_in" || metric === "flo_out") {
     var lo = scenLeft(D, fs, season, scenario), k = metric === "flo_in" ? "beatAny" : "beatExclCA";
-    return {value: lo[k], big: String(lo[k]), unit: "athletes left out who beat an automatic qualifier from another Area" +
-              (metric === "flo_out" ? " (Class A qualifiers not counted)" : ""),
-            lines: AREAS.map(function (a) { return [a, lo.areas[a][k] + " of " + lo.areas[a].leftOut + " left out", lo.areas[a][k]]; })};
+    return {value: lo[k], big: String(lo[k]), unit: "athlete-events left home despite outrunning an automatic qualifier from another Area" +
+              (metric === "flo_out" ? " (Class A qualifiers not counted)" : " (Class A qualifiers counted)"),
+            lines: AREAS.map(function (a) { return [a, lo.areas[a][k] + " of " + lo.areas[a].leftOut + " left-out athlete-events", lo.areas[a][k]]; })};
   }
   if (metric === "merit") {
     var m = pick(level(U(D, "scen_merit"), fs, season))[0] || {top_marks: 0, captured: 0};
     return {value: m.top_marks ? m.captured / m.top_marks : 0, big: pctNum(m.captured, m.top_marks) + "%",
-            unit: m.captured + " of " + m.top_marks + " top-24 Area marks in the field", lines: []};
+            unit: m.captured + " of " + m.top_marks + " top-24 athlete-events (24 fastest per event) in the field", lines: []};
   }
   if (metric === "share") {
     var mk = scenMakeup(D, fs, season);
     return {value: mk._total ? mk["tri-valley"].total / mk._total : 0, big: pctNum(mk["tri-valley"].total, mk._total) + "%",
-            unit: "Tri-Valley's share of the field (" + mk._total + " athletes)",
-            lines: AREAS.map(function (a) { return [a, pctNum(mk[a].total, mk._total) + "% (" + mk[a].total + ")", mk._total ? 100 * mk[a].total / mk._total : 0]; })};
+            unit: "Tri-Valley's share of the field (" + mk._total + " athlete-events)",
+            lines: AREAS.map(function (a) { return [a, pctNum(mk[a].total, mk._total) + "% (" + mk[a].total + " athlete-events)", mk._total ? 100 * mk[a].total / mk._total : 0]; })};
   }
   var ch = pick(level(U(D, "scen_changes"), fs, season));
   var col = {added: "added", removed: "removed", removed_final: "removed_made_final", gain: "added_above_cutoff"}[metric];
   var tot = ch.filter(function (r) { return r.area === "all"; })[0] || {};
-  var unit = {added: "athletes in under the scenario but not in reality",
-              removed: "athletes in reality but out under the scenario",
-              removed_final: "removed athletes who made the MOC final in reality",
-              gain: "added athletes whose Area mark was at or better than the MOC final cutoff (estimate — different meets)"}[metric];
+  var unit = {added: "athlete-events who would gain a spot",
+              removed: "athlete-events who would lose a spot",
+              removed_final: "athlete-events who would lose a spot but made the MOC final in real life",
+              gain: "athlete-events gaining a spot with an Area mark at least as good as the MOC final cutoff (estimate)"}[metric];
   var v = tot[col];
   var shown = v !== null && v !== undefined;
   return {value: shown ? v : 0, big: shown ? String(v) : "–",
-          unit: shown ? unit : "not shown: " + (tot.removed || 0) + " removed (fewer than 5)",
+          unit: shown ? unit : "not shown: " + (tot.removed || 0) + " athlete-events lose a spot (fewer than 5)",
           lines: AREAS.map(function (a) {
             var r = ch.filter(function (x) { return x.area === a; })[0] || {};
             var x = r[col];
-            return [a, x === null || x === undefined ? (metric === "removed_final" ? "– (" + (r.removed || 0) + " removed)" : "0") : String(x), x || 0];
+            return [a, x === null || x === undefined ? (metric === "removed_final" ? "– (" + (r.removed || 0) + " lose a spot)" : "0") : String(x) + " athlete-events", x || 0];
           })};
 }
 // Place grid: % of entries that made the MOC final by Area place (rows 1st-12th) and Area.
@@ -632,9 +655,101 @@ function headline(D) {
       render();
     });
   });
-  var metricSel = document.getElementById("metric");
-  METRICS.forEach(function (m) { metricSel.add(new Option(m[1], m[0])); });
-  metricSel.addEventListener("change", function () { state.metric = metricSel.value; render(); });
+  // ---------- definitions: info buttons + one shared popover ----------
+  var G = D.glossary, MET = {};
+  D.metrics.forEach(function (m) { MET[m[0]] = {label: m[1], term: m[2]}; });
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function info(term) { return '<button class="info" type="button" data-term="' + term + '"></button>'; }
+  function initInfo(root) {         // fill glyph + accessible name of every info button under root
+    (root || document).querySelectorAll("button.info:not([data-ready])").forEach(function (b) {
+      var g = G[b.dataset.term];
+      b.textContent = "i"; b.dataset.ready = "1"; b.type = "button";
+      b.setAttribute("aria-label", "Definition: " + g.name); b.setAttribute("aria-expanded", "false"); b.setAttribute("aria-controls", "pop");
+    });
+  }
+  var pop = document.getElementById("pop"), popBody = document.getElementById("pop-body");
+  var popFor = null, popPinned = false, hoverTimer = null;
+  function popHtml(g) {
+    return '<h4 id="pop-h">' + esc(g.name) + "</h4><p>" + (g.metric ? "<b>What it counts:</b> " : "") + esc(g.counts) + "</p>" +
+      (g.example ? "<p><b>Example:</b> " + esc(g.example) + "</p>" : "") +
+      (g.better ? "<p><b>Better =</b> " + esc(g.better) + ".</p>" : "") +
+      (g.metric ? '<p class="note">Counts are athlete-events: one athlete in two events counts twice.</p>' : "");
+  }
+  function placePop() {
+    if (!popFor) return;
+    var r = popFor.getBoundingClientRect(), vw = document.documentElement.clientWidth, vh = window.innerHeight, w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = Math.max(16, Math.min(r.left + r.width / 2 - w / 2, vw - 16 - w));
+    var top = r.bottom + 8;
+    if (top + h > vh - 8 && r.top - 8 - h >= 8) top = r.top - 8 - h;
+    pop.style.left = left + "px"; pop.style.top = Math.max(8, Math.min(top, vh - 8 - h)) + "px";
+  }
+  function openPop(b, pinned) {
+    if (popFor && popFor !== b) popFor.setAttribute("aria-expanded", "false");
+    popFor = b; popPinned = pinned;
+    popBody.innerHTML = popHtml(G[b.dataset.term]);
+    pop.classList.add("open"); b.setAttribute("aria-expanded", "true");
+    placePop();
+  }
+  function closePop(refocus) {
+    clearTimeout(hoverTimer);
+    if (!popFor) return;
+    var b = popFor; popFor = null; popPinned = false;
+    pop.classList.remove("open"); b.setAttribute("aria-expanded", "false");
+    if (refocus && document.contains(b)) b.focus();
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("button.info");
+    if (b) { e.preventDefault(); e.stopPropagation();
+      if (popFor === b && popPinned) closePop(false); else openPop(b, true);
+      return; }
+    if (e.target.closest && e.target.closest("#pop .x")) { closePop(true); return; }
+  });
+  document.addEventListener("pointerdown", function (e) {     // tap / click outside closes
+    if (popFor && !pop.contains(e.target) && !(e.target.closest && e.target.closest("button.info"))) closePop(false);
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && popFor) { e.preventDefault(); closePop(true); } });
+  // Hover (mouse only): open on enter, close on leave unless the pointer moves into the popover or it was clicked open.
+  document.addEventListener("pointerover", function (e) {
+    if (e.pointerType !== "mouse") return;
+    var b = e.target.closest && e.target.closest("button.info");
+    if (b) { clearTimeout(hoverTimer); if (popFor !== b) openPop(b, false); }
+    else if (pop.contains(e.target)) clearTimeout(hoverTimer);
+  });
+  document.addEventListener("pointerout", function (e) {
+    if (e.pointerType !== "mouse" || !popFor || popPinned) return;
+    var to = e.relatedTarget;
+    if (to && (pop.contains(to) || (to.closest && to.closest("button.info") === popFor))) return;
+    if (e.target.closest && (e.target.closest("button.info") === popFor || pop.contains(e.target)))
+      hoverTimer = setTimeout(function () { if (!popPinned) closePop(false); }, 200);
+  });
+  document.addEventListener("focusin", function (e) {          // keyboard focus leaving the button / popover closes it
+    if (popFor && e.target !== popFor && !pop.contains(e.target)) closePop(false);
+  });
+  window.addEventListener("resize", placePop);
+  window.addEventListener("scroll", placePop, true);
+
+  var metricBox = document.getElementById("metric");
+  metricBox.innerHTML = D.metrics.map(function (m) {
+    return '<span class="mchip" data-v="' + m[0] + '"><button class="mbtn" type="button" role="radio" data-v="' + m[0] + '">' + esc(m[1]) + "</button>" + info(m[2]) + "</span>";
+  }).join("");
+  metricBox.querySelectorAll(".mbtn").forEach(function (b) {
+    b.addEventListener("click", function () { state.metric = b.dataset.v; closePop(false); render(); });
+    b.addEventListener("keydown", function (e) {             // arrow keys move between metrics (radio group)
+      var d = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[e.key];
+      if (!d) return;
+      e.preventDefault();
+      var all = [].slice.call(metricBox.querySelectorAll(".mbtn")), i = (all.indexOf(b) + d + all.length) % all.length;
+      state.metric = all[i].dataset.v; render(); all[i].focus();
+    });
+  });
+  function syncMetric() {
+    metricBox.querySelectorAll(".mchip").forEach(function (c) {
+      var on = c.dataset.v === state.metric, b = c.querySelector(".mbtn");
+      c.classList.toggle("on", on); b.setAttribute("aria-checked", on); b.tabIndex = on ? 0 : -1;
+    });
+    var g = G[MET[state.metric].term];
+    el("metric-what").innerHTML = "<b>" + esc(MET[state.metric].label) + "</b>" + info(MET[state.metric].term) + "<br><b>What it counts:</b> " + esc(g.counts);
+  }
   function scenNote(what) {
     return state.scenario === "current" ? "" : '<p class="scen-note">Scenario <b>' + SCEN[state.scenario] + "</b>: " + what + "</p>";
   }
@@ -716,10 +831,10 @@ function headline(D) {
     var c = function (m) { return compareCell(D, f, m, sc, "all"); };
     var fin = c("flo_in"), fout = c("flo_out"), add = c("added"), rem = c("removed");
     return '<div class="card" id="card-scen" data-scenario="' + sc + '" data-flo="' + fin.value + '"><p class="cap" style="margin:0"><b>Selected allocation: ' + SCEN[sc] + "</b></p>" +
-      '<div class="big">' + fin.big + '</div><p class="cap">left-out athletes beat an automatic qualifier from another Area (' + fout.big +
+      '<div class="big">' + fin.big + '</div><p class="cap">left-out athlete-events beat an automatic qualifier from another Area' + info("flo") + ' (' + fout.big +
       " with Class A qualifiers excluded), 2022–2026 pooled</p>" +
       '<p class="cnt">' + (sc === "current" ? "Pick another allocation above to compare; the Compare scenarios tab shows all four side by side." :
-        add.big + " athletes added and " + rem.big + " removed vs. what actually happened.") + "</p></div>";
+        add.big + " athlete-events would gain a spot and " + rem.big + " would lose one, compared with what actually happened.") + "</p></div>";
   }
   function renderOverview() {
     var h = headline(D);
@@ -750,7 +865,7 @@ function headline(D) {
       " (" + pctNum(h.tv_entries.k, h.tv_entries.n) + "%) among actual entries.</p></div>" +
       scenCard() +
       '<div class="card" id="card-noshow" data-k="' + h.noshow.k + '" data-n="' + h.noshow.n + '"><div class="big">' + h.noshow.k +
-      '</div><p class="cap">no-shows over five seasons</p><p class="cnt">' + h.noshow.k + " of " + h.noshow.n +
+      '</div><p class="cap">no-shows' + info("noshow") + ' over five seasons</p><p class="cnt">' + h.noshow.k + " of " + h.noshow.n +
       " entries (" + pctNum(h.noshow.k, h.noshow.n) + "%) were in the MOC program for an event but didn't compete in it. " +
       "Declines before the deadline are not no-shows.</p>" + noShowHtml(noShowTable(D, {gender: "all", event: "all"}), false) + "</div>";
   }
@@ -784,13 +899,14 @@ function headline(D) {
 
   // ---------- Compare scenarios ----------
   function renderCompare() {
-    metricSel.value = state.metric;
-    var f = {gender: state.gender, event: state.event};
+    syncMetric();
+    var f = {gender: state.gender, event: state.event}, mt = MET[state.metric];
+    var title = function (what) { return '<h3 style="margin:0 0 6px;font-size:1.05rem">' + esc(mt.label) + info(mt.term) + " — " + what + "</h3>"; };
     var rows = D.seasons.map(String).concat(["all"]);
     var cells = {}, max = 0;
     rows.forEach(function (s) { D.scenarios.forEach(function (sc) {
       var c = compareCell(D, f, state.metric, sc[0], s); cells[s + "|" + sc[0]] = c; max = Math.max(max, c.value); }); });
-    var body = '<div class="panel"><div class="gridwrap"><table class="grid cgrid" id="compare-grid"><thead><tr><th></th>' +
+    var body = '<div class="panel">' + title("by season") + '<div class="gridwrap"><table class="grid cgrid" id="compare-grid"><thead><tr><th></th>' +
       D.scenarios.map(function (sc) { return "<th>" + sc[1] + "</th>"; }).join("") + "</tr></thead><tbody>" +
       rows.map(function (s) {
         return "<tr><th>" + (s === "all" ? "All seasons" : s) + "</th>" + D.scenarios.map(function (sc) {
@@ -800,7 +916,8 @@ function headline(D) {
         }).join("") + "</tr>";
       }).join("") + '</tbody></table></div><p class="note">Shading follows the value within this grid. ' +
       (state.metric === "gain" ? "Estimate — different meets: an Area mark at or better than the season's MOC final cutoff (8th-best mark across rounds; 9th in LJ/TJ/SP/DT) doesn't mean the athlete would have made the final. " : "") +
-      (state.metric === "removed_final" ? "Counts are blank when fewer than 5 athletes were removed (privacy). " : "") + "</p></div>";
+      (state.metric === "removed_final" ? "Counts are blank when fewer than 5 athlete-events would lose a spot (privacy). " : "") +
+      "Counts are athlete-events: one athlete in two events counts twice.</p></div>";
     // pooled chart: scenarios x Area (merit: one bar per scenario)
     var byArea = state.metric !== "merit";
     var labels = byArea ? AREAS.map(function (a) { return AREA_NAME[a]; }) : ["All events"];
@@ -811,8 +928,9 @@ function headline(D) {
               endLabels: byArea ? c.lines.map(function (l) { return state.metric === "share" ? l[1] : String(l[2]); }) : [c.big],
               tips: byArea ? c.lines.map(function (l) { return l[1]; }) : [c.unit]};
     });
-    body += '<div class="panel"><h3 style="margin:0 0 4px;font-size:1.05rem">All seasons pooled</h3><div class="legend" id="lg-cmp"></div>' +
-      '<div class="chart" id="w-cmp"><canvas id="c-cmp"></canvas></div></div>';
+    body += '<div class="panel">' + title("all seasons pooled") + '<div class="legend" id="lg-cmp"></div>' +
+      '<div class="chart" id="w-cmp"><canvas id="c-cmp"></canvas></div>' +
+      '<p class="note">' + (byArea ? "Bars: one per scenario within each Area. " : "") + "Counts are athlete-events: one athlete in two events counts twice.</p></div>";
     el("compare-body").innerHTML = body;
     legend("lg-cmp", D.scenarios.map(function (sc) { return [sc[1], SCEN_COLOR[sc[0]]]; }));
     hbar("c-cmp", "w-cmp", labels, sets, {count: state.metric !== "share" && state.metric !== "merit"});
@@ -823,7 +941,8 @@ function headline(D) {
     el("makeup-how").innerHTML = (state.scenario !== "current" ? scenNote("the field as this allocation would have built it, on real declarations (the Field toggle doesn't apply).") : "") + (state.field === "qualified"
       ? "<b>All qualifiers</b>: everyone who earned a spot, whether or not they entered."
       : "<b>Actual entries</b>: athletes who entered the MOC.") +
-      " Each Area's share of MOC spots, split by route: automatic (top places at the Area meet), next best mark (the 3 fill spots per event) and at-large standard." +
+      " Each Area's share of MOC spots, split by route: automatic" + info("automatic") + " (top places at the Area meet), next best mark" + info("nbm") +
+      " (the 3 fill spots per event) and at-large standard" + info("atlarge") + "." +
       " Counts are athlete-events: one athlete in two events counts twice.";
     var body = el("makeup-body");
     if (state.season === "side") {
@@ -1016,6 +1135,7 @@ function headline(D) {
   var RENDER = {overview: renderOverview, compare: renderCompare, curve: renderCurve, makeup: renderMakeup, spots: renderSpots,
                 perf: renderPerf, use: renderUse, left: renderLeft, defs: function () {}};
   function render() {
+    closePop(false);
     destroyAll();
     document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.toggle("active", p.id === "tab-" + state.tab); });
     tabs.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.tab === state.tab); });
@@ -1023,6 +1143,8 @@ function headline(D) {
       seasonSel.options[seasonSel.selectedIndex].text + " · " + document.getElementById("gender").selectedOptions[0].text + " · " +
       eventSel.options[eventSel.selectedIndex].text;
     RENDER[state.tab]();
+    initInfo();
+    if (popFor && !document.contains(popFor)) closePop(false);
   }
   window.__dashboard = {state: state, render: render, charts: charts};
   render();

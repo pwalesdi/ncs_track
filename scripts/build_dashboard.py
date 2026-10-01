@@ -67,20 +67,76 @@ DEFINITIONS = [
                             "automatic spot becomes a next-best-mark spot. Routes by pass-down; athletes who declined in "
                             "reality decline again, athletes never offered a spot are assumed to accept; the at-large "
                             "standard is unchanged. Tabs about MOC results show what actually happened."),
-    ("Added / removed", "Added: in the field under a scenario but not in reality. Removed: in reality but not under the "
-                        "scenario."),
-    ("Faster but left out", "Left-out athletes (as in Left out, under the scenario's routes) whose Area-final mark beat at "
-                            "least one automatic qualifier from another Area; shown with Class A qualifiers included and "
-                            "excluded as the beaten group."),
-    ("Estimated gain", "Added athletes whose Area mark was at or better than that season's MOC final cutoff (the 8th-best "
-                       "MOC mark across rounds; 9th in LJ/TJ/SP/DT). An estimate: the marks come from different meets."),
-    ("Merit capture", "Of the 24 best Area-final marks per event (among athletes who didn't decline), how many are in the "
-                      "field."),
     ("All seasons pooled", "Counts summed over 2022–2026; rates recomputed from the sums. Medians for pooled views "
                            "are computed from all five seasons' entries, not averaged."),
     ("Source", "Athletic.net Area and MOC results; MOC programs (Diablo Timing); rules per season. Pre-2026 "
                "allocations assumed from 2026; 2023 standards assumed from 2026. State results pending."),
 ]
+
+# Compare-tab metrics: key -> (name, what it counts, example or None, "Better =" or None). The page shows
+# "What it counts" under the metric picker and the whole entry in the metric's info popover.
+METRIC_DEFS = {
+    "added": ("Athletes who would gain a spot",
+              "Athletes who would be in the MOC field under this scenario but weren't in real life.",
+              "With 6 next-best-mark spots instead of 3, a fast athlete who finished 7th or 8th in a deep Area and "
+              "stayed home could now get in.", None),
+    "removed": ("Athletes who would lose a spot",
+                "Athletes who were in the real MOC field but wouldn't be under this scenario.",
+                "In the 2025 girls 1600, Bay Shore's 6th automatic qualifier ran 5:31.23. With only 5 automatic "
+                "spots, and 5:31 too slow for a next-best-mark spot, she'd stay home.", None),
+    "removed_final": ("Lost a spot, but actually made the final",
+                      "Of the athletes who would lose a spot, how many made the MOC final in real life. The cost check.",
+                      None, "lower"),
+    "gain": ("New athletes fast enough to make the final (estimate)",
+             "Of the athletes who would gain a spot, how many ran an Area-meet mark at least as good as what it took "
+             "to make that year's MOC final. An estimate: they never ran at the MOC, and their mark came from a "
+             "different meet.", None, "higher"),
+    "merit": ("How many of the 24 fastest make the field",
+              "For each event, take the 24 best Area-meet marks across all four Areas (leaving out athletes who chose "
+              "not to go); the share of those 24 who actually get into the MOC.",
+              "90% means about 21–22 of the 24 fastest get in and 2–3 stay home while slower athletes compete.",
+              "higher"),
+    "flo": ("Left home despite outrunning an automatic qualifier",
+            "Athletes who stayed home even though their Area mark beat at least one automatic qualifier from another "
+            "Area. Shown two ways: counting Class A qualifiers, and not counting them (Class A is slower by design).",
+            None, "lower"),
+    "share": ("Share of the MOC field from each Area",
+              "The percent of the MOC field that came from each Area under this scenario.", None, None),
+}
+# Metric picker entries: [key, label, definition key]. Left-home has two views of one definition.
+METRICS = [
+    ["flo_in", METRIC_DEFS["flo"][0] + " (Class A counted)", "flo"],
+    ["flo_out", METRIC_DEFS["flo"][0] + " (Class A not counted)", "flo"],
+    ["added", METRIC_DEFS["added"][0], "added"],
+    ["removed", METRIC_DEFS["removed"][0], "removed"],
+    ["removed_final", METRIC_DEFS["removed_final"][0], "removed_final"],
+    ["gain", METRIC_DEFS["gain"][0], "gain"],
+    ["merit", METRIC_DEFS["merit"][0], "merit"],
+    ["share", METRIC_DEFS["share"][0], "share"],
+]
+# Key terms with an info popover on the other tabs: key -> name in DEFINITIONS.
+TERM_DEFS = {"automatic": "Automatic", "nbm": "Next best mark", "atlarge": "At-large", "final": "Made the final",
+             "noshow": "Spot use: No-show", "leftout": "Left out", "guaranteed": "Guaranteed spots"}
+TERM_NAMES = {"atlarge": "At-large standard", "noshow": "No-show"}
+
+
+def glossary() -> dict:
+    """Info-popover entries: key -> {name, counts, example, better}."""
+    d = dict(DEFINITIONS)
+    out = {k: {"name": TERM_NAMES.get(k, n), "counts": d[n], "example": None, "better": None} for k, n in TERM_DEFS.items()}
+    for k, (name, counts, example, better) in METRIC_DEFS.items():
+        out[k] = {"name": name, "counts": counts, "example": example, "better": better, "metric": True}
+    return out
+
+
+def definitions() -> list:
+    """Definitions tab: the general terms, with the Compare metrics (new names) before the pooling note."""
+    i = next(j for j, (n, _) in enumerate(DEFINITIONS) if n == "All seasons pooled")
+    metric = [(name, counts + (f" Example: {ex}" if ex else "") + (f" Better = {b}." if b else ""))
+              for name, counts, ex, b in METRIC_DEFS.values()]
+    metric.append(("Athlete-events", "Every count on the Compare scenarios tab is athlete-events: one athlete in two "
+                                     "events counts twice."))
+    return DEFINITIONS[:i] + metric + DEFINITIONS[i:]
 
 
 CAVEATS = [
@@ -133,7 +189,8 @@ def build() -> dict:
     seasons = sorted(int(s) for s in su["season"].unique())
     events = [e for e in EVENT_ORDER if e in set(su["event_code"].astype(str))]
     return {
-        "seasons": seasons, "events": events, "definitions": DEFINITIONS,
+        "seasons": seasons, "events": events, "definitions": definitions(),
+        "glossary": glossary(), "metrics": METRICS,
         "field_makeup": records(fm, ["season", "gender", "event_code", "field", "area", "qualifier_type", "count"]),
         "at_large_share": records(al, ["season", "gender", "event_code", "field", "spot_type", "area", "count"]),
         "moc_performance": records(mp, ["season", "gender", "event", "area", "qualifier_type", "competed", "made_final"]),
